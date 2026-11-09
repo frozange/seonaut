@@ -1,6 +1,8 @@
 package services
 
 import (
+	"bytes"
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
@@ -9,6 +11,7 @@ import (
 	"net"
 	"net/mail"
 	"net/smtp"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -90,4 +93,53 @@ func buildMessage(from *mail.Address, to, subject, body string, now time.Time) (
 	b.WriteString(strings.ReplaceAll(strings.ReplaceAll(body, "\r\n", "\n"), "\n", "\r\n"))
 
 	return []byte(b.String()), rcpt.Address, nil
+}
+
+// SendmailMailer hands messages to a local sendmail compatible binary, which is
+// how the MTA of a shared host usually expects local applications to submit.
+type SendmailMailer struct {
+	path string
+	from *mail.Address
+	run  func(ctx context.Context, path string, args []string, msg []byte) error
+}
+
+// NewSendmailMailer validates the configuration and returns a mailer.
+func NewSendmailMailer(c *config.MailConfig) (*SendmailMailer, error) {
+	from, err := mail.ParseAddress(c.From)
+	if err != nil {
+		return nil, fmt.Errorf("mailer: invalid from address %q: %w", c.From, err)
+	}
+	return &SendmailMailer{path: c.Sendmail, from: from, run: runSendmail}, nil
+}
+
+// Send builds the message and pipes it to sendmail. The recipient is passed as an
+// argument after "--" so it can never be read as an option, and -i keeps a lone
+// dot in the body from ending the message.
+func (m *SendmailMailer) Send(to, subject, body string) error {
+	msg, rcpt, err := buildMessage(m.from, to, subject, body, time.Now())
+	if err != nil {
+		return err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	return m.run(ctx, m.path, []string{"-i", "-f", m.from.Address, "--", rcpt}, msg)
+}
+
+func runSendmail(ctx context.Context, path string, args []string, msg []byte) error {
+	cmd := exec.CommandContext(ctx, path, args...)
+	cmd.Stdin = bytes.NewReader(msg)
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("sendmail: %w: %s", err, strings.TrimSpace(stderr.String()))
+	}
+	return nil
+}
+
+// NewMailer picks the sendmail binary when configured, SMTP otherwise.
+func NewMailer(c *config.MailConfig) (Mailer, error) {
+	if c.Sendmail != "" {
+		return NewSendmailMailer(c)
+	}
+	return NewSMTPMailer(c)
 }

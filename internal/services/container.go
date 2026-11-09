@@ -293,10 +293,10 @@ func (c *Container) InitSecurity() {
 
 	c.Turnstile = security.NewTurnstile(c.Config.Turnstile.SiteKey, c.Config.Turnstile.SecretKey)
 
-	if c.Config.Mail.Host == "" {
+	if c.Config.Mail.Host == "" && c.Config.Mail.Sendmail == "" {
 		return
 	}
-	mailer, err := NewSMTPMailer(c.Config.Mail)
+	mailer, err := NewMailer(c.Config.Mail)
 	if err != nil {
 		log.Fatal(err)
 	}

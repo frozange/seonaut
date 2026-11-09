@@ -49,9 +49,11 @@ type TurnstileConfig struct {
 	SecretKey string `mapstructure:"secret_key"`
 }
 
-// MailConfig is the SMTP relay used for account e-mails. When Host is empty,
-// e-mail verification is disabled and new accounts are active immediately.
+// MailConfig is the relay used for account e-mails: an SMTP server (Host) or a
+// local sendmail binary (Sendmail). When both are empty, e-mail verification is
+// disabled and new accounts are active immediately.
 type MailConfig struct {
+	Sendmail string `mapstructure:"sendmail"`
 	Host     string `mapstructure:"host"`
 	Port     int    `mapstructure:"port"`
 	User     string `mapstructure:"user"`
@@ -115,6 +117,7 @@ func NewConfig(configFile string) (*Config, error) {
 	viper.SetDefault("turnstile.site_key", "")
 	viper.SetDefault("turnstile.secret_key", "")
 	viper.SetDefault("mail.host", "")
+	viper.SetDefault("mail.sendmail", "")
 	viper.SetDefault("mail.port", 25)
 	viper.SetDefault("limits.signups_per_ip_per_day", 0)
 	viper.SetDefault("limits.allow_custom_user_agent", true)

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"net/mail"
@@ -9,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stjudewashere/seonaut/internal/config"
 	"github.com/stjudewashere/seonaut/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -250,5 +252,30 @@ func TestSignupHashesPassword(t *testing.T) {
 	s.SignUp("h@example.com", "password1", "en", "light")
 	if bcrypt.CompareHashAndPassword([]byte(repo.users["h@example.com"].Password), []byte("password1")) != nil {
 		t.Fatal("password not hashed with bcrypt")
+	}
+}
+
+func TestSendmailMailerArguments(t *testing.T) {
+	var gotArgs []string
+	var gotMsg []byte
+	m, err := NewSendmailMailer(&config.MailConfig{Sendmail: "/usr/sbin/sendmail", From: "SEO <seo@example.com>"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.run = func(_ context.Context, path string, args []string, msg []byte) error {
+		gotArgs, gotMsg = args, msg
+		return nil
+	}
+	if err := m.Send("-oQ/tmp@example.com", "s", "b"); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Join(gotArgs, " ") != "-i -f seo@example.com -- -oQ/tmp@example.com" {
+		t.Errorf("args = %v", gotArgs)
+	}
+	if !strings.Contains(string(gotMsg), "From: \"SEO\" <seo@example.com>") {
+		t.Errorf("message = %q", gotMsg)
+	}
+	if err := m.Send("a@example.com\nBcc: x@example.com", "s", "b"); err == nil {
+		t.Error("header injection accepted")
 	}
 }
