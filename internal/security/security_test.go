@@ -187,3 +187,44 @@ func TestHeaders(t *testing.T) {
 		t.Error("NoIndex off must leave the app untouched")
 	}
 }
+
+func TestRequireSecretHeader(t *testing.T) {
+	var seen string
+	inner := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		seen = r.Header.Get("X-Origin-Auth")
+		w.Write([]byte("app"))
+	})
+	h := RequireSecretHeader(inner, "X-Origin-Auth", "s3cret")
+
+	for _, v := range []string{"", "wrong", "s3cre", "s3cret2"} {
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		if v != "" {
+			req.Header.Set("X-Origin-Auth", v)
+		}
+		h.ServeHTTP(rec, req)
+		if rec.Code != http.StatusForbidden {
+			t.Errorf("value %q: status %d", v, rec.Code)
+		}
+	}
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("X-Origin-Auth", "s3cret")
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK || rec.Body.String() != "app" {
+		t.Fatalf("valid secret refused: %d", rec.Code)
+	}
+	if seen != "" {
+		t.Error("secret header was passed on to the application")
+	}
+
+	if RequireSecretHeader(inner, "X-Origin-Auth", "") == nil {
+		t.Fatal("nil handler")
+	}
+	rec = httptest.NewRecorder()
+	RequireSecretHeader(inner, "X-Origin-Auth", "").ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
+	if rec.Code != http.StatusOK {
+		t.Error("an empty secret must disable the check")
+	}
+}

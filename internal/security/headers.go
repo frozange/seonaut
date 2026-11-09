@@ -1,6 +1,9 @@
 package security
 
-import "net/http"
+import (
+	"crypto/subtle"
+	"net/http"
+)
 
 // HeadersOptions configures the response headers added to every reply.
 type HeadersOptions struct {
@@ -31,6 +34,28 @@ func Headers(next http.Handler, o HeadersOptions) http.Handler {
 				return
 			}
 		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+// RequireSecretHeader refuses every request that does not carry header with the
+// expected value. It locks the instance to the edge proxy that injects the header
+// (a Cloudflare transform rule for example), so calling the origin directly does
+// not walk around the access rules enforced at the edge. An empty secret disables
+// the check.
+func RequireSecretHeader(next http.Handler, header, secret string) http.Handler {
+	if header == "" || secret == "" {
+		return next
+	}
+	want := []byte(secret)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		got := []byte(r.Header.Get(header))
+		if subtle.ConstantTimeCompare(got, want) != 1 {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+		// The secret must not travel further, for example into a replayed archive.
+		r.Header.Del(header)
 		next.ServeHTTP(w, r)
 	})
 }

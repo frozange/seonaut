@@ -37,6 +37,11 @@ type HTTPServerConfig struct {
 	TrustedProxies []string `mapstructure:"trusted_proxies"`
 	ClientIPHeader string   `mapstructure:"client_ip_header"`
 
+	// OriginSecretHeader and OriginSecret lock the instance to the edge proxy that
+	// injects this header: any request without it gets a 403.
+	OriginSecretHeader string `mapstructure:"origin_secret_header"`
+	OriginSecret       string `mapstructure:"origin_secret"`
+
 	// Session keys, base64 encoded (64 bytes for authentication, 32 for encryption).
 	// When empty, random keys are generated and every restart signs users out.
 	SessionAuthKey       string `mapstructure:"session_auth_key"`

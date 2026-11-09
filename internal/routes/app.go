@@ -101,6 +101,7 @@ func NewServer(container *services.Container) {
 		NoIndex: container.Config.HTTPServer.NoIndex,
 		HTTPS:   strings.HasPrefix(container.Config.HTTPServer.URL, "https://"),
 	})
+	handler = security.RequireSecretHeader(handler, container.Config.HTTPServer.OriginSecretHeader, container.Config.HTTPServer.OriginSecret)
 	err := http.ListenAndServe(fmt.Sprintf("%s:%d", container.Config.HTTPServer.Server, container.Config.HTTPServer.Port), handler)
 	if err != nil {
 		log.Fatalf("error starting server: %v", err)
