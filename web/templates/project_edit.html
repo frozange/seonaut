@@ -166,6 +166,7 @@
 			</div>
 		</div>
 
+		{{ if allow_custom_ua }}
 		<div class="box soft">
 			<div class="col col-main">
 				<div class="content">
@@ -190,6 +191,8 @@
 			</div>
 		</div>
 
+		{{ end }}
+
 		<div class="box box-highlight">
 			<div class="col col-main">
 				<div class="content-s">
@@ -205,9 +208,9 @@
 	<div class="box bg-alert">
 		<div class="col col-main">
 			<div class="content">
-				<a href="/project/delete?pid={{ .Project.Id }}">
-					{{ trans "DELETE_PROJECT" }}
-				</a>
+				<form method="POST" action="/project/delete?pid={{ .Project.Id }}" class="inline-form">
+					<button type="submit" class="link-button">{{ trans "DELETE_PROJECT" }}</button>
+				</form>
 				<p>
 					{{ trans "DELETE_PROJECT_MESSAGE" .Project.Host }}<br>
 					{{ trans "DELETE_CANT_BE_UNDONE" }}
@@ -218,6 +221,7 @@
 
 </div>
 
+{{ if allow_custom_ua }}
 <script type="text/javascript">
 	let userAgent = document.getElementById('custom_user_agent');
 	let userAgentInput = document.getElementById('user_agent_input');
@@ -231,6 +235,7 @@
 		toggleUserAgentInput(e.currentTarget.checked);
 	});
 </script>
+{{ end }}
 
 {{ end }}
 

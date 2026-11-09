@@ -1,8 +1,15 @@
 package services
 
 import (
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
+	"fmt"
+	"log"
 	"net/mail"
+	"strings"
+	"time"
 
 	"github.com/stjudewashere/seonaut/internal/models"
 
@@ -27,7 +34,19 @@ var (
 
 	// Error returned when trying to set a language that is not supported.
 	ErrInvalidLang = errors.New("user service: lang not valid")
+
+	// Error returned at sign in when the account e-mail has not been confirmed yet.
+	ErrEmailNotVerified = errors.New("user service: email not verified")
+
+	// Error returned when a verification link is unknown, already used or expired.
+	ErrInvalidVerificationToken = errors.New("user service: invalid verification token")
+
+	// Error returned when the verification e-mail could not be sent.
+	ErrVerificationMail = errors.New("user service: verification email not sent")
 )
+
+// VerificationTokenTTL is how long a verification link stays valid.
+const VerificationTokenTTL = 24 * time.Hour
 
 const (
 	LightTheme = "light"
@@ -50,12 +69,120 @@ type (
 		LangIsSupported(lang string) bool
 	}
 
+	// EmailVerificationRepository stores verification tokens, as hashes only.
+	EmailVerificationRepository interface {
+		SetEmailVerification(userID int, tokenHash string, expires time.Time) error
+		VerifyEmailByHash(tokenHash string) (string, error)
+		DeleteStaleUnverifiedUsers(grace time.Duration) (int64, error)
+	}
+
+	// MailLimiter caps how many verification e-mails an address receives.
+	MailLimiter interface {
+		Allow(key string) bool
+	}
+
+	emailVerification struct {
+		repository EmailVerificationRepository
+		mailer     Mailer
+		baseURL    string
+		limiter    MailLimiter
+		now        func() time.Time
+	}
+
 	UserService struct {
-		repository  UserServiceRepository
-		translator  TranslatorService
-		deleteHooks []DeleteHook
+		repository   UserServiceRepository
+		translator   TranslatorService
+		deleteHooks  []DeleteHook
+		verification *emailVerification
 	}
 )
+
+// EnableEmailVerification makes new accounts unusable until their owner follows
+// the link e-mailed to them. baseURL is the public URL of the instance.
+func (s *UserService) EnableEmailVerification(r EmailVerificationRepository, m Mailer, baseURL string, l MailLimiter) {
+	s.verification = &emailVerification{
+		repository: r,
+		mailer:     m,
+		baseURL:    strings.TrimRight(baseURL, "/"),
+		limiter:    l,
+		now:        time.Now,
+	}
+}
+
+// EmailVerificationEnabled reports whether sign ups must confirm their e-mail.
+func (s *UserService) EmailVerificationEnabled() bool {
+	return s.verification != nil
+}
+
+// SendVerification issues a new verification token for the user and e-mails the
+// link. Older links stop working because only the latest hash is stored.
+func (s *UserService) SendVerification(u *models.User) error {
+	v := s.verification
+	if v == nil {
+		return nil
+	}
+	if v.limiter != nil && !v.limiter.Allow(strings.ToLower(u.Email)) {
+		return ErrVerificationMail
+	}
+
+	raw := make([]byte, 32)
+	if _, err := rand.Read(raw); err != nil {
+		return err
+	}
+	token := hex.EncodeToString(raw)
+
+	if err := v.repository.SetEmailVerification(u.Id, hashToken(token), v.now().Add(VerificationTokenTTL)); err != nil {
+		return err
+	}
+
+	link := v.baseURL + "/verify?token=" + token
+	body := fmt.Sprintf("Hello,\n\nPlease confirm your e-mail address to activate your account:\n\n%s\n\nThis link expires in 24 hours. If you did not create an account, ignore this message and nothing will happen.\n", link)
+	if err := v.mailer.Send(u.Email, "Confirm your e-mail address", body); err != nil {
+		log.Printf("verification mail to user %d failed: %v", u.Id, err)
+		return ErrVerificationMail
+	}
+
+	return nil
+}
+
+// VerifyEmail activates the account matching the token and returns it.
+func (s *UserService) VerifyEmail(token string) (*models.User, error) {
+	v := s.verification
+	token = strings.TrimSpace(token)
+	if v == nil || len(token) != 64 {
+		return nil, ErrInvalidVerificationToken
+	}
+	if _, err := hex.DecodeString(token); err != nil {
+		return nil, ErrInvalidVerificationToken
+	}
+
+	email, err := v.repository.VerifyEmailByHash(hashToken(token))
+	if err != nil {
+		return nil, ErrInvalidVerificationToken
+	}
+
+	return s.repository.FindUserByEmail(email)
+}
+
+// PurgeUnverified deletes accounts whose verification link expired long ago.
+func (s *UserService) PurgeUnverified() {
+	if s.verification == nil {
+		return
+	}
+	n, err := s.verification.repository.DeleteStaleUnverifiedUsers(VerificationTokenTTL)
+	if err != nil {
+		log.Printf("purge unverified users: %v", err)
+		return
+	}
+	if n > 0 {
+		log.Printf("purged %d unverified users", n)
+	}
+}
+
+func hashToken(token string) string {
+	sum := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(sum[:])
+}
 
 func NewUserService(r UserServiceRepository, t TranslatorService) *UserService {
 	return &UserService{
@@ -88,7 +215,25 @@ func (s *UserService) SignUp(email, password, lang, theme string) (*models.User,
 
 	theme = s.getValidatedTheme(theme)
 
-	return s.repository.UserSignup(email, string(hashedPassword), lang, theme)
+	u, err := s.repository.UserSignup(email, string(hashedPassword), lang, theme)
+	if err != nil {
+		return nil, err
+	}
+
+	if s.verification == nil {
+		u.EmailVerified = true
+		return u, nil
+	}
+
+	// The account exists from here on but stays unusable until verified. If the
+	// e-mail cannot be sent the account is removed so the address can sign up again.
+	u.EmailVerified = false
+	if err := s.SendVerification(u); err != nil {
+		s.repository.DeleteUser(u)
+		return nil, err
+	}
+
+	return u, nil
 }
 
 // SignIn validates the provided email and password combination for user authentication.
@@ -102,6 +247,12 @@ func (s *UserService) SignIn(email, password string) (*models.User, error) {
 
 	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
 		return nil, ErrIncorrectPassword
+	}
+
+	// Only the owner of the password gets a fresh link, and the mail limiter caps it.
+	if s.verification != nil && !u.EmailVerified {
+		s.SendVerification(u)
+		return nil, ErrEmailNotVerified
 	}
 
 	return u, nil

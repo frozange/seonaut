@@ -38,7 +38,14 @@ type CrawlerServicesContainer struct {
 	CrawlerHandler *CrawlerHandler
 	ArchiveService *ArchiveService
 	Config         *config.CrawlerConfig
+
+	// MaxConcurrent caps the number of crawls running at the same time on the
+	// instance. Zero means no limit.
+	MaxConcurrent int
 }
+
+// ErrTooManyCrawls is returned when the instance already runs MaxConcurrent crawls.
+var ErrTooManyCrawls = errors.New("too many crawls running, try again later")
 
 type CrawlerService struct {
 	repository     CrawlerServiceRepository
@@ -49,6 +56,7 @@ type CrawlerService struct {
 	ArchiveService *ArchiveService
 	crawlers       map[int64]*crawler.Crawler
 	lock           *sync.RWMutex
+	maxConcurrent  int
 }
 
 func NewCrawlerService(r CrawlerServiceRepository, s CrawlerServicesContainer) *CrawlerService {
@@ -59,6 +67,7 @@ func NewCrawlerService(r CrawlerServiceRepository, s CrawlerServicesContainer) *
 		reportManager:  s.ReportManager,
 		crawlerHandler: s.CrawlerHandler,
 		ArchiveService: s.ArchiveService,
+		maxConcurrent:  s.MaxConcurrent,
 		crawlers:       make(map[int64]*crawler.Crawler),
 		lock:           &sync.RWMutex{},
 	}
@@ -174,6 +183,10 @@ func (s *CrawlerService) addCrawler(u *url.URL, p *models.Project, b *models.Bas
 
 	if _, ok := s.crawlers[p.Id]; ok {
 		return nil, errors.New("project is already being crawled")
+	}
+
+	if s.maxConcurrent > 0 && len(s.crawlers) >= s.maxConcurrent {
+		return nil, ErrTooManyCrawls
 	}
 
 	crawlLimit := CrawlLimit

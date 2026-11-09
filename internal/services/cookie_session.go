@@ -29,19 +29,26 @@ type (
 	}
 )
 
-func NewCookieSession(r CookieSessionRepository) *CookieSession {
-	authKeyOne := securecookie.GenerateRandomKey(64)
-	encryptionKeyOne := securecookie.GenerateRandomKey(32)
+// NewCookieSession creates the session store. authKey (64 bytes) and encryptionKey
+// (32 bytes) keep sessions valid across restarts; when either is nil random keys
+// are generated. secure marks the cookie HTTPS only.
+func NewCookieSession(r CookieSessionRepository, authKey, encryptionKey []byte, secure bool) *CookieSession {
+	if len(authKey) != 64 || len(encryptionKey) != 32 {
+		authKey = securecookie.GenerateRandomKey(64)
+		encryptionKey = securecookie.GenerateRandomKey(32)
+	}
 
 	cookie := sessions.NewCookieStore(
-		authKeyOne,
-		encryptionKeyOne,
+		authKey,
+		encryptionKey,
 	)
 
 	cookie.Options = &sessions.Options{
 		Path:     "/",
 		MaxAge:   60 * 15,
 		HttpOnly: true,
+		Secure:   secure,
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	gob.Register(models.User{})

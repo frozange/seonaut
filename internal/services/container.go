@@ -2,12 +2,17 @@ package services
 
 import (
 	"database/sql"
+	"encoding/base64"
 	"log"
+	"strings"
+	"time"
 
 	"github.com/stjudewashere/seonaut/internal/config"
 	"github.com/stjudewashere/seonaut/internal/issues/multipage"
 	"github.com/stjudewashere/seonaut/internal/issues/page"
+	"github.com/stjudewashere/seonaut/internal/netguard"
 	"github.com/stjudewashere/seonaut/internal/repository"
+	"github.com/stjudewashere/seonaut/internal/security"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
@@ -33,6 +38,15 @@ type Container struct {
 	ArchiveService     *ArchiveService
 	ReplayService      *ReplayService
 
+	// Protections of a public instance.
+	Turnstile          *security.Turnstile
+	ClientIP           *security.ClientIPResolver
+	SignupLimiter      *security.RateLimiter
+	SigninIPLimiter    *security.RateLimiter
+	SigninEmailLimiter *security.RateLimiter
+	CrawlLimiter       *security.RateLimiter
+	NetGuard           *netguard.Guard
+
 	db                   *sql.DB
 	issueRepository      *repository.IssueRepository
 	pageReportRepository *repository.PageReportRepository
@@ -55,6 +69,7 @@ func NewContainer(configFile string) *Container {
 	c.InitReportManager()
 	c.InitTranslator()
 	c.InitUserService()
+	c.InitSecurity()
 	c.InitDashboardService()
 	c.InitProjectService()
 	c.InitProjectViewService()
@@ -199,6 +214,7 @@ func (c *Container) InitCrawlerService() {
 		CrawlerHandler: NewCrawlerHandler(c.pageReportRepository, c.PubSubBroker, c.ReportManager),
 		ArchiveService: c.ArchiveService,
 		Config:         c.Config.Crawler,
+		MaxConcurrent:  c.Config.Limits.MaxConcurrentCrawls,
 	}
 	repository := &struct {
 		*repository.CrawlRepository
@@ -228,7 +244,9 @@ func (c *Container) InitTranslator() {
 // Create html renderer.
 func (c *Container) InitRenderer() {
 	renderer, err := NewRenderer(&RendererConfig{
-		TemplatesFolder: "web/templates",
+		TemplatesFolder:      "web/templates",
+		AllowCustomUserAgent: c.Config.Limits.AllowCustomUserAgent,
+		TurnstileSiteKey:     c.Turnstile.SiteKey,
 	}, c.Translator)
 	if err != nil {
 		log.Fatal(err)
@@ -239,7 +257,58 @@ func (c *Container) InitRenderer() {
 
 // Create cookie session handler
 func (c *Container) InitCookieSession() {
-	c.CookieSession = NewCookieSession(c.userRepository)
+	authKey, err1 := base64.StdEncoding.DecodeString(c.Config.HTTPServer.SessionAuthKey)
+	encKey, err2 := base64.StdEncoding.DecodeString(c.Config.HTTPServer.SessionEncryptionKey)
+	if err1 != nil || err2 != nil || len(authKey) != 64 || len(encKey) != 32 {
+		if c.Config.HTTPServer.SessionAuthKey != "" || c.Config.HTTPServer.SessionEncryptionKey != "" {
+			log.Fatal("session keys must be base64: 64 bytes for session_auth_key, 32 for session_encryption_key")
+		}
+		authKey, encKey = nil, nil
+	}
+
+	secure := strings.HasPrefix(c.Config.HTTPServer.URL, "https://")
+	c.CookieSession = NewCookieSession(c.userRepository, authKey, encKey, secure)
+}
+
+// InitSecurity sets up client IP resolution, rate limits, Turnstile, the network
+// guard used to validate project URLs and, when a mail relay is configured,
+// e-mail verification of new accounts.
+func (c *Container) InitSecurity() {
+	var err error
+	c.ClientIP, err = security.NewClientIPResolver(c.Config.HTTPServer.TrustedProxies, c.Config.HTTPServer.ClientIPHeader)
+	if err != nil {
+		log.Fatalf("invalid trusted_proxies: %v", err)
+	}
+
+	c.NetGuard, err = netguard.New(c.Config.Crawler.DenyAddresses, c.Config.Crawler.AllowedPorts)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	l := c.Config.Limits
+	c.SignupLimiter = security.NewRateLimiter(l.SignupsPerIPPerDay, 24*time.Hour)
+	c.SigninIPLimiter = security.NewRateLimiter(l.SigninAttemptsPerIPPerHour, time.Hour)
+	c.SigninEmailLimiter = security.NewRateLimiter(l.SigninAttemptsPerEmailHour, time.Hour)
+	c.CrawlLimiter = security.NewRateLimiter(l.CrawlsPerUserPerDay, 24*time.Hour)
+
+	c.Turnstile = security.NewTurnstile(c.Config.Turnstile.SiteKey, c.Config.Turnstile.SecretKey)
+
+	if c.Config.Mail.Host == "" {
+		return
+	}
+	mailer, err := NewSMTPMailer(c.Config.Mail)
+	if err != nil {
+		log.Fatal(err)
+	}
+	mailLimiter := security.NewRateLimiter(l.VerificationMailsPerDay, 24*time.Hour)
+	c.UserService.EnableEmailVerification(c.userRepository, mailer, c.Config.HTTPServer.URL, mailLimiter)
+
+	go func() {
+		for {
+			c.UserService.PurgeUnverified()
+			time.Sleep(time.Hour)
+		}
+	}()
 }
 
 // Init the WACZ archiver service.

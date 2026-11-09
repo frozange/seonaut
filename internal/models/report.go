@@ -23,4 +23,3 @@ type StatusCodeByDepth struct {
 	StatusCode400 int
 	StatusCode500 int
 }
-

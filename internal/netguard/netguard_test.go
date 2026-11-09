@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/netip"
+	"net/url"
 	"testing"
 )
 
@@ -116,6 +117,31 @@ func TestTransportRefusesLoopback(t *testing.T) {
 	if err == nil {
 		resp.Body.Close()
 		t.Fatal("request to localhost succeeded")
+	}
+}
+
+func TestCheckURL(t *testing.T) {
+	g := newGuard(t, nil, nil)
+	ctx := context.Background()
+	cases := map[string]bool{
+		"https://8.8.8.8/":        true,
+		"http://8.8.8.8:80/":      true,
+		"https://8.8.8.8:8443/":   false,
+		"ftp://8.8.8.8/":          false,
+		"http://127.0.0.1/":       false,
+		"http://localhost/":       false,
+		"http://[::1]/":           false,
+		"http://169.254.169.254/": false,
+		"http:///nohost":          false,
+	}
+	for raw, want := range cases {
+		u, err := url.Parse(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := g.CheckURL(ctx, u) == nil; got != want {
+			t.Errorf("CheckURL(%s) allowed=%v, want %v", raw, got, want)
+		}
 	}
 }
 

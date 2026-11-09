@@ -28,6 +28,47 @@ type HTTPServerConfig struct {
 	Server string `mapstructure:"host"`
 	Port   int    `mapstructure:"port"`
 	URL    string `mapstructure:"url"`
+
+	// NoIndex keeps the whole instance out of search engines (X-Robots-Tag and robots.txt).
+	NoIndex bool `mapstructure:"noindex"`
+
+	// TrustedProxies lists the reverse proxies allowed to report the visitor address
+	// through ClientIPHeader. Leave empty when the app is reached directly.
+	TrustedProxies []string `mapstructure:"trusted_proxies"`
+	ClientIPHeader string   `mapstructure:"client_ip_header"`
+
+	// Session keys, base64 encoded (64 bytes for authentication, 32 for encryption).
+	// When empty, random keys are generated and every restart signs users out.
+	SessionAuthKey       string `mapstructure:"session_auth_key"`
+	SessionEncryptionKey string `mapstructure:"session_encryption_key"`
+}
+
+// TurnstileConfig enables Cloudflare Turnstile on the sign up and sign in forms.
+type TurnstileConfig struct {
+	SiteKey   string `mapstructure:"site_key"`
+	SecretKey string `mapstructure:"secret_key"`
+}
+
+// MailConfig is the SMTP relay used for account e-mails. When Host is empty,
+// e-mail verification is disabled and new accounts are active immediately.
+type MailConfig struct {
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	User     string `mapstructure:"user"`
+	Password string `mapstructure:"password"`
+	From     string `mapstructure:"from"`
+}
+
+// LimitsConfig caps what a single visitor or account can do. Zero disables a limit.
+type LimitsConfig struct {
+	SignupsPerIPPerDay         int  `mapstructure:"signups_per_ip_per_day"`
+	SigninAttemptsPerIPPerHour int  `mapstructure:"signin_attempts_per_ip_per_hour"`
+	SigninAttemptsPerEmailHour int  `mapstructure:"signin_attempts_per_email_per_hour"`
+	VerificationMailsPerDay    int  `mapstructure:"verification_mails_per_email_per_day"`
+	CrawlsPerUserPerDay        int  `mapstructure:"crawls_per_user_per_day"`
+	MaxConcurrentCrawls        int  `mapstructure:"max_concurrent_crawls"`
+	MaxProjectsPerUser         int  `mapstructure:"max_projects_per_user"`
+	AllowCustomUserAgent       bool `mapstructure:"allow_custom_user_agent"`
 }
 
 // DBConfig stores the configuration for the database store.
@@ -51,6 +92,9 @@ type Config struct {
 	HTTPServer *HTTPServerConfig `mapstructure:"server"`
 	DB         *DBConfig         `mapstructure:"database"`
 	UIConfig   *UIConfig         `mapstructure:"UI"`
+	Turnstile  *TurnstileConfig  `mapstructure:"turnstile"`
+	Mail       *MailConfig       `mapstructure:"mail"`
+	Limits     *LimitsConfig     `mapstructure:"limits"`
 }
 
 // NewConfig loads the configuration from the specified file and path.
@@ -63,6 +107,17 @@ func NewConfig(configFile string) (*Config, error) {
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("SEONAUT") // Optional: prefix for env vars
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	// Defaults keep every section non-nil and preserve upstream behaviour when a
+	// section is absent: no limits, no Turnstile, no e-mail verification.
+	viper.SetDefault("server.noindex", false)
+	viper.SetDefault("server.client_ip_header", "")
+	viper.SetDefault("turnstile.site_key", "")
+	viper.SetDefault("turnstile.secret_key", "")
+	viper.SetDefault("mail.host", "")
+	viper.SetDefault("mail.port", 25)
+	viper.SetDefault("limits.signups_per_ip_per_day", 0)
+	viper.SetDefault("limits.allow_custom_user_agent", true)
 
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, err

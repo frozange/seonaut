@@ -264,3 +264,31 @@ h2.title {
 		margin: 0;
 	}
 }
+p.info {
+	color: var(--primary-color);
+}
+
+/* A form button styled like a link, for actions that must be POST requests. */
+form.inline-form {
+	display: inline;
+	margin: 0;
+}
+
+button.link-button {
+	background: none;
+	border: 0;
+	border-bottom: 1px dotted var(--primary-color);
+	color: var(--primary-color);
+	cursor: pointer;
+	font: inherit;
+	padding: 0;
+}
+
+button.link-button:hover {
+	border-bottom-style: solid;
+}
+
+.cf-turnstile {
+	margin: 1rem 0;
+	min-height: 65px;
+}

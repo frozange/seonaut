@@ -22,6 +22,9 @@
 					{{ if .Data.URLError }}
 						<p class="error">{{ trans "URL_NOT_VALID" }}</p>
 					{{ end }}
+					{{ if .Data.ProjectLimitError }}
+						<p class="error">{{ trans "ERROR_PROJECT_LIMIT" }}</p>
+					{{ end }}
 				</div>
 			</div>
 		</div>
@@ -160,6 +163,7 @@
 			</div>
 		</div>
 
+		{{ if allow_custom_ua }}
 		<div class="box soft">
 			<div class="col col-main">
 				<div class="content">
@@ -184,6 +188,8 @@
 			</div>
 		</div>
 
+		{{ end }}
+
 		<div class="box box-highlight">
 			<div class="col col-main">
 				<div class="content-s">
@@ -197,6 +203,7 @@
 	</form>
 </div>
 
+{{ if allow_custom_ua }}
 <script type="text/javascript">
 	let userAgent = document.getElementById('custom_user_agent');
 	let userAgentInput = document.getElementById('user_agent_input');
@@ -210,5 +217,6 @@
 		toggleUserAgentInput(e.currentTarget.checked);
 	});
 </script>
+{{ end }}
 
 {{ template "footer" . }}

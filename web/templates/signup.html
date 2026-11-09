@@ -17,11 +17,12 @@
 							<input type="email" name="email" value="{{ .Data.Email }}" required autofocus>
 							<label for="password">{{ trans "PASSWORD_LABEL" }}</label>
 							<input type="password" name="password" required>
+							{{ with turnstile_site_key }}<div class="cf-turnstile" data-sitekey="{{ . }}"></div>{{ end }}
 							<input type="submit" value="{{ trans "SIGN_UP" }}">
 						</form>
 
 						{{ if .Data.Error }}
-							<p class="error">{{ .Data.ErrorMessage }}</p>
+							<p class="error">{{ trans .Data.ErrorMessage }}</p>
 						{{ end }}
 					</div>
 

@@ -621,3 +621,16 @@ ERROR_PAGINATION_LINKS_DESC: Having link rel="next" and link rel="prev" tags wit
 
 ERROR_LOCALHOST_LINKS: Webpages with links to localhost
 ERROR_LOCALHOST_LINKS_DESC: Links to localhost or 127.0.0.1 are inaccessible to users and search engines, causing errors and poor SEO. To fix this, replace these links with the correct public URLs pointing to your live website.
+
+# Protections of a public instance
+ERROR_TOO_MANY_ATTEMPTS: Too many attempts. Please wait a while and try again.
+ERROR_HUMAN_CHECK: The security check failed. Please reload the page and try again.
+ERROR_INVALID_PASSWORD: Password is not valid.
+ERROR_INVALID_EMAIL: Email address is not valid.
+ERROR_MAIL_NOT_SENT: The confirmation e-mail could not be sent. Please try again later.
+VERIFY_EMAIL_SENT: Almost done. We sent you an e-mail with a link to activate your account. The link is valid for 24 hours.
+VERIFY_EMAIL_PENDING: Your account is not active yet. We sent you a new activation link, please check your inbox.
+VERIFY_EMAIL_INVALID: This activation link is invalid or has expired. Sign in to receive a new one.
+ERROR_CRAWL_LIMIT: You have reached the number of crawls allowed per day. Please try again tomorrow.
+ERROR_INSTANCE_BUSY: The crawler is busy with other crawls. Please try again in a few minutes.
+ERROR_PROJECT_LIMIT: You have reached the maximum number of projects. Delete a project to add a new one.

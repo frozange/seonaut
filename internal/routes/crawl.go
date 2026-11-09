@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -54,7 +55,15 @@ func (h *crawlHandler) startHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !h.crawlAllowed(w, user) {
+		return
+	}
+
 	err = h.CrawlerService.StartCrawler(p, models.BasicAuth{})
+	if errors.Is(err, services.ErrTooManyCrawls) {
+		http.Error(w, h.Translator.Trans(user.Lang, "ERROR_INSTANCE_BUSY"), http.StatusServiceUnavailable)
+		return
+	}
 	if err != nil {
 		log.Printf("start crawler for %s error: %v\n", p.URL, err)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -167,7 +176,15 @@ func (h *crawlHandler) authPostHandler(w http.ResponseWriter, r *http.Request) {
 		AuthPass: r.FormValue("password"),
 	}
 
+	if !h.crawlAllowed(w, user) {
+		return
+	}
+
 	err = h.CrawlerService.StartCrawler(p, basicAuth)
+	if errors.Is(err, services.ErrTooManyCrawls) {
+		http.Error(w, h.Translator.Trans(user.Lang, "ERROR_INSTANCE_BUSY"), http.StatusServiceUnavailable)
+		return
+	}
 	if err != nil {
 		log.Printf("start basic auth crawler for %s error: %v\n", p.URL, err)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -334,4 +351,14 @@ func (h *crawlHandler) wsHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
+}
+
+// crawlAllowed applies the per-user daily crawl limit. It writes the refusal and
+// returns false when the user has used all their crawls for the day.
+func (h *crawlHandler) crawlAllowed(w http.ResponseWriter, user *models.User) bool {
+	if h.CrawlLimiter.Allow(strconv.Itoa(user.Id)) {
+		return true
+	}
+	http.Error(w, h.Translator.Trans(user.Lang, "ERROR_CRAWL_LIMIT"), http.StatusTooManyRequests)
+	return false
 }

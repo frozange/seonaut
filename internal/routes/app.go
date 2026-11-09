@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/stjudewashere/seonaut/internal/models"
+	"github.com/stjudewashere/seonaut/internal/security"
 	"github.com/stjudewashere/seonaut/internal/services"
 )
 
@@ -64,7 +66,7 @@ func NewServer(container *services.Container) {
 	http.HandleFunc("POST /project/add", container.CookieSession.Auth(projectHandler.addPostHandler))
 	http.HandleFunc("GET /project/edit", container.CookieSession.Auth(projectHandler.editGetHandler))
 	http.HandleFunc("POST /project/edit", container.CookieSession.Auth(projectHandler.editPostHandler))
-	http.HandleFunc("GET /project/delete", container.CookieSession.Auth(projectHandler.deleteHandler))
+	http.HandleFunc("POST /project/delete", container.CookieSession.Auth(projectHandler.deleteHandler))
 
 	// Resource route
 	resourceHandler := resourceHandler{container}
@@ -81,6 +83,7 @@ func NewServer(container *services.Container) {
 	http.HandleFunc("POST /signup", userHandler.signupPostHandler)
 	http.HandleFunc("GET /signin", userHandler.signinGetHandler)
 	http.HandleFunc("POST /signin", userHandler.signinPostHandler)
+	http.HandleFunc("GET /verify", userHandler.verifyHandler)
 	http.HandleFunc("GET /account", container.CookieSession.Auth(userHandler.editGetHandler))
 	http.HandleFunc("POST /account", container.CookieSession.Auth(userHandler.editPostHandler))
 	http.HandleFunc("GET /account/password", container.CookieSession.Auth(userHandler.changePasswordGetHandler))
@@ -94,7 +97,11 @@ func NewServer(container *services.Container) {
 	http.HandleFunc("GET /replay", container.CookieSession.Auth(replayHandler.proxyHandler))
 
 	fmt.Printf("Starting server at %s on port %d...\n", container.Config.HTTPServer.Server, container.Config.HTTPServer.Port)
-	err := http.ListenAndServe(fmt.Sprintf("%s:%d", container.Config.HTTPServer.Server, container.Config.HTTPServer.Port), nil)
+	handler := security.Headers(http.DefaultServeMux, security.HeadersOptions{
+		NoIndex: container.Config.HTTPServer.NoIndex,
+		HTTPS:   strings.HasPrefix(container.Config.HTTPServer.URL, "https://"),
+	})
+	err := http.ListenAndServe(fmt.Sprintf("%s:%d", container.Config.HTTPServer.Server, container.Config.HTTPServer.Port), handler)
 	if err != nil {
 		log.Fatalf("error starting server: %v", err)
 	}

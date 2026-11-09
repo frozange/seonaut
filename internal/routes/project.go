@@ -4,7 +4,9 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/stjudewashere/seonaut/internal/models"
 	"github.com/stjudewashere/seonaut/internal/services"
@@ -134,13 +136,47 @@ func (h *projectHandler) addPostHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	customUserAgent, err := strconv.ParseBool(r.FormValue("custom_user_agent"))
-	if err != nil {
+	if err != nil || !h.Config.Limits.AllowCustomUserAgent {
 		customUserAgent = false
 	}
 
 	userAgent := h.Config.Crawler.Agent
 	if customUserAgent {
 		userAgent = r.FormValue("custom_user_agent_text")
+	}
+
+	renderAddError := func(status int, urlError, limitError bool) {
+		pageView := &PageView{
+			Lang:      user.Lang,
+			Theme:     user.Theme,
+			User:      *user,
+			PageTitle: "ADD_PROJECT_PAGE_TITLE",
+			Data: &struct {
+				URLError          bool
+				UserAgentError    bool
+				ProjectLimitError bool
+				UserAgent         string
+			}{
+				URLError:          urlError,
+				ProjectLimitError: limitError,
+				UserAgent:         h.Config.Crawler.Agent,
+			},
+		}
+		w.WriteHeader(status)
+		h.Renderer.RenderTemplate(w, "project_add", pageView, user.Lang)
+	}
+
+	if max := h.Config.Limits.MaxProjectsPerUser; max > 0 && len(h.ProjectViewService.GetProjectViews(user.Id)) >= max {
+		renderAddError(http.StatusForbidden, false, true)
+		return
+	}
+
+	// Refuse early, with a clear message, a URL the crawler would not be allowed to
+	// reach. The network guard in the crawler stays the enforcement point.
+	parsed, err := url.Parse(strings.TrimSpace(r.FormValue("url")))
+	if err != nil || h.NetGuard.CheckURL(r.Context(), parsed) != nil {
+		renderAddError(http.StatusOK, true, false)
+		return
 	}
 
 	project := &models.Project{
@@ -164,9 +200,10 @@ func (h *projectHandler) addPostHandler(w http.ResponseWriter, r *http.Request) 
 			User:      *user,
 			PageTitle: "ADD_PROJECT_PAGE_TITLE",
 			Data: &struct {
-				URLError       bool
-				UserAgentError bool
-				UserAgent      string
+				URLError          bool
+				UserAgentError    bool
+				ProjectLimitError bool
+				UserAgent         string
 			}{
 				URLError:       errors.Is(err, services.ErrProtocolNotSupported),
 				UserAgentError: errors.Is(err, services.ErrUserAgent),
@@ -320,7 +357,7 @@ func (h *projectHandler) editPostHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	customUserAgent, err := strconv.ParseBool(r.FormValue("custom_user_agent"))
-	if err != nil {
+	if err != nil || !h.Config.Limits.AllowCustomUserAgent {
 		customUserAgent = false
 	}
 

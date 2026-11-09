@@ -13,6 +13,7 @@ import (
 	"net"
 	"net/http"
 	"net/netip"
+	"net/url"
 	"strconv"
 	"syscall"
 	"time"
@@ -84,6 +85,34 @@ func New(extraDeny []string, allowedPorts []int) (*Guard, error) {
 	}
 
 	return g, nil
+}
+
+// PortAllowed reports whether the crawler may connect to the destination port.
+func (g *Guard) PortAllowed(port int) bool {
+	return g.ports[port]
+}
+
+// CheckURL validates a URL entered by a user: http or https, an allowed port and
+// a host that resolves only to allowed addresses.
+func (g *Guard) CheckURL(ctx context.Context, u *url.URL) error {
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return ErrForbiddenAddress
+	}
+	port := 80
+	if u.Scheme == "https" {
+		port = 443
+	}
+	if p := u.Port(); p != "" {
+		n, err := strconv.Atoi(p)
+		if err != nil {
+			return ErrForbiddenAddress
+		}
+		port = n
+	}
+	if !g.PortAllowed(port) || u.Hostname() == "" {
+		return ErrForbiddenAddress
+	}
+	return g.CheckHost(ctx, u.Hostname())
 }
 
 // AllowedAddr reports whether the address may be contacted, ignoring the port.
