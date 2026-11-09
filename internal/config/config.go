@@ -10,6 +10,17 @@ import (
 // CrawlerConfig stores the configuration for the crawler.
 type CrawlerConfig struct {
 	Agent string `mapstructure:"agent"`
+
+	// CrawlLimit is the maximum number of pages stored per crawl. Zero keeps the default.
+	CrawlLimit int `mapstructure:"crawl_limit"`
+
+	// AllowedPorts restricts the destination ports the crawler may connect to.
+	// Empty means 80 and 443.
+	AllowedPorts []int `mapstructure:"allowed_ports"`
+
+	// DenyAddresses lists extra IPs or CIDR ranges the crawler must never reach,
+	// on top of the private and reserved ranges that are always refused.
+	DenyAddresses []string `mapstructure:"deny_addresses"`
 }
 
 // HTTPServerConfig stores the configuration for the HTTP server.

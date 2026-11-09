@@ -92,11 +92,19 @@ func (sc *SitemapChecker) ParseSitemaps(URLs []string, callback func(u string)) 
 func (sc *SitemapChecker) checkIndex(URL string) []string {
 	sitemaps := []string{}
 
-	sitemap.ParseIndexFromSite(URL, func(e sitemap.IndexEntry) error {
-		l := e.GetLocation()
-		sitemaps = append(sitemaps, l)
-		return nil
-	})
+	// Fetch through the crawler client so the sitemap index gets the same user agent,
+	// redirect policy and network guard as every other request. The library helper
+	// ParseIndexFromSite uses http.Get and would bypass all three.
+	resp, err := sc.client.Get(URL)
+	if err == nil {
+		defer resp.Response.Body.Close()
+		if resp.Response.StatusCode >= 200 && resp.Response.StatusCode < 300 {
+			sitemap.ParseIndex(resp.Response.Body, func(e sitemap.IndexEntry) error {
+				sitemaps = append(sitemaps, e.GetLocation())
+				return nil
+			})
+		}
+	}
 
 	if len(sitemaps) == 0 {
 		sitemaps = append(sitemaps, URL)

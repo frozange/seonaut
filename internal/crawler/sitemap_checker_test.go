@@ -37,6 +37,29 @@ func (m *sitemapMockClient) Get(u string) (*crawler.ClientResponse, error) {
 		return nil, errors.New("mock transport error")
 	}
 
+	// Requests to the local test server are served for real, so tests can publish
+	// a sitemap index. The index is fetched through the client like any request.
+	if strings.HasPrefix(u, "http://127.0.0.1") {
+		resp, err := http.Get(u)
+		if err != nil {
+			return nil, err
+		}
+		return &crawler.ClientResponse{Response: resp}, nil
+	}
+
+	if strings.Contains(u, "index.xml") {
+		body := `<?xml version="1.0" encoding="UTF-8"?>
+	<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+		<sitemap><loc>https://example.com/good1.xml</loc></sitemap>
+	</sitemapindex>`
+		return &crawler.ClientResponse{
+			Response: &http.Response{
+				StatusCode: http.StatusOK,
+				Body:       io.NopCloser(bytes.NewBufferString(body)),
+			},
+		}, nil
+	}
+
 	body := `<?xml version="1.0" encoding="UTF-8"?>
 	<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 		<url><loc>https://example.com/page1</loc></url>
@@ -163,5 +186,24 @@ func TestParseSitemapsRespectsLimit(t *testing.T) {
 
 	if urls := runParseSitemaps(t, sc, []string{server.URL}); len(urls) > 1 {
 		t.Errorf("expected at most 1 url with a limit of 1, got %d: %v", len(urls), urls)
+	}
+}
+
+// TestSitemapIndexIsFetchedThroughClient makes sure the sitemap index is requested
+// with the crawler client, which carries the user agent and the network guard,
+// instead of the library helper that calls http.Get directly.
+func TestSitemapIndexIsFetchedThroughClient(t *testing.T) {
+	client := &sitemapMockClient{}
+	sc := crawler.NewSitemapChecker(client, 100)
+
+	urls := runParseSitemaps(t, sc, []string{"https://example.com/index.xml"})
+	if len(urls) != 2 {
+		t.Fatalf("expected 2 urls from the sitemap listed in the index, got %d", len(urls))
+	}
+
+	client.mu.Lock()
+	defer client.mu.Unlock()
+	if len(client.requests) == 0 || client.requests[0] != "https://example.com/index.xml" {
+		t.Errorf("sitemap index was not requested through the client: %v", client.requests)
 	}
 }

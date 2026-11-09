@@ -13,10 +13,11 @@ import (
 	"github.com/stjudewashere/seonaut/internal/config"
 	"github.com/stjudewashere/seonaut/internal/crawler"
 	"github.com/stjudewashere/seonaut/internal/models"
+	"github.com/stjudewashere/seonaut/internal/netguard"
 )
 
 const (
-	CrawlLimit      = 20000 // Max number of page reports that will be created
+	CrawlLimit      = 20000 // Default max number of page reports that will be created
 	LastCrawlsLimit = 5     // Max number returned by GetLastCrawls
 	ClientTimeout   = 10    // HTTP client timeout in seconds.
 )
@@ -175,8 +176,18 @@ func (s *CrawlerService) addCrawler(u *url.URL, p *models.Project, b *models.Bas
 		return nil, errors.New("project is already being crawled")
 	}
 
+	crawlLimit := CrawlLimit
+	if s.config.CrawlLimit > 0 {
+		crawlLimit = s.config.CrawlLimit
+	}
+
+	httpClient, err := newCrawlerHTTPClient(s.config)
+	if err != nil {
+		return nil, err
+	}
+
 	options := &crawler.Options{
-		CrawlLimit:      CrawlLimit,
+		CrawlLimit:      crawlLimit,
 		IgnoreRobotsTxt: p.IgnoreRobotsTxt,
 		FollowNofollow:  p.FollowNofollow,
 		IncludeNoindex:  p.IncludeNoindex,
@@ -185,13 +196,6 @@ func (s *CrawlerService) addCrawler(u *url.URL, p *models.Project, b *models.Bas
 	}
 
 	mainDomain := strings.TrimPrefix(u.Host, "www.")
-
-	httpClient := &http.Client{
-		Timeout: ClientTimeout * time.Second,
-		CheckRedirect: func(r *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
 
 	// Make sure the user agent is not empty
 	if p.UserAgent == "" {
@@ -217,4 +221,23 @@ func (s *CrawlerService) removeCrawler(p *models.Project) {
 	defer s.lock.Unlock()
 
 	delete(s.crawlers, p.Id)
+}
+
+// newCrawlerHTTPClient returns the HTTP client used by every crawler request. Its
+// transport refuses private, reserved and denied addresses at connect time, and it
+// never follows redirects itself: the crawler queues the target as a new request,
+// which goes through the same guard.
+func newCrawlerHTTPClient(cfg *config.CrawlerConfig) (*http.Client, error) {
+	guard, err := netguard.New(cfg.DenyAddresses, cfg.AllowedPorts)
+	if err != nil {
+		return nil, err
+	}
+
+	return &http.Client{
+		Transport: guard.Transport(),
+		Timeout:   ClientTimeout * time.Second,
+		CheckRedirect: func(r *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}, nil
 }
