@@ -13,7 +13,9 @@ import (
 
 // Returns a report_manager.PageIssueReporter with a callback function to check
 // if a page has images with no alt attribute. The callback returns true in case
-// the page is text/html and contains images with empty or missing alt attribute.
+// the page is text/html and contains images without an alt attribute. An empty
+// alt="" is the accessibility standard (WCAG H67) for decorative images and is
+// not reported.
 func NewAltTextReporter() *models.PageIssueReporter {
 	c := func(pageReport *models.PageReport, htmlNode *html.Node, header *http.Header) bool {
 		if !pageReport.Crawled {
@@ -24,13 +26,8 @@ func NewAltTextReporter() *models.PageIssueReporter {
 			return false
 		}
 
-		for _, i := range pageReport.Images {
-			if i.Alt == "" {
-				return true
-			}
-		}
-
-		return false
+		img, err := htmlquery.Query(htmlNode, "//body//img[not(@alt)]")
+		return err == nil && img != nil
 	}
 
 	return &models.PageIssueReporter{

@@ -25,6 +25,13 @@ type CrawlRunner interface {
 	Cleanup(projectID int64)
 }
 
+// LeftoverLister is implemented by a CrawlRunner that can list the projects
+// it still holds. At startup no audit is running, so every one of them was
+// left by an interruption (restart, crash) and is removed.
+type LeftoverLister interface {
+	LeftoverProjects() []int64
+}
+
 // Mailer sends plain text e-mails.
 type Mailer interface {
 	Send(to, subject, body string) error
@@ -133,6 +140,16 @@ func (s *Service) Start(ctx context.Context) {
 	if err := s.Store.RequeueInterrupted(); err != nil {
 		log.Printf("audit: requeue: %v", err)
 	}
+	// Listed before the queue starts, so a project the queue creates next is
+	// never taken for a leftover; deleted in the background.
+	if leftovers := s.leftovers(); len(leftovers) > 0 {
+		go func() {
+			for _, id := range leftovers {
+				s.Runner.Cleanup(id)
+			}
+			log.Printf("audit: removed %d project(s) left by an interrupted audit", len(leftovers))
+		}()
+	}
 	go func() {
 		for {
 			a, err := s.Store.NextQueued()
@@ -151,6 +168,19 @@ func (s *Service) Start(ctx context.Context) {
 			}
 		}
 	}()
+}
+
+// leftovers returns the projects to remove at startup: none when projects are
+// kept on purpose.
+func (s *Service) leftovers() []int64 {
+	if s.Cfg.KeepProjects {
+		return nil
+	}
+	l, ok := s.Runner.(LeftoverLister)
+	if !ok {
+		return nil
+	}
+	return l.LeftoverProjects()
 }
 
 // Run executes one audit from crawl to e-mail.

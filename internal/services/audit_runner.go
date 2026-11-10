@@ -120,6 +120,19 @@ func (r *AuditCrawlRunner) Crawl(ctx context.Context, siteURL string) (int64, in
 
 // Cleanup deletes the audit project and its crawl data once the report holds
 // everything it needs.
+// LeftoverProjects lists the robot's projects.
+func (r *AuditCrawlRunner) LeftoverProjects() []int64 {
+	bot, err := r.Users.FindUserByEmail(r.BotEmail)
+	if err != nil {
+		return nil
+	}
+	var ids []int64
+	for _, p := range r.ProjRepo.FindProjectsByUser(bot.Id) {
+		ids = append(ids, p.Id)
+	}
+	return ids
+}
+
 func (r *AuditCrawlRunner) Cleanup(projectID int64) {
 	bot, err := r.botUser()
 	if err != nil {

@@ -4,8 +4,11 @@
 // behalf: it needs the instance config (database credentials), so only the
 // account that runs SEOnaut can use it.
 //
-//	auditctl -c config request <site URL> <e-mail>
+//	auditctl -c config [-fresh] request <site URL> <e-mail>
 //	auditctl -c config status <token>
+//
+// -fresh crawls again even when a report of the same site is recent enough to
+// be reused (the form always reuses it).
 //
 // The running server picks the queued audit up within 30 seconds.
 package main

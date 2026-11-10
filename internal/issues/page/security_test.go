@@ -21,11 +21,23 @@ func TestMissingHSTSHeaderIssues(t *testing.T) {
 	}
 
 	// Run the reporter callback with the PageReport.
-	reportsIssue := reporter.Callback(&models.PageReport{}, &html.Node{}, &http.Header{})
+	reportsIssue := reporter.Callback(&models.PageReport{MediaType: "text/html"}, &html.Node{}, &http.Header{})
 
 	// The reporter should not found any issue.
 	if reportsIssue == false {
 		t.Errorf("TestMissingHSTSHeaderIssues: reportsIssue should be true")
+	}
+
+	// An invalid max-age that is not the first directive is still caught.
+	bad := &http.Header{}
+	bad.Set("Strict-Transport-Security", "includeSubDomains; max-age=abc")
+	if !reporter.Callback(&models.PageReport{MediaType: "text/html"}, &html.Node{}, bad) {
+		t.Errorf("TestMissingHSTSHeaderIssues: invalid max-age not reported")
+	}
+
+	// A stylesheet or a font without the header is not a page.
+	if reporter.Callback(&models.PageReport{MediaType: "text/css"}, &html.Node{}, &http.Header{}) {
+		t.Errorf("TestMissingHSTSHeaderIssues: non-HTML resource reported")
 	}
 }
 
@@ -41,7 +53,7 @@ func TestMissingHSTSHeaderNoIssues(t *testing.T) {
 	header.Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
 
 	// Run the reporter callback with the PageReport.
-	reportsIssue := reporter.Callback(&models.PageReport{}, &html.Node{}, header)
+	reportsIssue := reporter.Callback(&models.PageReport{MediaType: "text/html"}, &html.Node{}, header)
 
 	// The reporter should not found any issue.
 	if reportsIssue == true {

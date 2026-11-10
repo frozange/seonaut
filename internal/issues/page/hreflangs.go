@@ -3,6 +3,7 @@ package page
 import (
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/stjudewashere/seonaut/internal/issues/errors"
 	"github.com/stjudewashere/seonaut/internal/models"
@@ -90,7 +91,7 @@ func NewHreflangMismatchingLang() *models.PageIssueReporter {
 		}
 
 		for _, hl := range pageReport.Hreflangs {
-			if hl.URL == pageReport.URL && hl.Lang != "x-default" && hl.Lang != pageReport.Lang {
+			if hl.URL == pageReport.URL && hl.Lang != "x-default" && !langMatches(hl.Lang, pageReport.Lang) {
 				return true
 			}
 		}
@@ -139,4 +140,21 @@ func NewHreflangRelativeURL() *models.PageIssueReporter {
 		ErrorType: errors.ErrorHreflangRelativeURL,
 		Callback:  c,
 	}
+}
+
+// langMatches compares two language tags case-insensitively. The language must
+// match; the region only counts when both tags give one, so a page in "en-US"
+// may declare itself as hreflang "en", while "en-US" against "en-GB" or "en"
+// against "fr" do not match.
+func langMatches(a, b string) bool {
+	a, b = strings.ToLower(strings.ReplaceAll(a, "_", "-")), strings.ToLower(strings.ReplaceAll(b, "_", "-"))
+	if a == b {
+		return true
+	}
+	la, ra, _ := strings.Cut(a, "-")
+	lb, rb, _ := strings.Cut(b, "-")
+	if la != lb {
+		return false
+	}
+	return ra == "" || rb == ""
 }

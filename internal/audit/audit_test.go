@@ -265,3 +265,28 @@ func TestCleanRefs(t *testing.T) {
 		}
 	}
 }
+
+type leftoverRunner struct{ ids []int64 }
+
+func (leftoverRunner) Crawl(context.Context, string) (int64, int64, error) { return 0, 0, nil }
+func (leftoverRunner) Cleanup(int64)                                       {}
+func (r leftoverRunner) LeftoverProjects() []int64                         { return r.ids }
+
+type plainRunner struct{}
+
+func (plainRunner) Crawl(context.Context, string) (int64, int64, error) { return 0, 0, nil }
+func (plainRunner) Cleanup(int64)                                       {}
+
+func TestLeftoversAtStartup(t *testing.T) {
+	s := &Service{Runner: leftoverRunner{ids: []int64{3, 9}}}
+	if got := s.leftovers(); len(got) != 2 || got[0] != 3 || got[1] != 9 {
+		t.Errorf("leftovers = %v, want [3 9]", got)
+	}
+	s.Cfg.KeepProjects = true
+	if got := s.leftovers(); got != nil {
+		t.Errorf("kept projects must not be removed, got %v", got)
+	}
+	if got := (&Service{Runner: plainRunner{}}).leftovers(); got != nil {
+		t.Errorf("a runner that cannot list leftovers removes nothing, got %v", got)
+	}
+}

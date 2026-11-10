@@ -14,9 +14,14 @@ import (
 
 // Returns a report_manager.PageIssueReporter with a callback function that
 // reports if the page's HSTS header is missing. The callback returns true if the Strict-Transport-Security,
-// header does not exist or is not valid.
+// header does not exist or is not valid. Only HTML pages are checked: a browser
+// records the policy from the first page it loads, and counting every
+// stylesheet, font and image served from a CDN cache inflated the issue.
 func NewMissingHSTSHeaderReporter() *models.PageIssueReporter {
 	c := func(pageReport *models.PageReport, htmlNode *html.Node, header *http.Header) bool {
+		if pageReport.MediaType != "text/html" {
+			return false
+		}
 		hstsHeader := header.Get("Strict-Transport-Security")
 		if hstsHeader == "" {
 			return true
@@ -24,6 +29,7 @@ func NewMissingHSTSHeaderReporter() *models.PageIssueReporter {
 
 		directives := strings.Split(hstsHeader, ";")
 		for _, directive := range directives {
+			directive = strings.TrimSpace(directive)
 			if strings.HasPrefix(directive, "max-age=") {
 				maxAge := strings.TrimPrefix(directive, "max-age=")
 				_, err := strconv.Atoi(maxAge)

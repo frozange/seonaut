@@ -12,51 +12,27 @@ import (
 	"golang.org/x/net/html"
 )
 
-// Test the AltText reporter with a pageReport that does not
-// have any image without Alt text. The reporter should not report the issue.
-func TestAltTextReporterNoIssues(t *testing.T) {
-	pageReport := &models.PageReport{
-		Crawled:   true,
-		MediaType: "text/html",
-	}
-
-	// Add an image with alt text
-	pageReport.Images = append(pageReport.Images, models.Image{
-		Alt: "Image alt text",
-	})
-
+// Test the AltText reporter: an image without an alt attribute is reported, an
+// image with a text alt or a decorative alt="" is not.
+func TestAltTextReporter(t *testing.T) {
 	reporter := page.NewAltTextReporter()
 	if reporter.ErrorType != errors.ErrorImagesWithNoAlt {
-		t.Errorf("TestNoIssues: error type is not correct")
+		t.Errorf("TestAltTextReporter: error type is not correct")
 	}
-
-	reportsIssue := reporter.Callback(pageReport, &html.Node{}, &http.Header{})
-
-	if reportsIssue == true {
-		t.Errorf("TestAltTextReporterNoIssues: reportsIssue should be false")
-	}
-}
-
-// Test the LittleContent reporter with a pageReport that does
-// have a little content issue. The reporter should report the issue.
-func TestAltTextReporterIssues(t *testing.T) {
-	pageReport := &models.PageReport{
-		Crawled:   true,
-		MediaType: "text/html",
-	}
-
-	// Add an image without alt text
-	pageReport.Images = append(pageReport.Images, models.Image{})
-
-	reporter := page.NewAltTextReporter()
-	if reporter.ErrorType != errors.ErrorImagesWithNoAlt {
-		t.Errorf("TestNoIssues: error type is not correct")
-	}
-
-	reportsIssue := reporter.Callback(pageReport, &html.Node{}, &http.Header{})
-
-	if reportsIssue == false {
-		t.Errorf("TestAltTextReporterIssues: reportsIssue should be true")
+	for body, want := range map[string]bool{
+		`<img src="a.png" alt="A chart">`:            false,
+		`<img src="a.png" alt="">`:                   false,
+		`<img src="a.png" alt="x"><img src="b.png">`: true,
+		`<p>no image</p>`:                            false,
+	} {
+		doc, err := html.Parse(strings.NewReader("<html><body>" + body + "</body></html>"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		pageReport := &models.PageReport{Crawled: true, MediaType: "text/html"}
+		if got := reporter.Callback(pageReport, doc, &http.Header{}); got != want {
+			t.Errorf("TestAltTextReporter %s: got %v, want %v", body, got, want)
+		}
 	}
 }
 

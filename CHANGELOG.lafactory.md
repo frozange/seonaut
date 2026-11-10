@@ -3,6 +3,26 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.3.2 - 2026-11-11
+
+Contrôles corrigés après le premier audit réel de lafactory.com, qui relevait trois
+faux défauts :
+
+- Langue hreflang : une page en `en-US` qui se déclare `hreflang="en"` est
+  cohérente. La langue doit correspondre, la région ne compte que si les deux
+  balises en donnent une (25 pages faussement signalées).
+- HSTS : seules les pages HTML sont contrôlées. Les feuilles de style, polices et
+  images servies par le cache de Cloudflare comptaient comme des pages (124).
+- Images sans `alt` : seule l'absence de l'attribut est signalée. `alt=""` est la
+  norme d'accessibilité (WCAG H67) pour une image décorative.
+
+Et :
+
+- Au démarrage, l'audit supprime les projets du robot laissés par un audit
+  interrompu (redémarrage, panne).
+- `auditctl -fresh request` relance un crawl même si un rapport récent du même site
+  existe.
+
 ## 1.3.1 - 2026-11-11
 
 - Les données d'un crawl interrompu se suppriment en arrière-plan au démarrage. La

@@ -277,3 +277,31 @@ func TestHreflangRelativeURLIssues(t *testing.T) {
 		t.Errorf("HreflangRelativeURL: reportsIssue should be true")
 	}
 }
+
+// A page in "en-US" declaring itself as hreflang "en" is consistent; a different
+// language or a different region is not.
+func TestHreflangMismatchingLangRegions(t *testing.T) {
+	cases := []struct {
+		page, self string
+		issue      bool
+	}{
+		{"en-US", "en", false},
+		{"en", "en-US", false},
+		{"fr-FR", "fr", false},
+		{"EN-us", "en-US", false},
+		{"en-US", "en-GB", true},
+		{"en-US", "fr", true},
+		{"fr", "en", true},
+	}
+	reporter := page.NewHreflangMismatchingLang()
+	doc, _ := html.Parse(strings.NewReader(""))
+	for _, c := range cases {
+		pr := &models.PageReport{
+			Crawled: true, MediaType: "text/html", Lang: c.page, StatusCode: 200, URL: "http://example.com",
+			Hreflangs: []models.Hreflang{{URL: "http://example.com", Lang: c.self}},
+		}
+		if got := reporter.Callback(pr, doc, &http.Header{}); got != c.issue {
+			t.Errorf("page %q, hreflang %q: issue = %v, want %v", c.page, c.self, got, c.issue)
+		}
+	}
+}
