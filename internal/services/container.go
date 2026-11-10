@@ -300,7 +300,7 @@ func (c *Container) InitSecurity() {
 	c.SigninEmailLimiter = security.NewRateLimiter(l.SigninAttemptsPerEmailHour, time.Hour)
 	c.CrawlLimiter = security.NewRateLimiter(l.CrawlsPerUserPerDay, 24*time.Hour)
 
-	c.Turnstile = security.NewTurnstile(c.Config.Turnstile.SiteKey, c.Config.Turnstile.SecretKey)
+	c.Turnstile = security.NewTurnstile(c.Config.Turnstile.SiteKey, c.Config.Turnstile.SecretKey).WithQABypass(c.Config.Turnstile.QABypass)
 
 	if c.Config.Mail.Host == "" && c.Config.Mail.Sendmail == "" {
 		return
@@ -347,6 +347,9 @@ func (c *Container) InitAuditService() {
 	if c.Config.Crawler.CrawlLimit > 0 {
 		crawlLimit = c.Config.Crawler.CrawlLimit
 	}
+	if ac.MaxPages > 0 && ac.MaxPages < crawlLimit {
+		crawlLimit = ac.MaxPages
+	}
 
 	var interpreter *audit.Interpreter
 	if len(ac.AICommand) > 0 {
@@ -370,6 +373,7 @@ func (c *Container) InitAuditService() {
 			CrawlRepo: c.crawlRepository,
 			BotEmail:  ac.BotEmail,
 			UserAgent: c.Config.Crawler.Agent,
+			MaxPages:  crawlLimit,
 		},
 		Interpreter: interpreter,
 		Mailer:      c.Mailer,

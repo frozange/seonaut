@@ -52,6 +52,9 @@ type HTTPServerConfig struct {
 type TurnstileConfig struct {
 	SiteKey   string `mapstructure:"site_key"`
 	SecretKey string `mapstructure:"secret_key"`
+	// QABypass is the owner's test secret: sent as the Turnstile response, it
+	// passes without Cloudflare. At least 32 characters, empty by default.
+	QABypass string `mapstructure:"qa_bypass"`
 }
 
 // MailConfig is the relay used for account e-mails: an SMTP server (Host) or a
@@ -129,6 +132,7 @@ type AuditConfig struct {
 	BotEmail     string `mapstructure:"bot_email"`
 
 	KeyPages            int  `mapstructure:"key_pages"`
+	MaxPages            int  `mapstructure:"max_pages"` // pages per audit crawl
 	DailyCap            int  `mapstructure:"daily_cap"`
 	PerEmailPerDay      int  `mapstructure:"per_email_per_day"`
 	PerIPPerDay         int  `mapstructure:"per_ip_per_day"`
@@ -166,6 +170,7 @@ func NewConfig(configFile string) (*Config, error) {
 	viper.SetDefault("audit.language_name", "French")
 	viper.SetDefault("audit.bot_email", "audit-robot@localhost")
 	viper.SetDefault("audit.key_pages", 7)
+	viper.SetDefault("audit.max_pages", 150)
 	viper.SetDefault("audit.reuse_hours", 24)
 	viper.SetDefault("audit.crawl_timeout_minutes", 45)
 

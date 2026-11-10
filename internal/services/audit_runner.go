@@ -26,6 +26,7 @@ type AuditCrawlRunner struct {
 	CrawlRepo *repository.CrawlRepository
 	BotEmail  string
 	UserAgent string
+	MaxPages  int // pages per audit crawl, 0 = the instance limit
 }
 
 // botUser returns the robot account, creating it on first use with a random
@@ -83,6 +84,9 @@ func (r *AuditCrawlRunner) Crawl(ctx context.Context, siteURL string) (int64, in
 		return nil
 	})
 	defer r.Broker.Unsubscribe(sub)
+
+	r.Crawler.SetPageLimit(p.Id, r.MaxPages)
+	defer r.Crawler.SetPageLimit(p.Id, 0)
 
 	// The instance may already run its maximum of crawls: wait for a free slot.
 	for {

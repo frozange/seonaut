@@ -3,6 +3,15 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.3.0 - 2026-11-11
+
+- Plafond de pages propre à l'audit (`audit.max_pages`, 150 par défaut). Le premier
+  audit de prod suivait la limite de l'instance (5 000 pages) et dépassait les
+  45 minutes allouées au crawl.
+- Porte de test du propriétaire pour Turnstile (`turnstile.qa_bypass`) : un secret
+  d'au moins 32 caractères, envoyé à la place de la réponse Turnstile, passe sans
+  appeler Cloudflare, comparé en temps constant. Vide par défaut, donc fermée.
+
 ## 1.2.0 - 2026-11-11
 
 - Commande `auditctl` : demande d'audit depuis le serveur (`request <site> <e-mail>`)

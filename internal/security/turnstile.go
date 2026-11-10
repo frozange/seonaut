@@ -2,6 +2,7 @@ package security
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -20,6 +21,7 @@ var ErrTurnstileFailed = errors.New("turnstile verification failed")
 type Turnstile struct {
 	SiteKey  string
 	secret   string
+	qaBypass string
 	endpoint string
 	client   *http.Client
 }
@@ -33,6 +35,23 @@ func NewTurnstile(siteKey, secret string) *Turnstile {
 		endpoint: DefaultTurnstileEndpoint,
 		client:   &http.Client{Timeout: 10 * time.Second},
 	}
+}
+
+// MinQABypassLength is the shortest QA bypass secret accepted; a shorter one
+// leaves the bypass off.
+const MinQABypassLength = 32
+
+// WithQABypass arms the owner's test door: a request whose Turnstile response
+// field holds exactly this secret passes without calling Cloudflare, so end to
+// end tests can drive the real forms. Empty or shorter than MinQABypassLength,
+// the door stays closed.
+func (t *Turnstile) WithQABypass(secret string) *Turnstile {
+	if len(secret) >= MinQABypassLength {
+		t.qaBypass = secret
+	} else {
+		t.qaBypass = ""
+	}
+	return t
 }
 
 // Enabled reports whether both keys are configured.
@@ -49,6 +68,9 @@ func (t *Turnstile) Verify(ctx context.Context, token, remoteIP string) error {
 	token = strings.TrimSpace(token)
 	if token == "" || len(token) > 2048 {
 		return ErrTurnstileFailed
+	}
+	if t.qaBypass != "" && subtle.ConstantTimeCompare([]byte(token), []byte(t.qaBypass)) == 1 {
+		return nil
 	}
 
 	form := url.Values{"secret": {t.secret}, "response": {token}}

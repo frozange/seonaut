@@ -58,6 +58,7 @@ type CrawlerService struct {
 	crawlerHandler   *CrawlerHandler
 	ArchiveService   *ArchiveService
 	crawlers         map[int64]*crawler.Crawler
+	pageLimits       map[int64]int // per-project page caps below the instance limit
 	lock             *sync.RWMutex
 	maxConcurrent    int
 	denyIgnoreRobots bool
@@ -74,6 +75,7 @@ func NewCrawlerService(r CrawlerServiceRepository, s CrawlerServicesContainer) *
 		maxConcurrent:    s.MaxConcurrent,
 		denyIgnoreRobots: s.DenyIgnoreRobots,
 		crawlers:         make(map[int64]*crawler.Crawler),
+		pageLimits:       make(map[int64]int),
 		lock:             &sync.RWMutex{},
 	}
 }
@@ -179,6 +181,18 @@ func (s *CrawlerService) StopCrawler(p models.Project) {
 	crawler.Stop()
 }
 
+// SetPageLimit caps the pages of a project's next crawls below the instance
+// limit; zero removes the cap. The free audit uses it to keep its crawls short.
+func (s *CrawlerService) SetPageLimit(projectID int64, pages int) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	if pages > 0 {
+		s.pageLimits[projectID] = pages
+	} else {
+		delete(s.pageLimits, projectID)
+	}
+}
+
 // AddCrawler creates a new project crawler and adds it to the crawlers map. It returns the crawler
 // on success otherwise it returns an error indicating the crawler already exists or there was an
 // error creating it.
@@ -197,6 +211,9 @@ func (s *CrawlerService) addCrawler(u *url.URL, p *models.Project, b *models.Bas
 	crawlLimit := CrawlLimit
 	if s.config.CrawlLimit > 0 {
 		crawlLimit = s.config.CrawlLimit
+	}
+	if l := s.pageLimits[p.Id]; l > 0 && l < crawlLimit {
+		crawlLimit = l
 	}
 
 	httpClient, err := newCrawlerHTTPClient(s.config)

@@ -148,6 +148,25 @@ func TestTurnstileFailsClosed(t *testing.T) {
 	}
 }
 
+func TestTurnstileQABypass(t *testing.T) {
+	door := strings.Repeat("q", MinQABypassLength)
+	ts := turnstileServer(t, 200, `{"success":false}`, nil).WithQABypass(door)
+	if err := ts.Verify(context.Background(), door, ""); err != nil {
+		t.Errorf("QA secret refused: %v", err)
+	}
+	if err := ts.Verify(context.Background(), door[:len(door)-1]+"x", ""); err == nil {
+		t.Error("a wrong secret passed")
+	}
+	short := turnstileServer(t, 200, `{"success":false}`, nil).WithQABypass("short")
+	if err := short.Verify(context.Background(), "short", ""); err == nil {
+		t.Error("a secret under the minimum length armed the bypass")
+	}
+	off := turnstileServer(t, 200, `{"success":false}`, nil)
+	if err := off.Verify(context.Background(), door, ""); err == nil {
+		t.Error("the bypass works without being configured")
+	}
+}
+
 func TestTurnstileDisabled(t *testing.T) {
 	ts := NewTurnstile("", "")
 	if ts.Enabled() {
