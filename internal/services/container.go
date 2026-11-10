@@ -131,8 +131,10 @@ func (c *Container) InitRepositories() {
 	c.crawlRepository = &repository.CrawlRepository{DB: c.db}
 	c.dashboardRepository = &repository.DashboardRepository{DB: c.db}
 
-	// Clean up unfinished crawls.
-	c.crawlRepository.DeleteUnfinishedCrawls()
+	// Clean up unfinished crawls in the background: the deletion runs in
+	// throttled batches and took minutes for a large interrupted crawl, during
+	// which the server did not listen.
+	go c.crawlRepository.DeleteUnfinishedCrawls()
 }
 
 // Create the PubSub broker.

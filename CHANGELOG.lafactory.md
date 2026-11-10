@@ -3,6 +3,12 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.3.1 - 2026-11-11
+
+- Les données d'un crawl interrompu se suppriment en arrière-plan au démarrage. La
+  suppression procède par lots ralentis : après l'interruption d'un crawl de 3 300
+  pages, le serveur restait plusieurs minutes sans écouter.
+
 ## 1.3.0 - 2026-11-11
 
 - Plafond de pages propre à l'audit (`audit.max_pages`, 150 par défaut). Le premier
