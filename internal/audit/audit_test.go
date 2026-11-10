@@ -251,3 +251,17 @@ func TestExtractChrome(t *testing.T) {
 		t.Errorf("contacts = %v", contacts)
 	}
 }
+
+func TestCleanRefs(t *testing.T) {
+	cases := map[string]string{
+		"The title is short (E3).":        "The title is short.",
+		"Proofs are many (E1, E4 et E7).": "Proofs are many.",
+		"As E2 shows, the menu is long.":  "As  shows, the menu is long.",
+		"Nothing to clean, 3 pages (H1).": "Nothing to clean, 3 pages (H1).",
+	}
+	for in, want := range cases {
+		if got := cleanRefs(in); got != want {
+			t.Errorf("cleanRefs(%q) = %q, want %q", in, got, want)
+		}
+	}
+}

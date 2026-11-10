@@ -22,7 +22,7 @@ type Completer interface {
 }
 
 // GatewayCompleter runs a local gateway (the Claude Code CLI behind sudo, see
-// deploy/lafactory/seonaut-claude) that reads one JSON request on stdin and
+// /usr/local/bin/srv-claude on seo.lafactory.com) that reads one JSON request on stdin and
 // prints the CLI JSON envelope.
 type GatewayCompleter struct {
 	Command []string
@@ -129,6 +129,8 @@ const styleRules = `Writing rules for every text you produce:
 - Every sentence tells the reader something he does not know and cannot conclude alone. Never vouch for your own seriousness or honesty.
   No preamble announcing a quality, no joke, no punchline. A vague sentence is not more accurate than a precise one: state the fact plainly.
 - In French: a space before ":" ";" "!" "?", the guillemets « », accents always present, no English calques.
+- The reader never sees the evidence pack: never write "pack", "evidence", "dossier de preuves" or ids like E1 in the text.
+  Say "in the pages we read" or "not visible in the pages read" instead.
 - Never invent a figure, a statistic, a name or a fact. If something is missing from the evidence, say it is not verified.
 - Never use these phrases: %s`
 
@@ -336,8 +338,18 @@ func (in *Interpreter) Interpret(ctx context.Context, evidence []EvidenceEntry, 
 		rep.Criteria[i].Verdict = stripUnknownNumbers(rep.Criteria[i].Verdict, corpus)
 		rep.Criteria[i].Detail = stripUnknownNumbers(rep.Criteria[i].Detail, corpus)
 	}
+	for i := range rep.Criteria {
+		rep.Criteria[i].Why = cleanRefs(rep.Criteria[i].Why)
+	}
+	for i := range rep.TargetQueries {
+		rep.TargetQueries[i].Comment = cleanRefs(rep.TargetQueries[i].Comment)
+	}
+	for i := range rep.Rewrites {
+		rep.Rewrites[i].Why = cleanRefs(rep.Rewrites[i].Why)
+	}
 	var strengths []Strength
 	for _, s := range rep.Strengths {
+		s.Text = cleanRefs(s.Text)
 		if s.Text != "" && numbersKnown(s.Text, corpus) {
 			strengths = append(strengths, s)
 		}
@@ -444,11 +456,18 @@ func numbersKnown(text, corpus string) bool {
 
 var sentenceRe = regexp.MustCompile(`[^.!?]+[.!?]*\s*`)
 
+var evidenceRefRe = regexp.MustCompile(`\s*\((?:E\d+[\s,;/et&]*)+\)|\bE\d+\b`)
+
+// cleanRefs removes evidence ids (E1, (E2, E3)) the reader cannot use.
+func cleanRefs(text string) string {
+	return strings.TrimSpace(evidenceRefRe.ReplaceAllString(text, ""))
+}
+
 // stripUnknownNumbers drops every sentence that contains a figure absent from
-// the evidence.
+// the evidence, after removing evidence ids.
 func stripUnknownNumbers(text, corpus string) string {
 	var kept []string
-	for _, s := range sentenceRe.FindAllString(text, -1) {
+	for _, s := range sentenceRe.FindAllString(cleanRefs(text), -1) {
 		if numbersKnown(s, corpus) {
 			kept = append(kept, strings.TrimSpace(s))
 		}

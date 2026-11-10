@@ -32,6 +32,13 @@
 	table.q td, table.q th { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--lf-line); vertical-align: top; }
 	table.q th { color: var(--lf-muted); font-weight: 600; }
 	.scroll { overflow-x: auto; }
+	@media (max-width: 760px) {
+		table.q, table.q tbody, table.q tr, table.q td { display: block; width: 100%; }
+		table.q tr:first-child { display: none; }
+		table.q tr { border: 1px solid var(--lf-line); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; background: var(--lf-panel); }
+		table.q td { border: 0; padding: 4px 0; word-break: break-word; }
+		table.q td::before { content: attr(data-label); display: block; font-size: var(--lf-fs-label); color: var(--lf-muted); text-transform: uppercase; letter-spacing: .06em; }
+	}
 	@media print { .btn, .topbar { display: none; } body { background: #fff; color: #222; } }
 </style>
 {{ with .Data }}
@@ -132,7 +139,7 @@
 		<div class="scroll"><table class="q">
 			<tr><th>{{ trans "AUDIT_QUERIES_PAGE" }}</th><th>{{ trans "AUDIT_QUERIES_QUERY" }}</th><th>{{ trans "AUDIT_QUERIES_ALIGN" }}</th><th>{{ trans "AUDIT_QUERIES_COMMENT" }}</th></tr>
 			{{ range .TargetQueries }}
-			<tr><td>{{ .Page }}</td><td><strong>{{ .Query }}</strong></td><td><span class="badge r-{{ if eq .Alignment "good" }}good{{ else if eq .Alignment "partial" }}partial{{ else }}poor{{ end }}">{{ trans (print "AUDIT_ALIGN_" .Alignment) }}</span></td><td>{{ .Comment }}</td></tr>
+			<tr><td data-label="{{ trans "AUDIT_QUERIES_PAGE" }}">{{ .Page }}</td><td data-label="{{ trans "AUDIT_QUERIES_QUERY" }}"><strong>{{ .Query }}</strong></td><td data-label="{{ trans "AUDIT_QUERIES_ALIGN" }}"><span class="badge r-{{ if eq .Alignment "good" }}good{{ else if eq .Alignment "partial" }}partial{{ else }}poor{{ end }}">{{ trans (print "AUDIT_ALIGN_" .Alignment) }}</span></td><td data-label="{{ trans "AUDIT_QUERIES_COMMENT" }}">{{ .Comment }}</td></tr>
 			{{ end }}
 		</table></div>
 	</div></section>

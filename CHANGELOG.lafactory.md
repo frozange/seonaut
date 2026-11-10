@@ -3,6 +3,27 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.1.0 - 2026-11-11
+
+Audit gratuit sur demande, complété par l'IA, avec une page de rapport à la charte LaFactory.
+
+- Formulaire `/audit` (adresse e-mail, Turnstile, limites par jour, par adresse et
+  par IP, rapport réutilisé 24 h pour un même site) et file d'attente traitée un
+  audit à la fois.
+- Crawl par le robot de SEOnaut, puis dossier de preuves : faits du site, problèmes
+  avec exemples, texte des pages principales (blog et listes exclus), pied de page,
+  boutons et contacts.
+- Analyse IA en trois passes (analyse, rédaction, relecture adverse) par une
+  passerelle en ligne de commande, suivies de contrôles déterministes : chiffres
+  absents des preuves retirés, références internes retirées du texte, réécritures
+  vérifiées. Sur seo.lafactory.com, la passerelle est `srv-claude`, commune à tout
+  le serveur.
+- Notes publiées : technique, rédaction, contenu, avec un barème affiché.
+- Rapport `/rapport/<jeton>` : notes, synthèse, priorités, points forts, critères,
+  requêtes visées (en cartes sur mobile), réécritures, détails techniques, méthode.
+  Sans IA, le rapport est publié avec les mesures seules et le dit.
+- Interface en français complet.
+
 ## 1.0.0 - 2026-11-09
 
 Protections nécessaires pour ouvrir l'outil au public.
