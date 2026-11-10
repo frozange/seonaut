@@ -92,6 +92,14 @@ func NewServer(container *services.Container) {
 	http.HandleFunc("POST /account/delete", container.CookieSession.Auth((userHandler.deletePostHandler)))
 	http.HandleFunc("GET /signout", container.CookieSession.Auth(userHandler.signoutHandler))
 
+	// Free on-demand audit: public form and private report pages.
+	if container.AuditService != nil {
+		auditHandler := auditHandler{&userHandler}
+		http.HandleFunc("GET /audit", auditHandler.formHandler)
+		http.HandleFunc("POST /audit", auditHandler.requestHandler)
+		http.HandleFunc("GET /rapport/{token}", auditHandler.reportHandler)
+	}
+
 	// Replay routes
 	replayHandler := replayHandler{container}
 	http.HandleFunc("GET /replay", container.CookieSession.Auth(replayHandler.proxyHandler))

@@ -109,6 +109,32 @@ type Config struct {
 	Turnstile  *TurnstileConfig  `mapstructure:"turnstile"`
 	Mail       *MailConfig       `mapstructure:"mail"`
 	Limits     *LimitsConfig     `mapstructure:"limits"`
+	Audit      *AuditConfig      `mapstructure:"audit"`
+}
+
+// AuditConfig enables the free on-demand audit: public form, crawl, AI reading
+// and private report page.
+type AuditConfig struct {
+	Enabled bool `mapstructure:"enabled"`
+
+	// AICommand runs the gateway that answers one JSON request on stdin. Empty
+	// disables the AI part: reports are published with measurements only.
+	AICommand []string `mapstructure:"ai_command"`
+	AIModel   string   `mapstructure:"ai_model"`
+	AIEffort  string   `mapstructure:"ai_effort"`
+
+	Language     string `mapstructure:"language"`      // report language code, e.g. "fr"
+	LanguageName string `mapstructure:"language_name"` // given to the AI, e.g. "French"
+	NotifyEmail  string `mapstructure:"notify_email"`
+	BotEmail     string `mapstructure:"bot_email"`
+
+	KeyPages            int  `mapstructure:"key_pages"`
+	DailyCap            int  `mapstructure:"daily_cap"`
+	PerEmailPerDay      int  `mapstructure:"per_email_per_day"`
+	PerIPPerDay         int  `mapstructure:"per_ip_per_day"`
+	ReuseHours          int  `mapstructure:"reuse_hours"`
+	CrawlTimeoutMinutes int  `mapstructure:"crawl_timeout_minutes"`
+	KeepProjects        bool `mapstructure:"keep_projects"`
 }
 
 // NewConfig loads the configuration from the specified file and path.
@@ -134,6 +160,14 @@ func NewConfig(configFile string) (*Config, error) {
 	viper.SetDefault("limits.signups_per_ip_per_day", 0)
 	viper.SetDefault("limits.allow_custom_user_agent", true)
 	viper.SetDefault("limits.allow_ignore_robots", true)
+	viper.SetDefault("audit.enabled", false)
+	viper.SetDefault("audit.ai_model", "sonnet")
+	viper.SetDefault("audit.language", "fr")
+	viper.SetDefault("audit.language_name", "French")
+	viper.SetDefault("audit.bot_email", "audit-robot@localhost")
+	viper.SetDefault("audit.key_pages", 7)
+	viper.SetDefault("audit.reuse_hours", 24)
+	viper.SetDefault("audit.crawl_timeout_minutes", 45)
 
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, err

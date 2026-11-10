@@ -1,0 +1,82 @@
+{{ define "audit_head" }}
+<!DOCTYPE html>
+<html lang="{{ .Lang }}">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex,nofollow">
+	<title>{{ trans .PageTitle }} - LaFactory</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&family=Playfair+Display:wght@700&display=swap">
+	<style>
+		/* LaFactory brand: same variables as lafactory.com (lf-charte). */
+		:root {
+			--lf-bg: #0a0a0f; --lf-panel: #12121a; --lf-line: #262633;
+			--lf-text: #cccccc; --lf-strong: #ffffff; --lf-muted: #b0b4bf;
+			--lf-accent: #ffff00; --lf-pink: #de2477; --lf-blue: #2ea3f2; --lf-violet: #8f9cf3;
+			--lf-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			--lf-font-text: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+			--lf-font-title: 'Playfair Display', Georgia, serif;
+			--lf-fs-h1: 48px; --lf-fs-h2: 40px; --lf-fs-h3: 26px; --lf-fs-h4: 22px;
+			--lf-fs-text: 18px; --lf-fs-lead: 20px; --lf-fs-small: 16px; --lf-fs-label: 15px;
+		}
+		@media (max-width: 760px) {
+			:root { --lf-fs-h1: 34px; --lf-fs-h2: 30px; --lf-fs-h3: 23px; --lf-fs-h4: 20px; --lf-fs-text: 17px; }
+		}
+		* { box-sizing: border-box; }
+		html, body { margin: 0; background: var(--lf-bg); color: var(--lf-text); }
+		body { font-family: var(--lf-font-text); font-size: var(--lf-fs-text); line-height: 1.6; }
+		a { color: var(--lf-violet); }
+		h1, h2, h3, h4 { font-family: var(--lf-font-title); font-weight: 700; color: var(--lf-strong); line-height: 1.2; margin: 0 0 .6em; }
+		h1 { font-size: var(--lf-fs-h1); } h2 { font-size: var(--lf-fs-h2); } h3 { font-size: var(--lf-fs-h3); } h4 { font-size: var(--lf-fs-h4); }
+		.wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+		.topbar { border-bottom: 1px solid var(--lf-line); padding: 18px 0; }
+		.topbar .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+		.brand { color: var(--lf-strong); font-weight: 700; text-decoration: none; letter-spacing: .02em; font-size: var(--lf-fs-lead); }
+		.brand span { background: var(--lf-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+		.label { font-size: var(--lf-fs-label); text-transform: uppercase; letter-spacing: .08em; color: var(--lf-muted); font-weight: 600; }
+		.lead { font-size: var(--lf-fs-lead); color: var(--lf-text); }
+		.small { font-size: var(--lf-fs-small); color: var(--lf-muted); }
+		.btn { display: inline-block; background: var(--lf-grad); color: #fff; border: 0; border-radius: 999px; padding: 14px 30px;
+			font: 600 var(--lf-fs-text) var(--lf-font-text); text-decoration: none; cursor: pointer; }
+		.btn:disabled { opacity: .5; cursor: wait; }
+		.panel { background: var(--lf-panel); border: 1px solid var(--lf-line); border-radius: 16px; padding: 28px; }
+		section { padding: 48px 0; border-bottom: 1px solid var(--lf-line); }
+		footer { padding: 40px 0 60px; }
+		.error { color: var(--lf-pink); }
+	</style>
+	{{ with turnstile_site_key }}
+	<script>
+		// The submit button waits for the Turnstile token: sent without it, the form is refused.
+		function lfSubmit(enabled) {
+			document.querySelectorAll('.cf-turnstile').forEach(function (w) {
+				var b = w.closest('form') && w.closest('form').querySelector('[type=submit]');
+				if (b) { b.disabled = !enabled; }
+			});
+		}
+		function lfTurnstileReady() { lfSubmit(true); }
+		function lfTurnstileExpired() { lfSubmit(false); }
+		document.addEventListener('DOMContentLoaded', function () { lfSubmit(false); });
+	</script>
+	<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+	{{ end }}
+</head>
+<body>
+<div class="topbar">
+	<div class="wrap">
+		<a class="brand" href="https://lafactory.com/">La<span>Factory</span></a>
+		<span class="label">{{ trans "AUDIT_BRAND_TAG" }}</span>
+	</div>
+</div>
+{{ end }}
+
+{{ define "audit_foot" }}
+<footer>
+	<div class="wrap small">
+		{{ trans "AUDIT_FOOTER" }} <a href="https://lafactory.com/">lafactory.com</a>
+	</div>
+</footer>
+</body>
+</html>
+{{ end }}

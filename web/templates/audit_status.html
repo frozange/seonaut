@@ -1,0 +1,37 @@
+{{ template "audit_head" . }}
+{{ with .Data }}{{ if not (or .Failed .NotFound) }}<meta http-equiv="refresh" content="15">{{ end }}{{ end }}
+<style>
+	.status { padding: 96px 0; max-width: 680px; }
+	.steps { list-style: none; padding: 0; margin: 32px 0; display: grid; gap: 12px; }
+	.steps li { padding: 14px 18px; border-radius: 12px; border: 1px solid var(--lf-line); color: var(--lf-muted); }
+	.steps li.on { border-color: var(--lf-violet); color: var(--lf-strong); }
+	.steps li.done { color: var(--lf-text); }
+	.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--lf-violet); border-top-color: transparent;
+		border-radius: 50%; margin-right: 10px; vertical-align: -2px; animation: spin 1s linear infinite; }
+	@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+<main class="wrap">
+	<div class="status">
+	{{ with .Data }}
+		{{ if .NotFound }}
+			<h1>{{ trans "AUDIT_STATUS_NOT_FOUND" }}</h1>
+			<p class="lead"><a href="/audit">{{ trans "AUDIT_STATUS_NEW" }}</a></p>
+		{{ else if .Failed }}
+			<p class="label">{{ .Host }}</p>
+			<h1>{{ trans "AUDIT_STATUS_FAILED" }}</h1>
+			<p class="lead">{{ trans "AUDIT_STATUS_FAILED_HELP" }}</p>
+		{{ else }}
+			<p class="label">{{ .Host }}</p>
+			<h1>{{ trans "AUDIT_STATUS_RUNNING" }}</h1>
+			<p class="lead">{{ trans "AUDIT_STATUS_HELP" }}</p>
+			<ol class="steps">
+				<li class="{{ if eq .Status "queued" }}on{{ else }}done{{ end }}">{{ if eq .Status "queued" }}<span class="spinner"></span>{{ end }}{{ trans "AUDIT_STEP_QUEUED" }}</li>
+				<li class="{{ if eq .Status "crawling" }}on{{ else if eq .Status "analysing" }}done{{ end }}">{{ if eq .Status "crawling" }}<span class="spinner"></span>{{ end }}{{ trans "AUDIT_STEP_CRAWL" }}</li>
+				<li class="{{ if eq .Status "analysing" }}on{{ end }}">{{ if eq .Status "analysing" }}<span class="spinner"></span>{{ end }}{{ trans "AUDIT_STEP_ANALYSIS" }}</li>
+			</ol>
+			<p class="small">{{ trans "AUDIT_STATUS_MAIL" }}</p>
+		{{ end }}
+	{{ end }}
+	</div>
+</main>
+{{ template "audit_foot" . }}

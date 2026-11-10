@@ -634,3 +634,97 @@ VERIFY_EMAIL_INVALID: This activation link is invalid or has expired. Sign in to
 ERROR_CRAWL_LIMIT: You have reached the number of crawls allowed per day. Please try again tomorrow.
 ERROR_INSTANCE_BUSY: The crawler is busy with other crawls. Please try again in a few minutes.
 ERROR_PROJECT_LIMIT: You have reached the maximum number of projects. Delete a project to add a new one.
+
+# Free on-demand audit
+AUDIT_PAGE_TITLE: Free SEO audit
+AUDIT_REPORT_TITLE: SEO audit report
+AUDIT_BRAND_TAG: Free SEO audit
+AUDIT_FOOTER: "A free audit by LaFactory, web and SEO agency."
+AUDIT_FORM_KICKER: Free website audit
+AUDIT_FORM_TITLE: What does Google see when it reads your website?
+AUDIT_FORM_LEAD: We crawl your whole site, measure its technical health, read your main pages as a prospect would, and send you a report with your priorities.
+AUDIT_FORM_URL: Website address
+AUDIT_FORM_EMAIL: Your e-mail address, to receive the report
+AUDIT_FORM_SUBMIT: Start the audit
+AUDIT_FORM_PRIVACY: Your address is only used to send you this report. The report page is private and not indexed.
+AUDIT_POINT_TECH_TITLE: Technical health
+AUDIT_POINT_TECH: Broken links, redirects, titles, descriptions, headings, canonical tags, hreflang, response times, measured on every crawled page.
+AUDIT_POINT_COPY_TITLE: Copywriting and content
+AUDIT_POINT_COPY: Is your offer clear within seconds, does the text speak to your customers, does each page target a real search?
+AUDIT_POINT_PRIO_TITLE: Your priorities
+AUDIT_POINT_PRIO: A short list of what to fix first, with the reason and a concrete action for each point.
+AUDIT_ERROR_URL: This address cannot be audited. Check it and enter the full address of a public website.
+AUDIT_ERROR_LIMIT: The number of audits allowed today is reached. Please try again tomorrow.
+AUDIT_ERROR_UNAVAILABLE: The audit service is unavailable right now. Please try again in a few minutes.
+AUDIT_STATUS_RUNNING: Your audit is in progress
+AUDIT_STATUS_HELP: The crawl reads every page of the site, then the analysis takes a few minutes. This page refreshes on its own.
+AUDIT_STATUS_MAIL: You will also receive the link to the report by e-mail. You can close this page.
+AUDIT_STEP_QUEUED: Waiting for its turn
+AUDIT_STEP_CRAWL: Crawling the site
+AUDIT_STEP_ANALYSIS: Analysis and report writing
+AUDIT_STATUS_FAILED: The audit could not be completed
+AUDIT_STATUS_FAILED_HELP: The site did not answer as expected. We have been notified and will look at it.
+AUDIT_STATUS_NOT_FOUND: This report does not exist
+AUDIT_STATUS_NEW: Request a new audit
+AUDIT_MAIL_SUBJECT: "Your SEO audit of %1% is ready"
+AUDIT_MAIL_BODY: "Hello,\n\nThe audit of %1% is ready. Your report is here:\n\n%2%\n\nThis link is private: the page is not indexed by search engines.\n\nLaFactory\nhttps://lafactory.com/\n"
+AUDIT_REPORT_KICKER: SEO audit
+AUDIT_REPORT_LEAD: "Report based on the %1% pages crawled on the site."
+AUDIT_SCORE_TECHNICAL: Technical health
+AUDIT_SCORE_COPYWRITING: Copywriting
+AUDIT_SCORE_CONTENT: Content and SEO
+AUDIT_SUMMARY: In short
+AUDIT_NO_AI: The written analysis is not available for this report. The technical measurements below are complete.
+AUDIT_PRIORITIES: Your priorities
+AUDIT_LEVEL_1: To fix first
+AUDIT_LEVEL_2: Strong potential
+AUDIT_LEVEL_3: Optimisation
+AUDIT_PAGES_AFFECTED: "%1% pages affected"
+AUDIT_ACTION: "What to do:"
+AUDIT_STRENGTHS: What already works
+AUDIT_COPYWRITING: Copywriting
+AUDIT_COPYWRITING_HELP: How the home page and the main pages speak to a prospect.
+AUDIT_CONTENT: Content and SEO
+AUDIT_CONTENT_HELP: How the content answers the searches of your future customers.
+AUDIT_RATING_good: Good
+AUDIT_RATING_partial: Partial
+AUDIT_RATING_poor: Insufficient
+AUDIT_CRITERION_value: Is the offer understood within seconds?
+AUDIT_CRITERION_audience: Is the target named clearly?
+AUDIT_CRITERION_customer: Does the text speak about the customer?
+AUDIT_CRITERION_benefits: Are the results for the customer expressed?
+AUDIT_CRITERION_proof: Do proofs make the promise credible?
+AUDIT_CRITERION_cta: Is the expected action obvious?
+AUDIT_CRITERION_intent: Does each key page target a search?
+AUDIT_CRITERION_vocabulary: Is the wording the customers' own?
+AUDIT_CRITERION_depth: Does the content answer the questions before buying?
+AUDIT_CRITERION_structure: Can the text be scanned quickly?
+AUDIT_CRITERION_trust: Are trust signals present?
+AUDIT_QUERIES: The search each page should target
+AUDIT_QUERIES_HELP: Our hypothesis of the Google search each main page should answer, and how well the page matches it today. No search volume is given.
+AUDIT_QUERIES_PAGE: Page
+AUDIT_QUERIES_QUERY: Probable search
+AUDIT_QUERIES_ALIGN: Match
+AUDIT_QUERIES_COMMENT: Comment
+AUDIT_ALIGN_good: Good
+AUDIT_ALIGN_partial: Partial
+AUDIT_ALIGN_weak: Weak
+AUDIT_REWRITES: Suggested rewrites
+AUDIT_ELEMENT_title: Google title
+AUDIT_ELEMENT_h1: Main heading
+AUDIT_ELEMENT_hook: Hook
+AUDIT_ELEMENT_button: Button
+AUDIT_ELEMENT_meta_description: Meta description
+AUDIT_TECHNICAL: Technical detail
+AUDIT_TECHNICAL_HELP: "Issues measured on the %1% crawled pages. %2% other checks found nothing to report."
+AUDIT_CRITICAL: Critical
+AUDIT_ALERTS: Alerts
+AUDIT_WARNINGS: Warnings
+AUDIT_METHOD: Method
+AUDIT_METHOD_CRAWL: "The crawler followed the links of the site from its home page and its sitemap, and read %1% pages, like a search engine robot. It respects robots.txt."
+AUDIT_METHOD_SAMPLE: "The site has more pages than the %1% read for this free audit. Technical figures cover the pages read, not the whole site."
+AUDIT_METHOD_SCALE: "Technical score: 10 points, minus 1.2 per critical issue type, 0.6 per alert, 0.2 per warning, half of it as soon as one page is affected and all of it when every page is. Copywriting and content scores: average of the criteria, good 10, partial 5, insufficient 0."
+AUDIT_METHOD_AI: The written analysis is produced by an AI that only uses the measurements and the page texts shown in this report. Every statement must rely on them, and a second reading removes what is not supported.
+AUDIT_CTA_TITLE: Let us talk about your website
+AUDIT_CTA_TEXT: We can go through this report with you and decide what to do first.
+AUDIT_CTA_BUTTON: Contact LaFactory

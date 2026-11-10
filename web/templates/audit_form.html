@@ -1,0 +1,43 @@
+{{ template "audit_head" . }}
+<style>
+	.hero { padding: 72px 0 40px; }
+	.hero h1 { max-width: 15em; }
+	.form { display: grid; gap: 16px; max-width: 560px; margin-top: 32px; }
+	.form label { font-weight: 600; color: var(--lf-strong); }
+	.form input[type=url], .form input[type=email] { width: 100%; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--lf-line);
+		background: #0f0f16; color: var(--lf-strong); font: var(--lf-fs-text) var(--lf-font-text); }
+	.form input:focus { outline: 2px solid var(--lf-violet); border-color: transparent; }
+	.points { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 48px; }
+	.points h4 { margin-bottom: .3em; }
+</style>
+<main class="wrap">
+	<div class="hero">
+		<p class="label">{{ trans "AUDIT_FORM_KICKER" }}</p>
+		<h1>{{ trans "AUDIT_FORM_TITLE" }}</h1>
+		<p class="lead">{{ trans "AUDIT_FORM_LEAD" }}</p>
+
+		{{ with .Data }}
+		<form class="form" method="POST" action="/audit">
+			<div>
+				<label for="url">{{ trans "AUDIT_FORM_URL" }}</label>
+				<input type="url" id="url" name="url" value="{{ .URL }}" placeholder="https://www.example.com" required autofocus>
+			</div>
+			<div>
+				<label for="email">{{ trans "AUDIT_FORM_EMAIL" }}</label>
+				<input type="email" id="email" name="email" value="{{ .Email }}" required>
+			</div>
+			{{ with turnstile_site_key }}<div class="cf-turnstile" data-sitekey="{{ . }}" data-theme="dark" data-callback="lfTurnstileReady" data-expired-callback="lfTurnstileExpired"></div>{{ end }}
+			<div><input class="btn" type="submit" value="{{ trans "AUDIT_FORM_SUBMIT" }}"></div>
+			{{ with .ErrorMessage }}<p class="error">{{ trans . }}</p>{{ end }}
+			<p class="small">{{ trans "AUDIT_FORM_PRIVACY" }}</p>
+		</form>
+		{{ end }}
+
+		<div class="points">
+			<div class="panel"><h4>{{ trans "AUDIT_POINT_TECH_TITLE" }}</h4><p class="small">{{ trans "AUDIT_POINT_TECH" }}</p></div>
+			<div class="panel"><h4>{{ trans "AUDIT_POINT_COPY_TITLE" }}</h4><p class="small">{{ trans "AUDIT_POINT_COPY" }}</p></div>
+			<div class="panel"><h4>{{ trans "AUDIT_POINT_PRIO_TITLE" }}</h4><p class="small">{{ trans "AUDIT_POINT_PRIO" }}</p></div>
+		</div>
+	</div>
+</main>
+{{ template "audit_foot" . }}

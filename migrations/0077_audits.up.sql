@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS `audits` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `token` char(43) NOT NULL,
+  `url` varchar(2048) NOT NULL,
+  `email` varchar(256) NOT NULL,
+  `lang` varchar(5) NOT NULL DEFAULT 'fr',
+  `status` varchar(16) NOT NULL DEFAULT 'queued',
+  `error` varchar(1024) NOT NULL DEFAULT '',
+  `ip` varchar(64) NOT NULL DEFAULT '',
+  `project_id` int unsigned NULL DEFAULT NULL,
+  `crawl_id` int unsigned NULL DEFAULT NULL,
+  `result` mediumtext NULL,
+  `created` datetime NOT NULL,
+  `updated` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `audits_token` (`token`),
+  KEY `audits_status` (`status`),
+  KEY `audits_email` (`email`),
+  KEY `audits_created` (`created`)
+);

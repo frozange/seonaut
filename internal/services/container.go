@@ -1,12 +1,15 @@
 package services
 
 import (
+	"context"
 	"database/sql"
 	"encoding/base64"
 	"log"
+	"os"
 	"strings"
 	"time"
 
+	"github.com/stjudewashere/seonaut/internal/audit"
 	"github.com/stjudewashere/seonaut/internal/config"
 	"github.com/stjudewashere/seonaut/internal/issues/multipage"
 	"github.com/stjudewashere/seonaut/internal/issues/page"
@@ -46,6 +49,9 @@ type Container struct {
 	SigninEmailLimiter *security.RateLimiter
 	CrawlLimiter       *security.RateLimiter
 	NetGuard           *netguard.Guard
+	Mailer             Mailer
+	AuditService       *audit.Service
+	AuditIPLimiter     *security.RateLimiter
 
 	db                   *sql.DB
 	issueRepository      *repository.IssueRepository
@@ -78,6 +84,7 @@ func NewContainer(configFile string) *Container {
 	c.InitRenderer()
 	c.InitCookieSession()
 	c.InitReplayService()
+	c.InitAuditService()
 
 	return c
 }
@@ -302,6 +309,7 @@ func (c *Container) InitSecurity() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	c.Mailer = mailer
 	mailLimiter := security.NewRateLimiter(l.VerificationMailsPerDay, 24*time.Hour)
 	c.UserService.EnableEmailVerification(c.userRepository, mailer, c.Config.HTTPServer.URL, mailLimiter)
 
@@ -321,4 +329,81 @@ func (c *Container) InitArchiveService() {
 // Init the WACZ archive replay service.
 func (c *Container) InitReplayService() {
 	c.ReplayService = NewReplayService()
+}
+
+// InitAuditService sets up the free on-demand audit when it is enabled.
+func (c *Container) InitAuditService() {
+	ac := c.Config.Audit
+	if !ac.Enabled {
+		return
+	}
+
+	httpClient, err := newCrawlerHTTPClient(c.Config.Crawler)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	crawlLimit := CrawlLimit
+	if c.Config.Crawler.CrawlLimit > 0 {
+		crawlLimit = c.Config.Crawler.CrawlLimit
+	}
+
+	var interpreter *audit.Interpreter
+	if len(ac.AICommand) > 0 {
+		interpreter = &audit.Interpreter{
+			AI:       &audit.GatewayCompleter{Command: ac.AICommand, Model: ac.AIModel, Effort: ac.AIEffort},
+			Language: ac.LanguageName,
+			Banned:   loadLines("translations/audit_banned_phrases." + ac.Language + ".txt"),
+		}
+	}
+
+	c.AuditIPLimiter = security.NewRateLimiter(ac.PerIPPerDay, 24*time.Hour)
+	c.AuditService = &audit.Service{
+		Store:  &audit.Store{DB: c.db},
+		Reader: &audit.CrawlReader{DB: c.db},
+		Runner: &AuditCrawlRunner{
+			Projects:  c.ProjectService,
+			Crawler:   c.CrawlerService,
+			Broker:    c.PubSubBroker,
+			Users:     c.userRepository,
+			ProjRepo:  c.projectRepository,
+			CrawlRepo: c.crawlRepository,
+			BotEmail:  ac.BotEmail,
+			UserAgent: c.Config.Crawler.Agent,
+		},
+		Interpreter: interpreter,
+		Mailer:      c.Mailer,
+		HTTP:        httpClient,
+		Trans:       c.Translator.Trans,
+		Cfg: audit.Config{
+			BaseURL:      c.Config.HTTPServer.URL,
+			NotifyEmail:  ac.NotifyEmail,
+			DefaultLang:  ac.Language,
+			LanguageName: ac.LanguageName,
+			UserAgent:    c.Config.Crawler.Agent,
+			CrawlLimit:   crawlLimit,
+			KeyPages:     ac.KeyPages,
+			DailyCap:     ac.DailyCap,
+			PerEmailDay:  ac.PerEmailPerDay,
+			ReuseFor:     time.Duration(ac.ReuseHours) * time.Hour,
+			CrawlTimeout: time.Duration(ac.CrawlTimeoutMinutes) * time.Minute,
+			KeepProjects: ac.KeepProjects,
+		},
+	}
+	c.AuditService.Start(context.Background())
+}
+
+// loadLines reads a text file into its non-empty lines; a missing file gives none.
+func loadLines(path string) []string {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	var out []string
+	for _, l := range strings.Split(string(b), "\n") {
+		if l = strings.TrimSpace(l); l != "" {
+			out = append(out, l)
+		}
+	}
+	return out
 }
