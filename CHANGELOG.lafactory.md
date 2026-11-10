@@ -3,6 +3,14 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.2.0 - 2026-11-11
+
+- Commande `auditctl` : demande d'audit depuis le serveur (`request <site> <e-mail>`)
+  et état d'un audit (`status <jeton>`). Elle passe par la même validation et les
+  mêmes limites que le formulaire, sans le navigateur ni la vérification humaine :
+  c'est la voie du propriétaire pour les tests et les demandes faites pour un tiers.
+  Elle exige la config de l'instance, donc le compte qui fait tourner SEOnaut.
+
 ## 1.1.0 - 2026-11-11
 
 Audit gratuit sur demande, complété par l'IA, avec une page de rapport à la charte LaFactory.
