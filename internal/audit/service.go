@@ -226,7 +226,10 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64) (*Result
 			max = 1800
 		}
 		fctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-		pages[i].Text, pages[i].Headings, _ = PageText(fctx, s.HTTP, s.Cfg.UserAgent, pages[i].URL, max)
+		if pc, err := PageText(fctx, s.HTTP, s.Cfg.UserAgent, pages[i].URL, max); err == nil {
+			pages[i].Text, pages[i].Headings = pc.Text, pc.Headings
+			pages[i].Footer, pages[i].Actions, pages[i].Contacts = pc.Footer, pc.Actions, pc.Contacts
+		}
 		cancel()
 	}
 
@@ -238,7 +241,9 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64) (*Result
 		KeyPages:    pages,
 	}
 	res.Scores.Technical = TechnicalScore(issues, facts.PagesCrawled)
-	res.Evidence = BuildEvidence(facts, pages, issues, func(t string) string { return s.Trans("en", t) })
+	res.Evidence = BuildEvidence(facts, pages, issues, func(t string) (string, string) {
+		return s.Trans("en", t), s.Trans("en", t+"_DESC")
+	})
 	priorities := TechnicalPriorities(issues)
 
 	if s.Interpreter == nil {

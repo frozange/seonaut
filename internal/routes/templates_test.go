@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stjudewashere/seonaut/internal/audit"
 	"github.com/stjudewashere/seonaut/internal/models"
 	"github.com/stjudewashere/seonaut/internal/services"
 )
@@ -98,5 +99,40 @@ func TestCredentialFormsPostToTheirOwnRoute(t *testing.T) {
 	out := render(t, services.RendererConfig{}, "signin", &credentialsView{})
 	if strings.Contains(out, "cf-turnstile") || strings.Contains(out, "challenges.cloudflare.com") {
 		t.Error("Turnstile must not load without a site key")
+	}
+}
+
+func TestAuditReportRenders(t *testing.T) {
+	copy := 7.5
+	res := &audit.Result{
+		GeneratedAt: time.Date(2026, 11, 10, 0, 0, 0, 0, time.UTC),
+		Site:        audit.SiteFacts{PagesCrawled: 150, CrawlLimit: 150, LimitReached: true},
+		Scores:      audit.Scores{Technical: 6.8, Copywriting: &copy},
+		Issues:      []audit.IssueSummary{{Type: "ERROR_TIMEOUT", Priority: 1, Pages: 1, Examples: []string{"https://ex.com/"}}, {Type: "ERROR_SLOW_TTFB", Priority: 2, Pages: 14}},
+		Priorities:  []audit.Priority{{ID: "t:ERROR_TIMEOUT", Source: "technical", Level: 1, Title: "ERROR_TIMEOUT", Pages: 1, Action: "Fix it."}},
+	}
+	withAI := *res
+	withAI.AI = &audit.AIReport{
+		Summary:  "SUMMARY-MARKER",
+		Criteria: []audit.Criterion{{ID: "value", Group: "copywriting", Question: "value", Rating: "good", Verdict: "VERDICT-MARKER"}},
+		Rewrites: []audit.Rewrite{{Element: "title", Before: "Old", After: "New"}},
+	}
+	for name, r := range map[string]*audit.Result{"without AI": res, "with AI": &withAI} {
+		a := &audit.Audit{URL: "https://ex.com/", Result: r}
+		out := render(t, services.RendererConfig{}, "audit_report", newReportView(a, "fr"))
+		for _, s := range []string{"</html>", "6,8", "AUDIT_PAGE_AFFECTED_ONE", "AUDIT_METHOD_SAMPLE", "ERROR_SLOW_TTFB"} {
+			if !strings.Contains(out, s) {
+				t.Errorf("%s: missing %s", name, s)
+			}
+		}
+		if name == "with AI" {
+			for _, s := range []string{"SUMMARY-MARKER", "VERDICT-MARKER", "AUDIT_CRITERION_value", "7,5"} {
+				if !strings.Contains(out, s) {
+					t.Errorf("with AI: missing %s", s)
+				}
+			}
+		} else if !strings.Contains(out, "AUDIT_NO_AI") {
+			t.Error("without AI: the report must say the written analysis is missing")
+		}
 	}
 }

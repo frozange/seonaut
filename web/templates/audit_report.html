@@ -74,7 +74,7 @@
 			<li class="panel">
 				<span class="badge l{{ .Level }}">{{ if eq .Level 1 }}{{ trans "AUDIT_LEVEL_1" }}{{ else if eq .Level 2 }}{{ trans "AUDIT_LEVEL_2" }}{{ else }}{{ trans "AUDIT_LEVEL_3" }}{{ end }}</span>
 				<h4>{{ if eq .Source "technical" }}{{ trans .Title }}{{ else }}{{ .Title }}{{ end }}</h4>
-				{{ if .Pages }}<p class="small">{{ trans "AUDIT_PAGES_AFFECTED" .Pages }}</p>{{ end }}
+				{{ if .Pages }}<p class="small">{{ if eq .Pages 1 }}{{ trans "AUDIT_PAGE_AFFECTED_ONE" }}{{ else }}{{ trans "AUDIT_PAGES_AFFECTED" .Pages }}{{ end }}</p>{{ end }}
 				{{ if .Impact }}<p>{{ .Impact }}</p>{{ else if eq .Source "technical" }}<p class="small">{{ trans (print .Title "_DESC") }}</p>{{ end }}
 				{{ if .Action }}<p><strong>{{ trans "AUDIT_ACTION" }}</strong> {{ .Action }}</p>{{ end }}
 			</li>
@@ -159,15 +159,15 @@
 		<h2>{{ trans "AUDIT_TECHNICAL" }}</h2>
 		<p class="small">{{ trans "AUDIT_TECHNICAL_HELP" .Result.Site.PagesCrawled .Result.PassedCount }}</p>
 		{{ if .Critical }}<h3>{{ trans "AUDIT_CRITICAL" }}</h3>{{ range .Critical }}
-		<details><summary>{{ trans .Type }}<span class="count">{{ trans "AUDIT_PAGES_AFFECTED" .Pages }}</span></summary>
+		<details><summary>{{ trans .Type }}<span class="count">{{ if eq .Pages 1 }}{{ trans "AUDIT_PAGE_AFFECTED_ONE" }}{{ else }}{{ trans "AUDIT_PAGES_AFFECTED" .Pages }}{{ end }}</span></summary>
 			<p class="small">{{ trans (print .Type "_DESC") }}</p><ul>{{ range .Examples }}<li>{{ . }}</li>{{ end }}</ul></details>
 		{{ end }}{{ end }}
 		{{ if .Alerts }}<h3>{{ trans "AUDIT_ALERTS" }}</h3>{{ range .Alerts }}
-		<details><summary>{{ trans .Type }}<span class="count">{{ trans "AUDIT_PAGES_AFFECTED" .Pages }}</span></summary>
+		<details><summary>{{ trans .Type }}<span class="count">{{ if eq .Pages 1 }}{{ trans "AUDIT_PAGE_AFFECTED_ONE" }}{{ else }}{{ trans "AUDIT_PAGES_AFFECTED" .Pages }}{{ end }}</span></summary>
 			<p class="small">{{ trans (print .Type "_DESC") }}</p><ul>{{ range .Examples }}<li>{{ . }}</li>{{ end }}</ul></details>
 		{{ end }}{{ end }}
 		{{ if .Warnings }}<h3>{{ trans "AUDIT_WARNINGS" }}</h3>{{ range .Warnings }}
-		<details><summary>{{ trans .Type }}<span class="count">{{ trans "AUDIT_PAGES_AFFECTED" .Pages }}</span></summary>
+		<details><summary>{{ trans .Type }}<span class="count">{{ if eq .Pages 1 }}{{ trans "AUDIT_PAGE_AFFECTED_ONE" }}{{ else }}{{ trans "AUDIT_PAGES_AFFECTED" .Pages }}{{ end }}</span></summary>
 			<p class="small">{{ trans (print .Type "_DESC") }}</p><ul>{{ range .Examples }}<li>{{ . }}</li>{{ end }}</ul></details>
 		{{ end }}{{ end }}
 	</div></section>

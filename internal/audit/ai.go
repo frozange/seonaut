@@ -260,7 +260,8 @@ func (in *Interpreter) Interpret(ctx context.Context, evidence []EvidenceEntry, 
 	prompt = "Business: " + string(busJSON) + "\nPriorities, in order (keep their ids): " + string(prioJSON) +
 		"\nAssessments: " + string(critJSON) + "\nEvidence pack: " + truncate(string(pack), 30000) +
 		"\n\nWrite: a summary of 80 to 130 words; for each priority (same id) the impact for the business in one sentence and one concrete, doable action; " +
-		"up to 3 rewrites of existing elements (quote the current text exactly in 'before'); a conclusion of 40 to 80 words that makes the reader want to talk about it, with no figure promised."
+		"up to 3 rewrites of existing elements (quote the current text exactly in 'before', and write 'after' in the language of that page, " +
+		"given by language_declared and its text, never in the report language); a conclusion of 40 to 80 words that makes the reader want to talk about it, with no figure promised."
 	var writing struct {
 		Summary    string `json:"summary"`
 		Priorities []struct {

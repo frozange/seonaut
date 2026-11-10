@@ -728,3 +728,4 @@ AUDIT_METHOD_AI: The written analysis is produced by an AI that only uses the me
 AUDIT_CTA_TITLE: Let us talk about your website
 AUDIT_CTA_TEXT: We can go through this report with you and decide what to do first.
 AUDIT_CTA_BUTTON: Contact LaFactory
+AUDIT_PAGE_AFFECTED_ONE: "1 page affected"

@@ -233,3 +233,21 @@ func TestInterpretUnavailable(t *testing.T) {
 		t.Fatalf("got %v %v %v", rep, prio, err)
 	}
 }
+
+func TestExtractChrome(t *testing.T) {
+	doc, _ := html.Parse(strings.NewReader(`<html><body>
+		<header><a class="btn btn-primary" href="/book/">Book a call</a><a href="/about/">About</a></header>
+		<main><button>Get a quote</button><a class="elementor-button" href="/quote/">Quote</a></main>
+		<footer>Legal notice. 12 rue de Paris. <a href="tel:+33100000000">Call</a> <a href="mailto:hi@ex.com">Mail</a></footer>
+	</body></html>`))
+	footer, actions, contacts := extractChrome(doc)
+	if !strings.Contains(footer, "Legal notice. 12 rue de Paris.") {
+		t.Errorf("footer = %q", footer)
+	}
+	if strings.Join(actions, "|") != "Book a call -> /book/|Get a quote|Quote -> /quote/" {
+		t.Errorf("actions = %v", actions)
+	}
+	if strings.Join(contacts, "|") != "tel:+33100000000|mailto:hi@ex.com" {
+		t.Errorf("contacts = %v", contacts)
+	}
+}

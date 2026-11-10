@@ -150,33 +150,98 @@ func pickKeyPages(all []PageFacts, home string, max int) []PageFacts {
 	return out
 }
 
-// PageText fetches a page through the guarded client and returns its visible
-// main text and its headings. Navigation, header, footer, scripts and forms are
-// left out so the text is what a reader actually reads.
-func PageText(ctx context.Context, client *http.Client, userAgent, pageURL string, maxWords int) (string, []string, error) {
+// PageContent is what a fresh fetch of a page gives the AI.
+type PageContent struct {
+	Text     string   // visible main text, without navigation, header, footer and forms
+	Headings []string // h1 to h4, in order
+	Footer   string   // footer text: legal notice, address and phone usually live there
+	Actions  []string // buttons and button-like links, header included
+	Contacts []string // tel: and mailto: links
+}
+
+// PageText fetches a page through the guarded client and returns its content.
+func PageText(ctx context.Context, client *http.Client, userAgent, pageURL string, maxWords int) (*PageContent, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, pageURL, nil)
 	if err != nil {
-		return "", nil, err
+		return nil, err
 	}
 	req.Header.Set("User-Agent", userAgent)
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", nil, err
+		return nil, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", nil, fmt.Errorf("status %d", resp.StatusCode)
+		return nil, fmt.Errorf("status %d", resp.StatusCode)
 	}
 	doc, err := html.Parse(io.LimitReader(resp.Body, 4<<20))
 	if err != nil {
-		return "", nil, err
+		return nil, err
 	}
-	text, headings := extractText(doc)
-	words := strings.Fields(text)
-	if len(words) > maxWords {
-		words = words[:maxWords]
+	pc := &PageContent{}
+	pc.Text, pc.Headings = extractText(doc)
+	pc.Text = firstWords(pc.Text, maxWords)
+	pc.Footer, pc.Actions, pc.Contacts = extractChrome(doc)
+	return pc, nil
+}
+
+func firstWords(s string, n int) string {
+	words := strings.Fields(s)
+	if len(words) > n {
+		words = words[:n]
 	}
-	return strings.Join(words, " "), headings, nil
+	return strings.Join(words, " ")
+}
+
+var buttonClass = regexp.MustCompile(`(?i)(^|[\s_-])(btn|button|cta)([\s_-]|$)`)
+
+// extractChrome reads what extractText leaves out on purpose: the footer, the
+// calls to action (often in the header or the hero) and the contact links.
+func extractChrome(doc *html.Node) (footer string, actions, contacts []string) {
+	var footers []string
+	seen := map[string]bool{}
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
+		if n.Type == html.ElementNode {
+			switch n.Data {
+			case "script", "style", "noscript", "svg", "template":
+				return
+			case "footer":
+				footers = append(footers, strings.Join(strings.Fields(nodeText(n)), " "))
+			case "a", "button":
+				text := strings.Join(strings.Fields(nodeText(n)), " ")
+				href := attr(n, "href")
+				lower := strings.ToLower(href)
+				if (strings.HasPrefix(lower, "tel:") || strings.HasPrefix(lower, "mailto:")) && !seen[lower] && len(contacts) < 8 {
+					seen[lower] = true
+					contacts = append(contacts, href)
+				}
+				isButton := n.Data == "button" || attr(n, "role") == "button" || buttonClass.MatchString(attr(n, "class"))
+				key := text + "|" + href
+				if isButton && text != "" && len(text) < 80 && !seen[key] && len(actions) < 15 {
+					seen[key] = true
+					if href != "" {
+						text += " -> " + href
+					}
+					actions = append(actions, text)
+				}
+			}
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			walk(c)
+		}
+	}
+	walk(doc)
+	return firstWords(strings.Join(footers, " "), 250), actions, contacts
+}
+
+func attr(n *html.Node, key string) string {
+	for _, a := range n.Attr {
+		if a.Key == key {
+			return a.Val
+		}
+	}
+	return ""
 }
 
 var skipText = map[string]bool{
@@ -230,8 +295,10 @@ func nodeText(n *html.Node) string {
 	return b.String()
 }
 
-// BuildEvidence numbers the facts the AI may rely on: E1, E2...
-func BuildEvidence(site SiteFacts, pages []PageFacts, issues []IssueSummary, issueLabel func(string) string) []EvidenceEntry {
+// BuildEvidence numbers the facts the AI may rely on: E1, E2... issueText gives
+// the name and the description of an issue type, so the AI knows exactly what
+// each check measures.
+func BuildEvidence(site SiteFacts, pages []PageFacts, issues []IssueSummary, issueText func(string) (string, string)) []EvidenceEntry {
 	var out []EvidenceEntry
 	add := func(label string, data interface{}) {
 		out = append(out, EvidenceEntry{ID: fmt.Sprintf("E%d", len(out)+1), Label: label, Data: data})
@@ -249,8 +316,14 @@ func BuildEvidence(site SiteFacts, pages []PageFacts, issues []IssueSummary, iss
 		}
 		data := map[string]interface{}{
 			"title": p.Title, "meta_description": p.Description, "h1": p.H1,
-			"word_count": p.Words, "language": p.Lang, "click_depth": p.Depth, "internal_links_to_it": p.Inlinks,
-			"headings": p.Headings,
+			"word_count_whole_html_including_menus_and_footer": p.Words,
+			"language_declared": p.Lang, "click_depth": p.Depth, "internal_links_to_it": p.Inlinks,
+			"headings":                    p.Headings,
+			"buttons_and_calls_to_action": p.Actions,
+			"phone_and_email_links":       p.Contacts,
+		}
+		if i == 0 {
+			data["footer_text"] = p.Footer
 		}
 		limit := 350
 		if i == 0 {
@@ -260,13 +333,14 @@ func BuildEvidence(site SiteFacts, pages []PageFacts, issues []IssueSummary, iss
 		if len(words) > limit {
 			words = words[:limit]
 		}
-		data["text_excerpt"] = strings.Join(words, " ")
+		data["main_text_excerpt_without_menus_and_footer"] = strings.Join(words, " ")
 		add(label, data)
 	}
 	var measured []map[string]interface{}
 	for _, is := range issues {
+		name, what := issueText(is.Type)
 		measured = append(measured, map[string]interface{}{
-			"issue": issueLabel(is.Type), "priority": []string{"", "critical", "alert", "warning"}[clamp(is.Priority, 1, 3)],
+			"issue": name, "what_it_checks": what, "priority": []string{"", "critical", "alert", "warning"}[clamp(is.Priority, 1, 3)],
 			"pages_affected": is.Pages, "examples": is.Examples,
 		})
 	}
