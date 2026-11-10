@@ -219,3 +219,18 @@ func TestMultipleTitleTagsIssues(t *testing.T) {
 		t.Errorf("reportsIssue should be true")
 	}
 }
+
+// Lengths count characters, not bytes: a French title of exactly 60 characters
+// with accents is not too long.
+func TestTitleLengthCountsCharacters(t *testing.T) {
+	reporter := page.NewLongTitleReporter()
+	pr := &models.PageReport{Crawled: true, MediaType: "text/html", StatusCode: 200,
+		Title: "FAQ : prix des sites, hébergement, délais et SEO | LaFactory"}
+	if reporter.Callback(pr, &html.Node{}, &http.Header{}) {
+		t.Error("a 60-character title with accents was reported as too long")
+	}
+	pr.Title += "!"
+	if !reporter.Callback(pr, &html.Node{}, &http.Header{}) {
+		t.Error("a 61-character title was not reported")
+	}
+}

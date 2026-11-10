@@ -3,6 +3,12 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.3.3 - 2026-11-11
+
+- Longueur des titres et des descriptions comptée en caractères, plus en octets :
+  un accent comptait double, et un titre français de 60 caractères passait pour
+  trop long.
+
 ## 1.3.2 - 2026-11-11
 
 Contrôles corrigés après le premier audit réel de lafactory.com, qui relevait trois

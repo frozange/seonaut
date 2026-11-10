@@ -2,6 +2,7 @@ package page
 
 import (
 	"net/http"
+	"unicode/utf8"
 
 	"github.com/stjudewashere/seonaut/internal/issues/errors"
 	"github.com/stjudewashere/seonaut/internal/models"
@@ -53,7 +54,7 @@ func NewShortDescriptionReporter() *models.PageIssueReporter {
 			return false
 		}
 
-		return len(pageReport.Description) > 0 && len(pageReport.Description) < 80
+		return utf8.RuneCountInString(pageReport.Description) > 0 && utf8.RuneCountInString(pageReport.Description) < 80
 	}
 
 	return &models.PageIssueReporter{
@@ -79,7 +80,7 @@ func NewLongDescriptionReporter() *models.PageIssueReporter {
 			return false
 		}
 
-		return len(pageReport.Description) > 160
+		return utf8.RuneCountInString(pageReport.Description) > 160
 	}
 
 	return &models.PageIssueReporter{
