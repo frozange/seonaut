@@ -28,13 +28,15 @@ import (
 )
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: auditctl -c config request <site URL> <e-mail>\n       auditctl -c config status <token>")
+	fmt.Fprintln(os.Stderr, "usage: auditctl -c config [-fresh] request <site URL> <e-mail>\n       auditctl -c config status <token>")
 	os.Exit(2)
 }
 
 func main() {
 	var configFile string
+	var fresh bool
 	flag.StringVar(&configFile, "c", "config", "Configuration file.")
+	flag.BoolVar(&fresh, "fresh", false, "Crawl again instead of reusing a recent report.")
 	flag.Parse()
 	args := flag.Args()
 	if len(args) < 2 {
@@ -63,6 +65,9 @@ func main() {
 			PerEmailDay: cfg.Audit.PerEmailPerDay,
 			ReuseFor:    time.Duration(cfg.Audit.ReuseHours) * time.Hour,
 		},
+	}
+	if fresh {
+		svc.Cfg.ReuseFor = 0
 	}
 	if m, err := services.NewMailer(cfg.Mail); err == nil {
 		svc.Mailer = m
