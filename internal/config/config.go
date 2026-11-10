@@ -64,6 +64,10 @@ type MailConfig struct {
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
 	From     string `mapstructure:"from"`
+
+	// TLSServerName is the name checked against the relay certificate when Host is
+	// an IP address or a tunnel (for example "mail.example.com" for 127.0.0.1).
+	TLSServerName string `mapstructure:"tls_server_name"`
 }
 
 // LimitsConfig caps what a single visitor or account can do. Zero disables a limit.
@@ -76,6 +80,9 @@ type LimitsConfig struct {
 	MaxConcurrentCrawls        int  `mapstructure:"max_concurrent_crawls"`
 	MaxProjectsPerUser         int  `mapstructure:"max_projects_per_user"`
 	AllowCustomUserAgent       bool `mapstructure:"allow_custom_user_agent"`
+	// AllowIgnoreRobots lets users crawl paths that robots.txt disallows. A public
+	// instance crawls other people's sites, so it should keep this off.
+	AllowIgnoreRobots bool `mapstructure:"allow_ignore_robots"`
 }
 
 // DBConfig stores the configuration for the database store.
@@ -126,6 +133,7 @@ func NewConfig(configFile string) (*Config, error) {
 	viper.SetDefault("mail.port", 25)
 	viper.SetDefault("limits.signups_per_ip_per_day", 0)
 	viper.SetDefault("limits.allow_custom_user_agent", true)
+	viper.SetDefault("limits.allow_ignore_robots", true)
 
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, err

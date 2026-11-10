@@ -292,3 +292,8 @@ button.link-button:hover {
 	margin: 1rem 0;
 	min-height: 65px;
 }
+
+input[type=submit]:disabled {
+	cursor: wait;
+	opacity: .5;
+}

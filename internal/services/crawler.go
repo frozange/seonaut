@@ -42,34 +42,39 @@ type CrawlerServicesContainer struct {
 	// MaxConcurrent caps the number of crawls running at the same time on the
 	// instance. Zero means no limit.
 	MaxConcurrent int
+
+	// DenyIgnoreRobots makes every crawl respect robots.txt, whatever the project says.
+	DenyIgnoreRobots bool
 }
 
 // ErrTooManyCrawls is returned when the instance already runs MaxConcurrent crawls.
 var ErrTooManyCrawls = errors.New("too many crawls running, try again later")
 
 type CrawlerService struct {
-	repository     CrawlerServiceRepository
-	config         *config.CrawlerConfig
-	broker         *Broker
-	reportManager  *ReportManager
-	crawlerHandler *CrawlerHandler
-	ArchiveService *ArchiveService
-	crawlers       map[int64]*crawler.Crawler
-	lock           *sync.RWMutex
-	maxConcurrent  int
+	repository       CrawlerServiceRepository
+	config           *config.CrawlerConfig
+	broker           *Broker
+	reportManager    *ReportManager
+	crawlerHandler   *CrawlerHandler
+	ArchiveService   *ArchiveService
+	crawlers         map[int64]*crawler.Crawler
+	lock             *sync.RWMutex
+	maxConcurrent    int
+	denyIgnoreRobots bool
 }
 
 func NewCrawlerService(r CrawlerServiceRepository, s CrawlerServicesContainer) *CrawlerService {
 	return &CrawlerService{
-		repository:     r,
-		broker:         s.Broker,
-		config:         s.Config,
-		reportManager:  s.ReportManager,
-		crawlerHandler: s.CrawlerHandler,
-		ArchiveService: s.ArchiveService,
-		maxConcurrent:  s.MaxConcurrent,
-		crawlers:       make(map[int64]*crawler.Crawler),
-		lock:           &sync.RWMutex{},
+		repository:       r,
+		broker:           s.Broker,
+		config:           s.Config,
+		reportManager:    s.ReportManager,
+		crawlerHandler:   s.CrawlerHandler,
+		ArchiveService:   s.ArchiveService,
+		maxConcurrent:    s.MaxConcurrent,
+		denyIgnoreRobots: s.DenyIgnoreRobots,
+		crawlers:         make(map[int64]*crawler.Crawler),
+		lock:             &sync.RWMutex{},
 	}
 }
 
@@ -201,7 +206,7 @@ func (s *CrawlerService) addCrawler(u *url.URL, p *models.Project, b *models.Bas
 
 	options := &crawler.Options{
 		CrawlLimit:      crawlLimit,
-		IgnoreRobotsTxt: p.IgnoreRobotsTxt,
+		IgnoreRobotsTxt: p.IgnoreRobotsTxt && !s.denyIgnoreRobots,
 		FollowNofollow:  p.FollowNofollow,
 		IncludeNoindex:  p.IncludeNoindex,
 		CrawlSitemap:    p.CrawlSitemap,

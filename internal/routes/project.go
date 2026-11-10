@@ -16,6 +16,15 @@ type projectHandler struct {
 	*services.Container
 }
 
+// projectAddView is the data of the add project form. Every handler rendering the
+// form must use it: the template reads all its fields and stops at a missing one.
+type projectAddView struct {
+	URLError          bool
+	UserAgentError    bool
+	ProjectLimitError bool
+	UserAgent         string
+}
+
 // indexHandler Handles the user homepage request and lists all the user's projects.
 func (h *projectHandler) indexHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -68,11 +77,7 @@ func (h *projectHandler) addGetHandler(w http.ResponseWriter, r *http.Request) {
 		Theme:     user.Theme,
 		User:      *user,
 		PageTitle: "ADD_PROJECT_PAGE_TITLE",
-		Data: &struct {
-			URLError       bool
-			UserAgentError bool
-			UserAgent      string
-		}{UserAgent: h.Config.Crawler.Agent},
+		Data:      &projectAddView{UserAgent: h.Config.Crawler.Agent},
 	}
 
 	h.Renderer.RenderTemplate(w, "project_add", pageView, user.Lang)
@@ -96,6 +101,7 @@ func (h *projectHandler) addPostHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	ignoreRobotsTxt, err := strconv.ParseBool(r.FormValue("ignore_robotstxt"))
+	ignoreRobotsTxt = ignoreRobotsTxt && h.Config.Limits.AllowIgnoreRobots
 	if err != nil {
 		ignoreRobotsTxt = false
 	}
@@ -151,12 +157,7 @@ func (h *projectHandler) addPostHandler(w http.ResponseWriter, r *http.Request) 
 			Theme:     user.Theme,
 			User:      *user,
 			PageTitle: "ADD_PROJECT_PAGE_TITLE",
-			Data: &struct {
-				URLError          bool
-				UserAgentError    bool
-				ProjectLimitError bool
-				UserAgent         string
-			}{
+			Data: &projectAddView{
 				URLError:          urlError,
 				ProjectLimitError: limitError,
 				UserAgent:         h.Config.Crawler.Agent,
@@ -199,12 +200,7 @@ func (h *projectHandler) addPostHandler(w http.ResponseWriter, r *http.Request) 
 			Theme:     user.Theme,
 			User:      *user,
 			PageTitle: "ADD_PROJECT_PAGE_TITLE",
-			Data: &struct {
-				URLError          bool
-				UserAgentError    bool
-				ProjectLimitError bool
-				UserAgent         string
-			}{
+			Data: &projectAddView{
 				URLError:       errors.Is(err, services.ErrProtocolNotSupported),
 				UserAgentError: errors.Is(err, services.ErrUserAgent),
 				UserAgent:      h.Config.Crawler.Agent,
@@ -317,6 +313,7 @@ func (h *projectHandler) editPostHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	p.IgnoreRobotsTxt, err = strconv.ParseBool(r.FormValue("ignore_robotstxt"))
+	p.IgnoreRobotsTxt = p.IgnoreRobotsTxt && h.Config.Limits.AllowIgnoreRobots
 	if err != nil {
 		p.IgnoreRobotsTxt = false
 	}

@@ -23,6 +23,9 @@ type (
 		// AllowCustomUserAgent shows the custom user agent option on project forms.
 		AllowCustomUserAgent bool
 
+		// AllowIgnoreRobots shows the "ignore robots.txt" option on project forms.
+		AllowIgnoreRobots bool
+
 		// TurnstileSiteKey renders the Turnstile widget on the credential forms when set.
 		TurnstileSiteKey string
 	}
@@ -42,14 +45,15 @@ func NewRenderer(config *RendererConfig, translator RendererTranslator) (*Render
 	}
 
 	commonFuncMap := template.FuncMap{
-		"total_time":         r.totalTime,
-		"add":                r.add,
-		"to_kb":              r.toKByte,
-		"is_rtl":             r.isRTL,
-		"allow_custom_ua":    func() bool { return config.AllowCustomUserAgent },
-		"turnstile_site_key": func() string { return config.TurnstileSiteKey },
-		"trans":              func(s string, args ...interface{}) string { return s },   // This gets replaced with the user lang in the RenderTemplate
-		"trans_date":         func(d time.Time, f string) string { return d.Format(f) }, // This gets replaced with the user lang in the RenderTemplate
+		"total_time":          r.totalTime,
+		"add":                 r.add,
+		"to_kb":               r.toKByte,
+		"is_rtl":              r.isRTL,
+		"allow_custom_ua":     func() bool { return config.AllowCustomUserAgent },
+		"allow_ignore_robots": func() bool { return config.AllowIgnoreRobots },
+		"turnstile_site_key":  func() string { return config.TurnstileSiteKey },
+		"trans":               func(s string, args ...interface{}) string { return s },   // This gets replaced with the user lang in the RenderTemplate
+		"trans_date":          func(d time.Time, f string) string { return d.Format(f) }, // This gets replaced with the user lang in the RenderTemplate
 	}
 
 	var err error

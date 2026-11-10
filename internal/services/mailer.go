@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"crypto/tls"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -51,10 +52,62 @@ func NewSMTPMailer(c *config.MailConfig) (*SMTPMailer, error) {
 		from: from,
 		send: smtp.SendMail,
 	}
+	serverName := c.Host
+	if c.TLSServerName != "" {
+		serverName = c.TLSServerName
+	}
 	if c.User != "" {
-		m.auth = smtp.PlainAuth("", c.User, c.Password, c.Host)
+		m.auth = smtp.PlainAuth("", c.User, c.Password, serverName)
+	}
+	if c.TLSServerName != "" {
+		m.send = func(addr string, a smtp.Auth, from string, to []string, msg []byte) error {
+			return sendSMTP(addr, serverName, a, from, to, msg)
+		}
 	}
 	return m, nil
+}
+
+// sendSMTP is smtp.SendMail with an explicit TLS server name: STARTTLS is required
+// and the certificate is verified against serverName instead of the dialed host.
+func sendSMTP(addr, serverName string, a smtp.Auth, from string, to []string, msg []byte) error {
+	c, err := smtp.Dial(addr)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+	if err := c.Hello("localhost"); err != nil {
+		return err
+	}
+	if ok, _ := c.Extension("STARTTLS"); !ok {
+		return errors.New("mailer: relay does not offer STARTTLS")
+	}
+	if err := c.StartTLS(&tls.Config{ServerName: serverName, MinVersion: tls.VersionTLS12}); err != nil {
+		return err
+	}
+	if a != nil {
+		if err := c.Auth(a); err != nil {
+			return err
+		}
+	}
+	if err := c.Mail(from); err != nil {
+		return err
+	}
+	for _, r := range to {
+		if err := c.Rcpt(r); err != nil {
+			return err
+		}
+	}
+	w, err := c.Data()
+	if err != nil {
+		return err
+	}
+	if _, err := w.Write(msg); err != nil {
+		return err
+	}
+	if err := w.Close(); err != nil {
+		return err
+	}
+	return c.Quit()
 }
 
 // Send builds and sends the message.

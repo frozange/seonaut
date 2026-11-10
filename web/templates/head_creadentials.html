@@ -9,7 +9,21 @@
 		{{ trans .PageTitle }} - SEOnaut
 	</title>
 	<link rel="stylesheet" href="/resources/style.css">
-	{{ if turnstile_site_key }}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{{ end }}
+	{{ if turnstile_site_key }}
+	<script>
+		// The submit button waits for the Turnstile token: sent without it, the form is refused.
+		function lfSubmit(enabled) {
+			document.querySelectorAll('.cf-turnstile').forEach(function (w) {
+				var b = w.closest('form') && w.closest('form').querySelector('[type=submit]');
+				if (b) { b.disabled = !enabled; }
+			});
+		}
+		function lfTurnstileReady() { lfSubmit(true); }
+		function lfTurnstileExpired() { lfSubmit(false); }
+		document.addEventListener('DOMContentLoaded', function () { lfSubmit(false); });
+	</script>
+	<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+	{{ end }}
 </head>
 <body class="{{ .Theme }}{{ if (is_rtl .Lang) }} rtl{{ end }}">
 <div id="main" class="credentials borderless">

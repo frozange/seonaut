@@ -209,12 +209,13 @@ func (c *Container) InitExportService() {
 // Create Crawler service.
 func (c *Container) InitCrawlerService() {
 	crawlerServices := CrawlerServicesContainer{
-		Broker:         c.PubSubBroker,
-		ReportManager:  c.ReportManager,
-		CrawlerHandler: NewCrawlerHandler(c.pageReportRepository, c.PubSubBroker, c.ReportManager),
-		ArchiveService: c.ArchiveService,
-		Config:         c.Config.Crawler,
-		MaxConcurrent:  c.Config.Limits.MaxConcurrentCrawls,
+		Broker:           c.PubSubBroker,
+		ReportManager:    c.ReportManager,
+		CrawlerHandler:   NewCrawlerHandler(c.pageReportRepository, c.PubSubBroker, c.ReportManager),
+		ArchiveService:   c.ArchiveService,
+		Config:           c.Config.Crawler,
+		MaxConcurrent:    c.Config.Limits.MaxConcurrentCrawls,
+		DenyIgnoreRobots: !c.Config.Limits.AllowIgnoreRobots,
 	}
 	repository := &struct {
 		*repository.CrawlRepository
@@ -246,6 +247,7 @@ func (c *Container) InitRenderer() {
 	renderer, err := NewRenderer(&RendererConfig{
 		TemplatesFolder:      "web/templates",
 		AllowCustomUserAgent: c.Config.Limits.AllowCustomUserAgent,
+		AllowIgnoreRobots:    c.Config.Limits.AllowIgnoreRobots,
 		TurnstileSiteKey:     c.Turnstile.SiteKey,
 	}, c.Translator)
 	if err != nil {
