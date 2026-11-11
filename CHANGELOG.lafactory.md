@@ -3,6 +3,28 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.4.0 - 2026-11-11
+
+La note technique ne compte plus que ce que Google dit utiliser. Les contrôles
+d'origine qui mesurent autre chose passent dans une rubrique « Hors classement
+Google » du rapport, sans poids sur la note ni place dans les priorités :
+
+| contrôles | ce que dit Google |
+|---|---|
+| ordre des titres, absence de H1 | « number and order of headings » figure dans « Things we believe you shouldn't focus on » ([guide de démarrage SEO](https://developers.google.com/search/docs/fundamentals/seo-starter-guide)) |
+| peu de contenu | la longueur seule ne compte pas pour le classement (même guide) |
+| title court ou long | aucune limite de longueur ([title links](https://developers.google.com/search/docs/appearance/title-link)) |
+| description courte ou longue | aucune limite de longueur ([snippets](https://developers.google.com/search/docs/appearance/snippet)) |
+| liens externes sans nofollow | un lien ordinaire n'a besoin d'aucun attribut rel ([qualify outbound links](https://developers.google.com/search/docs/crawling-indexing/qualify-outbound-links)) |
+| attribut lang absent ou invalide | Google n'utilise pas l'attribut lang ([sites multirégionaux](https://developers.google.com/search/docs/specialty/international/managing-multi-regional-sites)) |
+| trop de liens, alt trop long | aucune règle chez Google |
+| ID dupliqués | « the web in general is not valid HTML » (guide de démarrage) |
+| taille du DOM, images sans dimensions ou lourdes | la vitesse et la stabilité se mesurent sur de vraies visites ([Core Web Vitals](https://developers.google.com/search/docs/appearance/core-web-vitals)) |
+| en-têtes HSTS, CSP, X-Content-Type-Options | sécurité, pas classement |
+
+Les descriptions de ces contrôles ne promettent plus d'effet sur Google, et l'IA
+du rapport a pour consigne de ne jamais les présenter comme facteurs de classement.
+
 ## 1.3.3 - 2026-11-11
 
 - Longueur des titres et des descriptions comptée en caractères, plus en octets :

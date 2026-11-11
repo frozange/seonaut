@@ -46,6 +46,7 @@ type Result struct {
 	Site        SiteFacts       `json:"site"`
 	Scores      Scores          `json:"scores"`
 	Issues      []IssueSummary  `json:"issues"`
+	Hygiene     []IssueSummary  `json:"hygiene,omitempty"` // outside Google ranking, see google.go
 	PassedCount int             `json:"passed_count"`
 	KeyPages    []PageFacts     `json:"key_pages"`
 	Priorities  []Priority      `json:"priorities"`

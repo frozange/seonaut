@@ -404,10 +404,10 @@ ERROR_DUPLICATED_TITLE: Pages with duplicated title
 ERROR_DUPLICATED_TITLE_DESC: The title tag is considered one of the most important elements for on-page SEO. If multiple pages have the same title, they will compete for a given search query confusing search engines.
 
 ERROR_LONG_TITLE: Pages with long title
-ERROR_LONG_TITLE_DESC: Long titles won't affect your on-page SEO, but they are usually cut off on search results and tend to get fewer clicks.
+ERROR_LONG_TITLE_DESC: "Google sets no length limit. A long title is truncated to the screen width in results, and Google only advises against verbose titles."
 
 ERROR_SHORT_TITLE: Pages with short title
-ERROR_SHORT_TITLE_DESC: These pages have titles that are too short. Search engines will be happier if you provide longer titles.
+ERROR_SHORT_TITLE_DESC: "Google sets no title length. It asks for a title that describes the page precisely: \"Home\" or \"Blog\" alone does not tell the page apart from the others."
 
 ERROR_EMPTY_TITLE: Pages with missing title
 ERROR_EMPTY_TITLE_DESC: Page titles help search engines understand what a page is about and are often shown in search results. Without a title, your page may rank lower, get overlooked by users, and appear unprofessional or incomplete.
@@ -425,13 +425,13 @@ ERROR_DUPLICATED_DESCRIPTION: Pages with duplicated meta description
 ERROR_DUPLICATED_DESCRIPTION_DESC: It is recomended to have unique descriptions for each page so search engines can understand better your page.
 
 ERROR_LITTLE_CONTENT: Pages with little content
-ERROR_LITTLE_CONTENT_DESC: Pages with little content are not really useful for users or search engines, consider adding more content to your pages.
+ERROR_LITTLE_CONTENT_DESC: "Google states that content length alone does not matter for ranking. This only flags short pages, to be reread to check they answer the visitor's question."
 
 ERROR_IMAGES_NO_ALT: Pages containing images with no alt attribute
 ERROR_IMAGES_NO_ALT_DESC: The image alt attribute improves your site's accessibility, it also helps search engines understand better your images.
 
 ERROR_NO_H1: Pages missing the H1 heading
-ERROR_NO_H1_DESC: The H1 tag describes the main topic of the page, without it both your users and search engine will find it harder to figure what the page is talking about.
+ERROR_NO_H1_DESC: "Google requires neither an H1 nor a number of headings. A visible main heading mostly helps visitors and screen readers grasp the topic of the page."
 
 ERROR_NO_LANG: Pages missing the language attribute
 ERROR_NO_LANG_DESC: The language attribute is particularly usefull for screen readers and it's recommended to use it. Some search engines use it to show the appropriate page to the users depending on their language, but it does not affect your search engine ranking.
@@ -443,19 +443,19 @@ ERROR_HREFLANG_RETURN: Pages missing the hreflang
 ERROR_HREFLANG_RETURN_DESC: When referencing a page with hreflang, that page must reference back with a hreflang tag too. Without this two-way reference, search engines may ignore the hreflang annotations, leading to incorrect language versions being shown in search results.
 
 ERROR_TOO_MANY_LINKS: Pages with too many Links
-ERROR_TOO_MANY_LINKS_DESC: The SEO link juice is divided between all the links in the page, the more links in a page the less amount of juice is passed to them. Make sure all links are relevant, remove the ones that aren't or use the nofollow attribute.
+ERROR_TOO_MANY_LINKS_DESC: "Google sets no maximum number of links per page. A page crowded with links can still bother visitors: check that each one is useful."
 
 ERROR_INTERNAL_NOFOLLOW: Internal nofollow links
 ERROR_INTERNAL_NOFOLLOW_DESC: Internal links in general should not use the nofollow attribute unless they link to pages you don't want indexed by search engines. Review the internal links and make sure important pages are linked without the nofollow attribute.
 
 ERROR_EXTERNAL_WITHOUT_NOFOLLOW: Pages with external follow links
-ERROR_EXTERNAL_WITHOUT_NOFOLLOW_DESC: Follow links will pass SEO authority to external sites. You may want to keep an eye on it to avoid link spam in comments and user generated content.
+ERROR_EXTERNAL_WITHOUT_NOFOLLOW_DESC: "According to Google, an ordinary link to another site needs no rel attribute. Only paid links (sponsored), user-generated links (ugc) and links you do not vouch for (nofollow) need qualifying."
 
 ERROR_CANONICALIZED_NON_CANONICAL: Canonicalized to non canonical
 ERROR_CANONICALIZED_NON_CANONICAL_DESC: Pages canonicalized to a non canonical URL. Canonicalized pages should point to a canonical page, replace the canonical link URL in this pages so they point to a canonical one.
 
-ERROR_NOT_VALID_HEADINGS: Pages without valid headings order
-ERROR_NOT_VALID_HEADINGS_DESC: The heading tags in this pages don't follow the correct order. Headings should start with an H1 and follow a clear hierarchy (H2, H3, etc.). Proper structure helps search engines understand your content and improves accessibility for screen readers.
+ERROR_NOT_VALID_HEADINGS: "Pages that skip a heading level"
+ERROR_NOT_VALID_HEADINGS_DESC: "These pages go for example from an H2 to an H4. Google's SEO Starter Guide states that heading order does not matter for Search. A continuous order helps screen reader users navigate the page."
 
 ERROR_HREFLANG_TO_NON_CANONICAL: Hreflang to non canonical page
 ERROR_HREFLANG_TO_NON_CANONICAL_DESC: Hreflang tags tell search engines where to find content in specific languages, linking hreflang tags to non canonical pages confuses search engines.
@@ -720,6 +720,8 @@ AUDIT_TECHNICAL_HELP: "Issues measured on the %1% crawled pages. %2% other check
 AUDIT_CRITICAL: Critical
 AUDIT_ALERTS: Alerts
 AUDIT_WARNINGS: Warnings
+AUDIT_HYGIENE: "Outside Google ranking"
+AUDIT_HYGIENE_HELP: "These findings do not weigh on the score: Google's documentation says it does not use them to rank pages, or sets no rule about them. They still matter for accessibility, security or speed."
 AUDIT_METHOD: Method
 AUDIT_METHOD_CRAWL: "The crawler followed the links of the site from its home page and its sitemap, and read %1% pages, like a search engine robot. It respects robots.txt."
 AUDIT_METHOD_SAMPLE: "The site has more pages than the %1% read for this free audit. Technical figures cover the pages read, not the whole site."

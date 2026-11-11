@@ -177,6 +177,10 @@
 		<details><summary>{{ trans .Type }}<span class="count">{{ if eq .Pages 1 }}{{ trans "AUDIT_PAGE_AFFECTED_ONE" }}{{ else }}{{ trans "AUDIT_PAGES_AFFECTED" .Pages }}{{ end }}</span></summary>
 			<p class="small">{{ trans (print .Type "_DESC") }}</p><ul>{{ range .Examples }}<li>{{ . }}</li>{{ end }}</ul></details>
 		{{ end }}{{ end }}
+		{{ if .Hygiene }}<h3>{{ trans "AUDIT_HYGIENE" }}</h3><p class="small">{{ trans "AUDIT_HYGIENE_HELP" }}</p>{{ range .Hygiene }}
+		<details><summary>{{ trans .Type }}<span class="count">{{ if eq .Pages 1 }}{{ trans "AUDIT_PAGE_AFFECTED_ONE" }}{{ else }}{{ trans "AUDIT_PAGES_AFFECTED" .Pages }}{{ end }}</span></summary>
+			<p class="small">{{ trans (print .Type "_DESC") }}</p><ul>{{ range .Examples }}<li>{{ . }}</li>{{ end }}</ul></details>
+		{{ end }}{{ end }}
 	</div></section>
 
 	<section><div class="wrap">

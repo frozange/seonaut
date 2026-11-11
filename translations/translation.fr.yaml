@@ -404,10 +404,10 @@ ERROR_DUPLICATED_TITLE: Pages avec une balise title dupliquée
 ERROR_DUPLICATED_TITLE_DESC: La balise title est l'un des éléments les plus importants du SEO on-page. Si plusieurs pages ont le même title, elles se concurrencent sur une même requête et brouillent la compréhension des moteurs de recherche.
 
 ERROR_LONG_TITLE: Pages avec une balise title trop longue
-ERROR_LONG_TITLE_DESC: Un title trop long ne nuit pas à votre SEO on-page, mais il est souvent tronqué dans les résultats de recherche et génère généralement moins de clics.
+ERROR_LONG_TITLE_DESC: "Google ne fixe aucune limite de longueur. Un title long est tronqué à la largeur de l'écran dans les résultats, Google conseille seulement d'éviter le verbiage."
 
 ERROR_SHORT_TITLE: Pages avec une balise title trop courte
-ERROR_SHORT_TITLE_DESC: Le title de ces pages est trop court. Les moteurs de recherche apprécieront des title plus complets.
+ERROR_SHORT_TITLE_DESC: "Google ne fixe aucune longueur de title. Il demande un title qui décrit précisément la page : « Accueil » ou « Blog » seul ne distingue pas la page des autres."
 
 ERROR_EMPTY_TITLE: Pages sans balise title
 ERROR_EMPTY_TITLE_DESC: La balise title aide les moteurs de recherche à comprendre le sujet d'une page et s'affiche souvent dans les résultats. Sans title, votre page peut être moins bien classée, passer inaperçue et paraître peu professionnelle ou inachevée.
@@ -425,13 +425,13 @@ ERROR_DUPLICATED_DESCRIPTION: Pages avec une meta description dupliquée
 ERROR_DUPLICATED_DESCRIPTION_DESC: Il est recommandé de rédiger une description unique pour chaque page afin que les moteurs de recherche comprennent mieux votre contenu.
 
 ERROR_LITTLE_CONTENT: Pages avec peu de contenu
-ERROR_LITTLE_CONTENT_DESC: Les pages avec peu de contenu apportent peu aux internautes comme aux moteurs de recherche. Pensez à enrichir ces pages.
+ERROR_LITTLE_CONTENT_DESC: "Google indique que la longueur d'un texte ne compte pas pour le classement. Ce relevé signale seulement des pages courtes, à relire pour vérifier qu'elles répondent à la question du visiteur."
 
 ERROR_IMAGES_NO_ALT: Pages contenant des images sans attribut alt
 ERROR_IMAGES_NO_ALT_DESC: Le texte alternatif (attribut alt) améliore l'accessibilité de votre site et aide les moteurs de recherche à mieux comprendre vos images.
 
 ERROR_NO_H1: Pages sans balise H1
-ERROR_NO_H1_DESC: La balise H1 décrit le sujet principal de la page. Sans elle, vos visiteurs comme les moteurs de recherche auront plus de mal à comprendre de quoi parle la page.
+ERROR_NO_H1_DESC: "Google n'impose ni H1 ni nombre de titres. Un titre principal visible aide surtout le visiteur et les lecteurs d'écran à saisir le sujet de la page."
 
 ERROR_NO_LANG: Pages sans attribut de langue
 ERROR_NO_LANG_DESC: L'attribut de langue est particulièrement utile aux lecteurs d'écran et son usage est recommandé. Certains moteurs de recherche s'en servent pour proposer la bonne page selon la langue de l'internaute, mais il n'influence pas votre classement.
@@ -443,19 +443,19 @@ ERROR_HREFLANG_RETURN: Pages sans hreflang de retour
 ERROR_HREFLANG_RETURN_DESC: Quand une page en référence une autre avec hreflang, celle-ci doit à son tour la référencer avec une balise hreflang. Sans cette réciprocité, les moteurs de recherche peuvent ignorer les annotations hreflang et afficher la mauvaise version linguistique dans les résultats.
 
 ERROR_TOO_MANY_LINKS: Pages avec trop de liens
-ERROR_TOO_MANY_LINKS_DESC: Le jus SEO (link juice) se répartit entre tous les liens de la page, donc plus il y a de liens, moins chacun en reçoit. Vérifiez que tous les liens sont pertinents, supprimez les autres ou utilisez l'attribut nofollow.
+ERROR_TOO_MANY_LINKS_DESC: "Google ne fixe pas de nombre maximal de liens par page. Une page très chargée en liens peut en revanche gêner le visiteur : vérifiez que chacun sert."
 
 ERROR_INTERNAL_NOFOLLOW: Liens internes nofollow
 ERROR_INTERNAL_NOFOLLOW_DESC: En règle générale, les liens internes ne doivent pas utiliser l'attribut nofollow, sauf s'ils pointent vers des pages que vous ne souhaitez pas voir indexées. Passez en revue vos liens internes et assurez-vous que les pages importantes sont liées sans nofollow.
 
 ERROR_EXTERNAL_WITHOUT_NOFOLLOW: Pages avec des liens externes follow
-ERROR_EXTERNAL_WITHOUT_NOFOLLOW_DESC: Les liens follow transmettent de l'autorité SEO aux sites externes. Gardez un œil dessus pour éviter le spam de liens dans les commentaires et les contenus générés par les utilisateurs.
+ERROR_EXTERNAL_WITHOUT_NOFOLLOW_DESC: "Un lien ordinaire vers un autre site n'a besoin d'aucun attribut rel, selon Google. Seuls les liens payants (sponsored), les liens laissés par les internautes (ugc) et ceux que vous ne cautionnez pas (nofollow) doivent être qualifiés."
 
 ERROR_CANONICALIZED_NON_CANONICAL: Canonicalisées vers une URL non canonique
 ERROR_CANONICALIZED_NON_CANONICAL_DESC: Pages dont la balise canonical pointe vers une URL non canonique. Une page canonicalisée doit pointer vers une page canonique, remplacez donc l'URL canonical de ces pages pour qu'elle cible une URL canonique.
 
-ERROR_NOT_VALID_HEADINGS: Pages dont la hiérarchie des titres est invalide
-ERROR_NOT_VALID_HEADINGS_DESC: Les balises de titre de ces pages ne respectent pas le bon ordre. La structure doit commencer par un H1 puis suivre une hiérarchie claire (H2, H3, etc.). Une structure propre aide les moteurs de recherche à comprendre votre contenu et améliore l'accessibilité pour les lecteurs d'écran.
+ERROR_NOT_VALID_HEADINGS: "Pages qui sautent un niveau de titre"
+ERROR_NOT_VALID_HEADINGS_DESC: "Ces pages passent par exemple d'un H2 à un H4. Google indique dans son guide de démarrage SEO que l'ordre des titres ne compte pas pour la recherche. Un ordre continu aide en revanche les lecteurs d'écran à parcourir la page."
 
 ERROR_HREFLANG_TO_NON_CANONICAL: Hreflang vers une page non canonique
 ERROR_HREFLANG_TO_NON_CANONICAL_DESC: Les balises hreflang indiquent aux moteurs de recherche où trouver le contenu dans une langue donnée. Les faire pointer vers des pages non canoniques brouille leur compréhension.
@@ -720,6 +720,8 @@ AUDIT_TECHNICAL_HELP: "Problèmes mesurés sur les %1% pages explorées. %2% aut
 AUDIT_CRITICAL: Critique
 AUDIT_ALERTS: Alertes
 AUDIT_WARNINGS: Avertissements
+AUDIT_HYGIENE: "Hors classement Google"
+AUDIT_HYGIENE_HELP: "Ces relevés ne pèsent pas sur la note : Google indique dans sa documentation qu'il ne s'en sert pas pour classer les pages, ou n'y fixe aucune règle. Ils restent utiles pour l'accessibilité, la sécurité ou la vitesse."
 AUDIT_METHOD: Méthode
 AUDIT_METHOD_CRAWL: "Le robot a suivi les liens du site depuis sa page d'accueil et son sitemap, et a lu %1% pages comme le ferait celui d'un moteur de recherche. Il respecte le fichier robots.txt."
 AUDIT_METHOD_SAMPLE: "Le site compte plus de pages que les %1% lues pour cet audit gratuit. Les chiffres techniques portent sur les pages lues, pas sur tout le site."

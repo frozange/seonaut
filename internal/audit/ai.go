@@ -131,6 +131,9 @@ const styleRules = `Writing rules for every text you produce:
 - In French: a space before ":" ";" "!" "?", the guillemets « », accents always present, no English calques.
 - The reader never sees the evidence pack: never write "pack", "evidence", "dossier de preuves" or ids like E1 in the text.
   Say "in the pages we read" or "not visible in the pages read" instead.
+- Google's documentation is the only authority on ranking. Never present as a Google ranking factor: the order or number of headings,
+  the length of a text, a title or a description, nofollow on ordinary external links, the number of links, the lang attribute,
+  keywords in the URL or in meta keywords, E-E-A-T.
 - Never invent a figure, a statistic, a name or a fact. If something is missing from the evidence, say it is not verified.
 - Never use these phrases: %s`
 

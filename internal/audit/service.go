@@ -263,10 +263,12 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64) (*Result
 		cancel()
 	}
 
+	issues, hygiene := SplitByGoogle(issues)
 	res := &Result{
 		GeneratedAt: time.Now().UTC(),
 		Site:        facts,
 		Issues:      issues,
+		Hygiene:     hygiene,
 		PassedCount: passed,
 		KeyPages:    pages,
 	}

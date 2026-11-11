@@ -127,6 +127,7 @@ type reportView struct {
 	Critical    []audit.IssueSummary
 	Alerts      []audit.IssueSummary
 	Warnings    []audit.IssueSummary
+	Hygiene     []audit.IssueSummary
 	HasAI       bool
 	ContactURL  string
 	SampleNote  bool
@@ -192,6 +193,7 @@ func newReportView(a *audit.Audit, lang string) *reportView {
 			v.Warnings = append(v.Warnings, is)
 		}
 	}
+	v.Hygiene = res.Hygiene
 	if res.AI != nil {
 		for _, c := range res.AI.Criteria {
 			if c.Group == "copywriting" {
