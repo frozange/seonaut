@@ -3,6 +3,14 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.4.2 - 2026-11-11
+
+- La consigne de l'IA rangeait E-E-A-T parmi les idées reçues. Google dit que
+  E-E-A-T n'est pas un facteur de classement en soi, mais que ses systèmes
+  cherchent ces qualités à travers un ensemble de signaux ([helpful
+  content](https://developers.google.com/search/docs/fundamentals/creating-helpful-content)) :
+  la consigne le décrit désormais ainsi.
+
 ## 1.4.1 - 2026-11-11
 
 Le rapport de lafactory.com affirmait trois choses fausses, toutes nées de la
