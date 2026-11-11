@@ -255,7 +255,7 @@ func extractText(doc *html.Node) (string, []string) {
 	var walk func(n *html.Node)
 	walk = func(n *html.Node) {
 		if n.Type == html.ElementNode {
-			if skipText[n.Data] {
+			if skipText[n.Data] || unseen(n) {
 				return
 			}
 			if len(n.Data) == 2 && n.Data[0] == 'h' && n.Data[1] >= '1' && n.Data[1] <= '4' {
@@ -279,10 +279,33 @@ func extractText(doc *html.Node) (string, []string) {
 	return strings.Join(strings.Fields(b.String()), " "), headings
 }
 
+// codeElements hold code or markup, never text a visitor reads.
+var codeElements = map[string]bool{"script": true, "style": true, "noscript": true, "template": true, "svg": true}
+
+// unseen reports an element whose text a visitor does not read as page text:
+// code, or a copy kept hidden (inactive tab panels, aria-hidden duplicates).
+func unseen(n *html.Node) bool {
+	if n.Type != html.ElementNode {
+		return false
+	}
+	if codeElements[n.Data] {
+		return true
+	}
+	for _, a := range n.Attr {
+		if a.Key == "hidden" || (a.Key == "aria-hidden" && a.Val == "true") {
+			return true
+		}
+	}
+	return false
+}
+
 func nodeText(n *html.Node) string {
 	var b strings.Builder
 	var walk func(*html.Node)
 	walk = func(n *html.Node) {
+		if unseen(n) {
+			return
+		}
 		if n.Type == html.TextNode {
 			b.WriteString(n.Data)
 			b.WriteByte(' ')

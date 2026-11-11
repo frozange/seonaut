@@ -135,12 +135,15 @@ func isHTML(p *models.PageReport) bool {
 }
 
 // Count number of words in an HTML node
+// nonText elements hold code, never words a visitor reads.
+var nonText = map[string]bool{"script": true, "style": true, "noscript": true, "template": true}
+
 func countWords(n *html.Node) int {
 	var output func(*bytes.Buffer, *html.Node)
 	output = func(buf *bytes.Buffer, n *html.Node) {
 		switch n.Type {
 		case html.TextNode:
-			if n.Parent.Type == html.ElementNode && n.Parent.Data != "script" {
+			if n.Parent.Type == html.ElementNode && !nonText[n.Parent.Data] {
 				buf.WriteString(fmt.Sprintf("%s ", n.Data))
 			}
 			return

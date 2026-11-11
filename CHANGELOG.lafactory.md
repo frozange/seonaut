@@ -3,6 +3,21 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.4.1 - 2026-11-11
+
+Le rapport de lafactory.com affirmait trois choses fausses, toutes nées de la
+lecture des pages par SEOnaut, pas du site :
+
+- « Du code apparaît dans le texte du pied de page » : le texte du pied de page
+  reprenait le contenu des balises `<style>` et `<script>` (la feuille de style du
+  bouton WhatsApp), qu'aucun navigateur n'affiche.
+- « La FAQ pèse près de 39 000 mots » : le compteur de mots d'origine comptait le
+  CSS des balises `<style>`. Il ignore désormais `style`, `noscript` et `template`
+  comme il ignorait déjà `script`.
+- « Case Studies répète chaque titre deux fois » : les copies des onglets inactifs,
+  marquées `hidden`, étaient lues comme du texte visible. Les éléments `hidden` ou
+  `aria-hidden="true"` ne sont plus lus.
+
 ## 1.4.0 - 2026-11-11
 
 La note technique ne compte plus que ce que Google dit utiliser. Les contrôles

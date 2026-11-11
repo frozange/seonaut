@@ -252,6 +252,27 @@ func TestExtractChrome(t *testing.T) {
 	}
 }
 
+func TestFooterSkipsCode(t *testing.T) {
+	doc, _ := html.Parse(strings.NewReader(`<html><body><footer>Legal notice
+		<style>.whatsapp-float { position: fixed; }</style><script>var a = 1;</script>
+		<svg><title>icon</title></svg> Privacy policy</footer></body></html>`))
+	footer, _, _ := extractChrome(doc)
+	if footer != "Legal notice Privacy policy" {
+		t.Errorf("footer = %q", footer)
+	}
+}
+
+func TestTextSkipsHiddenCopies(t *testing.T) {
+	doc, _ := html.Parse(strings.NewReader(`<html><body><main>
+		<section><h2>World Expo 2020</h2></section>
+		<section hidden><h2>World Expo 2020</h2></section>
+		<div aria-hidden="true">Copy</div><p>Read the case study</p></main></body></html>`))
+	text, headings := extractText(doc)
+	if strings.Join(headings, "|") != "H2 World Expo 2020" || text != "World Expo 2020 Read the case study" {
+		t.Errorf("text = %q, headings = %v", text, headings)
+	}
+}
+
 func TestCleanRefs(t *testing.T) {
 	cases := map[string]string{
 		"The title is short (E3).":        "The title is short.",
