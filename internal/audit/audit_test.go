@@ -311,3 +311,17 @@ func TestLeftoversAtStartup(t *testing.T) {
 		t.Errorf("a runner that cannot list leftovers removes nothing, got %v", got)
 	}
 }
+
+func TestSlug(t *testing.T) {
+	for in, want := range map[string]string{
+		"https://sel-tech.fr/":          "sel-tech-fr",
+		"https://lafactory.com/":        "lafactory-com",
+		"https://WWW.Example.co.uk/a/b": "www-example-co-uk",
+		"http://host.test:8080/":        "host-test-8080",
+		"https://xn--caf-dma.fr/":       "xn-caf-dma-fr",
+	} {
+		if got := Slug(in); got != want {
+			t.Errorf("Slug(%q) = %q, want %q", in, got, want)
+		}
+	}
+}

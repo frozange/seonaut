@@ -6,6 +6,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"net/url"
+	"regexp"
+	"strings"
 	"time"
 )
 
@@ -72,6 +75,75 @@ func (s *Store) ByToken(token string) (*Audit, error) {
 		return nil, ErrNotFound
 	}
 	return scanAudit(s.DB.QueryRow(selectAudit+` WHERE token = ?`, token))
+}
+
+var (
+	slugInvalid = regexp.MustCompile(`[^a-z0-9]+`)
+	slugValid   = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
+)
+
+// Slug is the public name of a site's report: its host, lowercase, every run
+// of other characters (dots, port colon) turned into one hyphen, e.g.
+// "sel-tech.fr" gives "sel-tech-fr".
+func Slug(siteURL string) string {
+	host := siteURL
+	if u, err := url.Parse(siteURL); err == nil && u.Host != "" {
+		host = u.Host
+	}
+	return strings.Trim(slugInvalid.ReplaceAllString(strings.ToLower(host), "-"), "-")
+}
+
+// BySlug returns the most recent finished audit of the site with this slug,
+// or the most recent one of any state when none has finished yet.
+func (s *Store) BySlug(slug string) (*Audit, error) {
+	if len(slug) > 253 || !slugValid.MatchString(slug) {
+		return nil, ErrNotFound
+	}
+	rows, err := s.DB.Query(`SELECT id, url, status FROM audits ORDER BY id DESC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var done, any int64
+	for rows.Next() {
+		var id int64
+		var u, st string
+		if err := rows.Scan(&id, &u, &st); err != nil {
+			return nil, err
+		}
+		if Slug(u) != slug {
+			continue
+		}
+		if any == 0 {
+			any = id
+		}
+		if Status(st) == StatusDone {
+			done = id
+			break
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	id := done
+	if id == 0 {
+		id = any
+	}
+	if id == 0 {
+		return nil, ErrNotFound
+	}
+	return scanAudit(s.DB.QueryRow(selectAudit+` WHERE id = ?`, id))
+}
+
+// ByKey finds an audit by its token (old links) or by its site slug.
+func (s *Store) ByKey(key string) (*Audit, error) {
+	if len(key) == 43 {
+		a, err := s.ByToken(key)
+		if !errors.Is(err, ErrNotFound) {
+			return a, err
+		}
+	}
+	return s.BySlug(key)
 }
 
 // NextQueued returns the oldest queued audit, or ErrNotFound.

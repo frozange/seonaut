@@ -3,6 +3,23 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.6.0 - 2026-11-24
+
+Les adresses de rapport portent le nom du site : le jeton de 43 caractères
+faisait bloquer le lien par Cloudflare chez des visiteurs.
+
+- `audit.Slug` : l'hôte du site audité en minuscules, chaque suite de points ou
+  d'autres signes changée en un tiret (`sel-tech.fr` donne `sel-tech-fr`). Pas de
+  colonne en base : le nom se calcule à partir de l'adresse du site.
+- Un nom de site désigne l'audit terminé le plus récent de ce site (le plus
+  récent tout court quand aucun n'est terminé).
+- `[audit] report_url` accepte `{slug}` en plus de `{token}`. E-mails, formulaire
+  et anciennes adresses `/rapport/<jeton>` mènent à l'adresse au nom du site.
+- `GET /rapport/<jeton ou nom>/fragment` accepte les deux et renvoie le nom
+  canonique dans l'en-tête `X-LF-Audit-Slug`, pour que la page du site redirige
+  les anciens liens. `auditctl status` accepte aussi le nom.
+- `VERSION` était resté à 1.4.2 en 1.5.0 ; il suit de nouveau ce journal.
+
 ## 1.5.0 - 2026-11-24
 
 Le rapport d'audit s'affiche dans lafactory.com, comme une page du site, et sa

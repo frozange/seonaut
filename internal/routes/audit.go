@@ -88,9 +88,9 @@ func (h *auditHandler) requestHandler(w http.ResponseWriter, r *http.Request) {
 
 // reportHandler shows the report, or a waiting page that refreshes itself. When
 // the report lives on the main site (report_url), the visitor is sent there:
-// links already mailed keep working.
+// links already mailed keep working. The token or the site slug both find it.
 func (h *auditHandler) reportHandler(w http.ResponseWriter, r *http.Request) {
-	a, err := h.AuditService.Store.ByToken(r.PathValue("token"))
+	a, err := h.AuditService.Store.ByKey(r.PathValue("token"))
 	if err != nil {
 		h.renderAudit(w, "audit_status", "AUDIT_PAGE_TITLE", http.StatusNotFound, &auditStatusView{NotFound: true})
 		return
@@ -110,16 +110,18 @@ func (h *auditHandler) reportHandler(w http.ResponseWriter, r *http.Request) {
 // fragmentHandler returns the report, or its waiting state, as an HTML fragment
 // for the page of the main site that frames it: no html, head or body, styles
 // scoped under .lfr, every crawled or AI text escaped by html/template. Headers
-// tell the framing page the state and the audited host.
+// tell the framing page the state, the audited host and the canonical slug, so
+// a page asked by an old token can redirect to the slug address.
 func (h *auditHandler) fragmentHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
-	a, err := h.AuditService.Store.ByToken(r.PathValue("token"))
+	a, err := h.AuditService.Store.ByKey(r.PathValue("token"))
 	if err != nil {
 		w.Header().Set("X-LF-Audit-Status", "notfound")
 		h.renderAudit(w, "audit_fragment", "AUDIT_PAGE_TITLE", http.StatusNotFound, &fragmentView{Status: &auditStatusView{NotFound: true}})
 		return
 	}
 	w.Header().Set("X-LF-Audit-Host", hostOf(a.URL))
+	w.Header().Set("X-LF-Audit-Slug", audit.Slug(a.URL))
 	if a.Status != audit.StatusDone || a.Result == nil {
 		w.Header().Set("X-LF-Audit-Status", string(a.Status))
 		h.renderAudit(w, "audit_fragment", "AUDIT_PAGE_TITLE", http.StatusOK, &fragmentView{Status: newStatusView(a)})

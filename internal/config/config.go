@@ -132,8 +132,9 @@ type AuditConfig struct {
 	BotEmail     string `mapstructure:"bot_email"`
 
 	// ReportURL is the public address of a report when a page of the main site
-	// frames it, with {token} in place of the token, e.g.
-	// "https://lafactory.com/fr/audit/rapport/{token}/". Empty: reports are served
+	// frames it, with {slug} in place of the site slug (see audit.Slug) or
+	// {token} in place of the token, e.g.
+	// "https://lafactory.com/fr/audit/rapport/{slug}/". Empty: reports are served
 	// here, at /rapport/{token}.
 	ReportURL string `mapstructure:"report_url"`
 

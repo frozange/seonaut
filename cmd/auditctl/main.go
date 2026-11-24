@@ -5,7 +5,7 @@
 // account that runs SEOnaut can use it.
 //
 //	auditctl -c config [-fresh] request <site URL> <e-mail>
-//	auditctl -c config status <token>
+//	auditctl -c config status <token or slug>
 //
 // -fresh crawls again even when a report of the same site is recent enough to
 // be reused (the form always reuses it).
@@ -28,7 +28,7 @@ import (
 )
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: auditctl -c config [-fresh] request <site URL> <e-mail>\n       auditctl -c config status <token>")
+	fmt.Fprintln(os.Stderr, "usage: auditctl -c config [-fresh] request <site URL> <e-mail>\n       auditctl -c config status <token or slug>")
 	os.Exit(2)
 }
 
@@ -89,7 +89,7 @@ func main() {
 		}
 		fmt.Printf("audit %d %s\nstatus: %s\nreport: %s\n", a.ID, a.URL, a.Status, svc.ReportURL(a))
 	case "status":
-		a, err := svc.Store.ByToken(args[1])
+		a, err := svc.Store.ByKey(args[1])
 		if errors.Is(err, audit.ErrNotFound) {
 			log.Fatal("no audit with this token")
 		}
