@@ -316,6 +316,7 @@ func TestStoreUpdate(t *testing.T) {
 		t.Fatalf("empty store: %v", err)
 	}
 	// An error status at discovery pauses the store.
+	s.Retries = -1
 	srv.fail.Store(503)
 	if out, err := s.Update(context.Background(), now.Add(time.Hour)); out != Backoff || err != nil {
 		t.Fatalf("503: %v %v", out, err)
@@ -385,5 +386,29 @@ func TestLock(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		u()
+	}
+}
+
+func TestRetryWithinSlot(t *testing.T) {
+	data := bytes.Repeat([]byte("x"), 1<<16)
+	srv := &fileServer{files: map[string][]byte{"/f.gz": data}, etag: `"v1"`}
+	ts := httptest.NewServer(srv)
+	defer ts.Close()
+	var logs []string
+	s := &Store{Fetcher: &Fetcher{}, RetryWait: 10 * time.Millisecond, Log: func(f string, a ...interface{}) { logs = append(logs, fmt.Sprintf(f, a...)) }}
+	dest := filepath.Join(t.TempDir(), "f.gz")
+	srv.fail.Store(503)
+	if err := s.fetchWithRetries(context.Background(), ts.URL+"/f.gz", dest, time.Now().Add(time.Minute)); err != nil {
+		t.Fatalf("one refusal then success: %v", err)
+	}
+	if len(logs) != 1 || !strings.Contains(logs[0], "trying again") {
+		t.Fatalf("logs = %v", logs)
+	}
+	// No time left in the slot for a new try: the refusal is returned at once.
+	dest2 := filepath.Join(t.TempDir(), "f.gz")
+	srv.fail.Store(503)
+	s.RetryWait = time.Hour
+	if err := s.fetchWithRetries(context.Background(), ts.URL+"/f.gz", dest2, time.Now().Add(time.Minute)); !errors.Is(err, ErrBackoff) {
+		t.Fatalf("no time to retry: %v", err)
 	}
 }

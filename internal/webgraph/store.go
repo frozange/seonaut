@@ -27,6 +27,8 @@ type Store struct {
 	CheckEvery time.Duration // between two looks for a new release; default 24 h
 	Pause      time.Duration // between two HEAD requests; default 2 s
 	BackoffFor time.Duration // after an error status; default 45 min, so the next hourly slot tries again
+	Retries    int           // new tries of a file within the slot after an error status; default 2, negative: none
+	RetryWait  time.Duration // between two tries; default 1 min
 	Now        func() time.Time
 	Log        func(format string, args ...interface{})
 }
@@ -254,7 +256,7 @@ func (s *Store) Update(ctx context.Context, deadline time.Time) (Outcome, error)
 			if !time.Now().Before(deadline) {
 				return More, nil
 			}
-			err := s.Fetcher.Fetch(ctx, FileURL(name, f), filepath.Join(dl, f+".txt.gz"), deadline)
+			err := s.fetchWithRetries(ctx, FileURL(name, f), filepath.Join(dl, f+".txt.gz"), deadline)
 			switch {
 			case errors.Is(err, ErrDeadline):
 				return More, nil
@@ -272,6 +274,31 @@ func (s *Store) Update(ctx context.Context, deadline time.Time) (Outcome, error)
 	}
 	s.prune(st)
 	return Idle, nil
+}
+
+// fetchWithRetries tries a file again, a minute later, when the server
+// answers with an error status (Common Crawl's "503 SlowDown" comes and goes),
+// as long as the slot allows; the caller pauses after the last refusal.
+func (s *Store) fetchWithRetries(ctx context.Context, url, dest string, deadline time.Time) error {
+	retries, wait := s.Retries, s.RetryWait
+	if retries == 0 {
+		retries = 2
+	}
+	if wait == 0 {
+		wait = time.Minute
+	}
+	for try := 0; ; try++ {
+		err := s.Fetcher.Fetch(ctx, url, dest, deadline)
+		if !errors.Is(err, ErrBackoff) || try >= retries || !time.Now().Add(wait).Before(deadline) {
+			return err
+		}
+		s.logf("trying again in %s: %v", wait, err)
+		select {
+		case <-ctx.Done():
+			return err
+		case <-time.After(wait):
+		}
+	}
 }
 
 func (s *Store) build(name string) error {

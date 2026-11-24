@@ -3,6 +3,13 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.8.2 - 2026-11-24
+
+- Graphe Common Crawl : un refus du serveur (« 503 SlowDown », revenu deux fois
+  le soir du premier téléchargement) est retenté deux fois, à une minute
+  d'intervalle, dans la même fenêtre, avant la pause de 45 min. Avant, un seul
+  refus faisait perdre la fenêtre de l'heure.
+
 ## 1.8.1 - 2026-11-24
 
 - Popularité : la seconde carte de chaque rangée n'est plus décalée de 20 px
