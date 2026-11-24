@@ -5,10 +5,11 @@ import (
 	"sort"
 )
 
-// Link Score: PageRank over the internal link graph on a 0 to 100 log scale,
-// ported from LibreCrawl (src/core/crawl_analysis.py _link_score, MIT, see
-// THIRD_PARTY_NOTICES). The home page usually reads 100; a page few others
-// link to reads close to 0.
+// Ease of access: PageRank over the internal link graph on a 0 to 100 log
+// scale, ported from LibreCrawl (src/core/crawl_analysis.py _link_score, MIT,
+// see THIRD_PARTY_NOTICES). It tells how easily visitors and Google's crawler,
+// which finds pages by following links, reach a page; it is not a score Google
+// uses. The home page usually reads 100, a page few others link to close to 0.
 const (
 	linkDamping    = 0.85
 	linkIterations = 40

@@ -86,7 +86,7 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 		"1,8\u00a0s", "134\u00a0ms", "0,31", "bon jusqu&#39;à 2,5\u00a0s", "Note de la simulation", "46", "Réduisez le JavaScript inutilisé", "gain possible : 0,9\u00a0s",
 		"Offre : il manque le prix", "(conseillé par Google)", "Fil d&#39;Ariane : une seule étape", "Commerce ou entreprise locale : format incorrect pour le prix, la note ou un avis",
 		"Recherches écartées (1)", "zzz inconnu", "Google propose plutôt : « zzz connu »", "4,0\u00a0s", "Proposée par Google", "« électrolyseur piscine »", "« pompe piscine prix »",
-		"Pages peu reliées : 9", "/p9 (fiche produit)", "5 clics", "texte commun à 93 %", "Groupes de copies : 1",
+		"Pages peu reliées : 9", "/p9 (fiche produit)", "Les pages les plus faciles à atteindre", "pas une note de Google", "texte commun à 93 %", "Groupes de copies : 1",
 		"sur l&#39;ensemble du site", "Vitesse vécue par vos visiteurs sur téléphone",
 	} {
 		if !strings.Contains(out, s) {
@@ -96,7 +96,7 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 	if strings.Contains(out, "Sur ordinateur") {
 		t.Error("the failed desktop measurement must show no line and no figure")
 	}
-	for _, s := range []string{"concurrence", "même recherche visée"} {
+	for _, s := range []string{"concurrence", "même recherche visée", "4 clics"} {
 		if strings.Contains(out, s) {
 			t.Errorf("pages are never presented as competing: %q", s)
 		}

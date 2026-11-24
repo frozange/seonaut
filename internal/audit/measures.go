@@ -205,15 +205,15 @@ func MeasureEvidence(res *Result, evidence []EvidenceEntry) ([]EvidenceEntry, ma
 	if l := res.Linking; l != nil {
 		top := []string{}
 		for _, p := range l.Top {
-			top = append(top, fmt.Sprintf("%s (link score %d, linked from %d pages)", p.URL, p.Score, p.Inlinks))
+			top = append(top, fmt.Sprintf("%s (ease of access %d/100, linked from %d pages)", p.URL, p.Score, p.Inlinks))
 		}
 		weak := []string{}
 		for _, p := range l.Weak {
 			weak = append(weak, fmt.Sprintf("%s (linked from %d pages)", p.URL, p.Inlinks))
 		}
-		add("linking", "Internal links (link score: internal PageRank, 0 to 100)", map[string]interface{}{
-			"indexable_pages": l.Pages, "pages_most_pushed_by_internal_links": top,
-			"pages_linked_from_one_page_or_none": l.WeakCount, "examples_weakly_linked": weak, "pages_four_clicks_or_more_from_home": l.Deep,
+		add("linking", "Internal links: how easily visitors and Google's crawler reach each page through the site's own links (LaFactory measure on a 0 to 100 scale, not a score Google uses)", map[string]interface{}{
+			"indexable_pages": l.Pages, "pages_easiest_to_reach": top,
+			"pages_linked_from_one_page_or_none": l.WeakCount, "examples_weakly_linked": weak,
 		})
 	}
 	if len(res.Duplicates) > 0 {
@@ -300,7 +300,7 @@ func MeasuredPriorities(res *Result, ev map[string]string) []Priority {
 		out = append(out, Priority{ID: "m:structured", Source: "technical", Level: 2, Title: "AUDIT_PRIO_STRUCTURED", Pages: f.ErrorPages, Evidence: evid("structured")})
 	}
 	if n := duplicatePages(res.Duplicates); n > 0 {
-		out = append(out, Priority{ID: "m:duplicates", Source: "technical", Level: 2, Title: "AUDIT_PRIO_DUPLICATES", Pages: n, Evidence: evid("duplicates")})
+		out = append(out, Priority{ID: "m:duplicates", Source: "technical", Level: 3, Title: "AUDIT_PRIO_DUPLICATES", Pages: n, Evidence: evid("duplicates")})
 	}
 	if l := res.Linking; l != nil && l.WeakCount > 0 && l.Pages > 0 && l.WeakCount*10 >= l.Pages {
 		out = append(out, Priority{ID: "m:linking", Source: "technical", Level: 3, Title: "AUDIT_PRIO_LINKING", Pages: l.WeakCount, Evidence: evid("linking")})

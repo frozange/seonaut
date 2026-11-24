@@ -3,6 +3,26 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.7.3 - 2026-11-24
+
+Les mesures du lot A relues contre la documentation de Google Search Central
+(règle de Francis : un outil SEO qui invente un problème pour vendre sa
+correction n'entre pas dans le rapport).
+
+- Données structurées alignées sur les tableaux « obligatoire / conseillé » des
+  pages de Google : le nom d'une Organization devient conseillé (Google n'y
+  exige rien), l'image n'est plus réclamée à un LocalBusiness (absente de la
+  liste de Google). Le reste (Product, Offer, AggregateOffer, livraison,
+  retours, avis, fil d'Ariane, FAQ) était déjà conforme.
+- Liens internes : présentés comme la facilité avec laquelle visiteurs et robot
+  de Google atteignent une page (Google dit trouver les pages en suivant les
+  liens), « repère de LaFactory, pas une note de Google ». Plus de « donne de
+  l'importance aux yeux de Google » ni de « calcul rendu célèbre par Google ».
+  La ligne « pages à 4 clics ou plus » sort du rapport et du dossier de l'IA :
+  Google ne documente aucune règle de profondeur.
+- Pages copiées : priorité ramenée à « Optimisation » (Google choisit une page
+  parmi des doublons, il ne sanctionne pas).
+
 ## 1.7.2 - 2026-11-24
 
 - **Plus de « pages qui se font concurrence »** (Francis : la cannibalisation est

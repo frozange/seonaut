@@ -334,7 +334,7 @@ func TestMeasuredPriorities(t *testing.T) {
 	for _, x := range p {
 		got[x.ID] = x.Level
 	}
-	want := map[string]int{"m:speed": 2, "m:structured": 2, "m:duplicates": 2, "m:linking": 3}
+	want := map[string]int{"m:speed": 2, "m:structured": 2, "m:duplicates": 3, "m:linking": 3}
 	for k, v := range want {
 		if got[k] != v {
 			t.Errorf("%s: level %d, want %d", k, got[k], v)

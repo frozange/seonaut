@@ -138,3 +138,13 @@ func TestBuildStructuredFamilies(t *testing.T) {
 		t.Errorf("other types %v", r.OtherTypes)
 	}
 }
+
+// Google's Organization documentation has no required property: a missing
+// name is a recommendation, never a blocking error.
+func TestStructuredOrganizationHasNoRequiredField(t *testing.T) {
+	doc := parseDoc(t, `<script type="application/ld+json">{"@type":"Organization","url":"https://ex.com/"}</script>`)
+	got := issueSet(func() []StructuredItem { i, _ := ExtractStructured(doc, "https://ex.com/"); return i }())
+	if !got["Organization name missing warning"] || got["Organization name missing error"] {
+		t.Errorf("%v", got)
+	}
+}

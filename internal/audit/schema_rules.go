@@ -193,9 +193,9 @@ func applyRules(r *ruleCtx) {
 		r.recommended("telephone", nil)
 		r.recommended("url", nil)
 		r.recommended("openingHoursSpecification", nil)
-		r.recommended("image", nil)
 	case organizationTypes[r.typ]:
-		r.required("name", nil)
+		// Google's Organization documentation has no required property.
+		r.recommended("name", nil)
 		if r.isRoot() {
 			r.recommended("url", nil)
 			r.recommended("logo", nil)

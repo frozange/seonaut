@@ -226,8 +226,6 @@ type linkingView struct {
 	Top       []linkRow
 	Weak      []linkRow
 	WeakCount int
-	Deep      int
-	DeepRows  []linkRow
 }
 
 type linkRow struct {
@@ -251,9 +249,9 @@ func newLinkingView(l *audit.LinkingReport) *linkingView {
 	if l == nil {
 		return nil
 	}
-	v := &linkingView{Pages: l.Pages, Top: linkRows(l.Top), Weak: linkRows(l.Weak), WeakCount: l.WeakCount, Deep: l.Deep, DeepRows: linkRows(l.DeepExamples)}
+	v := &linkingView{Pages: l.Pages, Top: linkRows(l.Top), Weak: linkRows(l.Weak), WeakCount: l.WeakCount}
 	switch {
-	case l.WeakCount*10 >= l.Pages || l.Deep*10 >= l.Pages:
+	case l.WeakCount*10 >= l.Pages:
 		v.Class = "mid"
 	default:
 		v.Class = "good"
