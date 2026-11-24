@@ -3,6 +3,23 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.7.1 - 2026-11-24
+
+Corrections vues sur le premier rapport réel en 1.7.0 (sel-tech.fr).
+
+- Une recherche écartée dit ce que Google propose à la place : jusqu'à trois
+  suggestions qui partagent au moins deux mots utiles avec elle (sur sel-tech.fr,
+  4 recherches sur 6 étaient écartées sans autre indication).
+- `auditctl requery <nom ou jeton>` refait la vérification Google Suggest d'un
+  rapport terminé, sans exploration ni appel à l'IA.
+- Vitesse : les durées gardent leur décimale (« 4,0 s », plus « 4 s »), la
+  stabilité deux décimales ; l'aide ne répète plus l'adresse « / » de la page
+  d'accueil ; deux mesures par ligne sur téléphone, cartes alignées en haut.
+- Les listes de pages passent sur une colonne sur téléphone (le gain d'une piste
+  de vitesse ne comprime plus son titre).
+- La ligne « autres types trouvés » (WebPage, WPHeader...) est retirée du
+  rapport : du vocabulaire technique sans action pour le lecteur.
+
 ## 1.7.0 - 2026-11-24
 
 Lot A de l'étude des outils libres (mémoire lafactory, 2026-11-24) : quatre mesures

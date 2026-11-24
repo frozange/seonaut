@@ -14,7 +14,6 @@ import (
 // template only places them; a measurement that failed carries no figure.
 
 type speedView struct {
-	Path    string
 	Mobile  *speedRunView
 	Desktop *speedRunView
 }
@@ -57,11 +56,10 @@ func ratingClass(r string) string {
 	return "low"
 }
 
+// decimal keeps its digits: "4,0 s" next to "bon jusqu'à 2,5 s" reads as a
+// measure, "4 s" as a rounding.
 func decimal(v float64, digits int, lang string) string {
 	s := fmt.Sprintf("%.*f", digits, v)
-	if digits > 0 {
-		s = strings.TrimRight(strings.TrimRight(s, "0"), ".")
-	}
 	if lang == "fr" {
 		s = strings.ReplaceAll(s, ".", ",")
 	}
@@ -76,7 +74,7 @@ func newSpeedView(s *audit.SpeedReport, lang string) *speedView {
 	if s == nil {
 		return nil
 	}
-	return &speedView{Path: pagePath(s.URL), Mobile: newSpeedRunView(s.Mobile, lang), Desktop: newSpeedRunView(s.Desktop, lang)}
+	return &speedView{Mobile: newSpeedRunView(s.Mobile, lang), Desktop: newSpeedRunView(s.Desktop, lang)}
 }
 
 func newSpeedRunView(r *audit.SpeedRun, lang string) *speedRunView {

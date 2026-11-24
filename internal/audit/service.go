@@ -326,6 +326,37 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64, signals 
 	return res, nil
 }
 
+// Requery checks the target searches of a finished report against Google
+// Suggest again, without crawling or calling the AI: for a report made while
+// Suggest did not answer, or before a change of the check.
+func (s *Service) Requery(ctx context.Context, a *Audit) error {
+	res := a.Result
+	if res == nil || res.AI == nil {
+		return errors.New("the report has no AI part, hence no target search")
+	}
+	if s.Suggest == nil {
+		return errors.New("audit.suggest is off")
+	}
+	all := append(append([]TargetQuery{}, res.AI.TargetQueries...), res.AI.DroppedQueries...)
+	for i := range all {
+		all[i].Google, all[i].GoogleVariant, all[i].GoogleRelated = "", "", nil
+	}
+	res.AI.TargetQueries, res.AI.DroppedQueries = all, nil
+	var kept []CompetingPair
+	for _, c := range res.Competing {
+		if c.Reason != "query" {
+			kept = append(kept, c)
+		}
+	}
+	res.Competing = kept
+	u, err := url.Parse(a.URL)
+	if err != nil {
+		return err
+	}
+	s.checkQueries(ctx, res, res.KeyPages, u.Host, nil)
+	return s.Store.SaveResult(a, res)
+}
+
 // checkQueries confronts the AI's target searches with Google Suggest, then
 // pairs the key pages left aiming at the same search.
 func (s *Service) checkQueries(ctx context.Context, res *Result, pages []PageFacts, host string, signals []*PageSignal) {

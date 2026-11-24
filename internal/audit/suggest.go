@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"sort"
 	"strings"
 	"time"
 )
@@ -159,12 +160,61 @@ func (s *Suggester) Check(ctx context.Context, q string) (QueryCheck, error) {
 	words := strings.Fields(q)
 	if res.Status != QueryConfirmed && len(words) >= 3 {
 		if more, err := s.Suggest(ctx, strings.Join(words[:len(words)-1], " ")); err == nil {
-			if r2 := matchSuggestions(q, append(list, more...)); r2.Status == QueryConfirmed || res.Status == QueryUnknown {
+			list = append(list, more...)
+			if r2 := matchSuggestions(q, list); r2.Status == QueryConfirmed || res.Status == QueryUnknown {
 				res = r2
 			}
 		}
 	}
+	if res.Status == QueryUnknown {
+		// What Google proposes instead: searches that share at least two
+		// meaningful words with the guess, from its first two words if needed.
+		res.Related = alternatives(q, list)
+		if len(res.Related) == 0 && len(words) >= 3 {
+			if more, err := s.Suggest(ctx, strings.Join(words[:2], " ")); err == nil {
+				res.Related = alternatives(q, more)
+			}
+		}
+	}
 	return res, nil
+}
+
+// alternatives keeps up to three proposals sharing two meaningful words or
+// more with the search, most shared first.
+func alternatives(q string, suggestions []string) []string {
+	want := map[string]bool{}
+	for _, t := range ContentTokens(q) {
+		want[t] = true
+	}
+	type cand struct {
+		s      string
+		shared int
+	}
+	var list []cand
+	seen := map[string]bool{}
+	for _, s := range suggestions {
+		k := QueryKey(s)
+		if seen[k] {
+			continue
+		}
+		seen[k] = true
+		n, used := 0, map[string]bool{}
+		for _, t := range ContentTokens(s) {
+			if want[t] && !used[t] {
+				used[t] = true
+				n++
+			}
+		}
+		if n >= 2 {
+			list = append(list, cand{s, n})
+		}
+	}
+	sort.SliceStable(list, func(i, j int) bool { return list[i].shared > list[j].shared })
+	var out []string
+	for i := 0; i < len(list) && i < 3; i++ {
+		out = append(out, list[i].s)
+	}
+	return out
 }
 
 // CheckQueries applies Check to the target searches of the AI: searches

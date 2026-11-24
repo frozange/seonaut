@@ -180,6 +180,8 @@ func TestCheckQueriesAgainstSuggest(t *testing.T) {
 			fmt.Fprint(w, `["traitement eau piscine",["traitement eau piscine sel","traitement eau piscine"]]`)
 		case "piscine au sel entretien hiver", "piscine au sel entretien":
 			fmt.Fprint(w, `["x",["piscine au sel entretien hiver facile"]]`)
+		case "étanchéité parking":
+			fmt.Fprint(w, `["x",["étanchéité parking souterrain","étanchéité parking prix","étanchéité toiture"]]`)
 		default:
 			fmt.Fprint(w, `["x",[]]`)
 		}
@@ -194,12 +196,16 @@ func TestCheckQueriesAgainstSuggest(t *testing.T) {
 		{Page: "https://ex.com/", Query: "traitement eau piscine"},
 		{Page: "https://ex.com/a", Query: "piscine au sel entretien hiver"},
 		{Page: "https://ex.com/b", Query: "zzz inconnu du tout"},
+		{Page: "https://ex.com/c", Query: "étanchéité parking sous-sol cuvelage"},
 	})
 	if len(kept) != 2 || kept[0].Google != QueryConfirmed || kept[1].Google != QueryConfirmed {
 		t.Errorf("kept %+v", kept)
 	}
-	if len(dropped) != 1 || dropped[0].Google != QueryUnknown {
+	if len(dropped) != 2 || dropped[0].Google != QueryUnknown || len(dropped[0].GoogleRelated) != 0 {
 		t.Errorf("dropped %+v", dropped)
+	}
+	if alt := dropped[1].GoogleRelated; len(alt) != 2 || alt[0] != "étanchéité parking souterrain" {
+		t.Errorf("what Google proposes instead: %v", alt)
 	}
 
 	SuggestEndpoint = "http://127.0.0.1:1"

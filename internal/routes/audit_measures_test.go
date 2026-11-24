@@ -26,7 +26,7 @@ func renderFR(t *testing.T, tpl string, data interface{}) string {
 }
 
 func lotAResult() *audit.Result {
-	score, lcp, cls, tbt := 46, 5120.0, 0.02, 640.0
+	score, lcp, cls, tbt := 46, 4006.0, 0.02, 640.0
 	copy := 5.0
 	return &audit.Result{
 		GeneratedAt: time.Date(2026, 11, 24, 0, 0, 0, 0, time.UTC),
@@ -59,7 +59,7 @@ func lotAResult() *audit.Result {
 			TargetQueries: []audit.TargetQuery{
 				{Page: "https://ex.com/", Query: "pompe piscine", Alignment: "good", Google: audit.QueryConfirmed, GoogleRelated: []string{"pompe piscine prix"}},
 				{Page: "https://ex.com/a", Query: "électrolyseur bretagne", Alignment: "weak", Google: audit.QueryVariant, GoogleVariant: "électrolyseur piscine"}},
-			DroppedQueries: []audit.TargetQuery{{Page: "https://ex.com/b", Query: "zzz inconnu", Google: audit.QueryUnknown}},
+			DroppedQueries: []audit.TargetQuery{{Page: "https://ex.com/b", Query: "zzz inconnu", Google: audit.QueryUnknown, GoogleRelated: []string{"zzz connu"}}},
 		},
 		Priorities: []audit.Priority{{ID: "m:speed", Source: "technical", Level: 2, Title: "AUDIT_PRIO_SPEED"}},
 	}
@@ -86,7 +86,7 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 	for _, s := range []string{
 		"1,8 s", "134 ms", "0,31", "bon jusqu&#39;à 2,5 s", "Note de la simulation", "46", "Réduisez le JavaScript inutilisé", "gain possible : 0,9 s",
 		"Offre : il manque le prix", "(conseillé par Google)", "Fil d&#39;Ariane : une seule étape", "Commerce ou entreprise locale : format incorrect pour le prix, la note ou un avis",
-		"Recherches écartées (1)", "zzz inconnu", "Proposée par Google", "« électrolyseur piscine »", "« pompe piscine prix »",
+		"Recherches écartées (1)", "zzz inconnu", "Google propose plutôt : « zzz connu »", "4,0 s", "Proposée par Google", "« électrolyseur piscine »", "« pompe piscine prix »",
 		"Pages peu reliées : 9", "/p9 (fiche produit)", "5 clics", "texte commun à 93 %", "même recherche visée", "Paires : 2",
 		"sur l&#39;ensemble du site", "Vitesse vécue par vos visiteurs sur téléphone",
 	} {

@@ -138,7 +138,7 @@
 	.lfr-rows > li:last-child { border-bottom: 0; }
 	.lfr-rows > li > span:first-child { color: var(--lfr-strong); word-break: break-word; }
 	.lfr-rows > li:has(.lfr-bar) { grid-template-columns: minmax(0, 1fr) minmax(60px, 30%) auto; }
-	@media (max-width: 600px) { .lfr-rows > li, .lfr-rows > li:has(.lfr-bar) { grid-template-columns: 1fr auto; } .lfr-rows .lfr-bar { grid-column: 1 / -1; grid-row: 2; } }
+	@media (max-width: 600px) { .lfr-rows > li { grid-template-columns: 1fr; } .lfr-rows > li:has(.lfr-bar) { grid-template-columns: 1fr auto; } .lfr-rows .lfr-bar { grid-column: 1 / -1; grid-row: 2; } }
 	.lfr-card-title { margin: 14px 0 6px; font-family: var(--lf-font-text, 'Barlow', sans-serif); font-weight: 600; }
 	.lfr-card-text { margin-top: 12px; }
 	.lfr-note { margin-top: 18px; max-width: 75ch; }
@@ -146,8 +146,9 @@
 	.lfr-google .lfr-chip { white-space: normal; }
 
 	/* Speed: one tile per measure, the value large, its rating and threshold under. */
+	.lfr-grid:has(> .lfr-speed) { align-items: start; }
 	.lfr-speed > .lfr-kicker { color: var(--lfr-strong); margin-bottom: 6px; }
-	.lfr-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px; }
+	.lfr-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 16px; }
 	.lfr-metric { background: var(--lfr-panel-2); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 	.lfr-metric b { font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif); font-size: var(--lf-fs-h3, 26px); color: var(--lfr-figure); line-height: 1.1; }
 	.lfr-metric b small { font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); margin-left: 2px; }
@@ -297,7 +298,7 @@
 		<details class="lfr-fold">
 			<summary>{{ trans "AUDIT_QUERIES_DROPPED" }} ({{ len .Dropped }})</summary>
 			<p class="lfr-small">{{ trans "AUDIT_QUERIES_DROPPED_HELP" }}</p>
-			<ul class="lfr-rows">{{ range .Dropped }}<li><span>« {{ .Query }} »</span><span class="lfr-small">{{ .Path }}</span></li>{{ end }}</ul>
+			<ul class="lfr-rows">{{ range .Dropped }}<li><span>« {{ .Query }} »{{ if .GoogleRelated }}<br><span class="lfr-small">{{ trans "AUDIT_GOOGLE_INSTEAD" }} {{ range $i, $r := .GoogleRelated }}{{ if $i }}, {{ end }}« {{ $r }} »{{ end }}</span>{{ end }}</span><span class="lfr-small">{{ .Path }}</span></li>{{ end }}</ul>
 		</details>
 		{{ end }}
 	</section>
@@ -324,13 +325,12 @@
 			{{ end }}
 		</div>
 		{{ if .Unreadable }}<p class="lfr-small lfr-note">{{ trans "AUDIT_SD_UNREADABLE" .Unreadable }} {{ trans "AUDIT_EXAMPLE" }} {{ index .UnreadableExamples 0 }}</p>{{ end }}
-		{{ with .OtherTypes }}<p class="lfr-small lfr-note">{{ trans "AUDIT_SD_OTHER" }} {{ . }}.</p>{{ end }}
 	</section>
 	{{ end }}
 
 	{{ with .Speed }}
 	<section class="lfr-sec">
-		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_SPEED" }}</h2><p class="lfr-help">{{ trans "AUDIT_SPEED_HELP" .Path }}</p></div></div>
+		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_SPEED" }}</h2><p class="lfr-help">{{ trans "AUDIT_SPEED_HELP" }}</p></div></div>
 		{{ with .Mobile }}
 		{{ if .Failed }}<div class="lfr-card"><p>{{ trans "AUDIT_SPEED_FAILED" }}</p></div>{{ else }}
 		<div class="lfr-grid">

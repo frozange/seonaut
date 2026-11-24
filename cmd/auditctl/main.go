@@ -6,6 +6,10 @@
 //
 //	auditctl -c config [-fresh] request <site URL> <e-mail>
 //	auditctl -c config status <token or slug>
+//	auditctl -c config requery <token or slug>
+//
+// requery checks the target searches of a finished report against Google
+// Suggest again, with no crawl and no AI call.
 //
 // -fresh crawls again even when a report of the same site is recent enough to
 // be reused (the form always reuses it).
@@ -14,6 +18,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -28,7 +33,7 @@ import (
 )
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: auditctl -c config [-fresh] request <site URL> <e-mail>\n       auditctl -c config status <token or slug>")
+	fmt.Fprintln(os.Stderr, "usage: auditctl -c config [-fresh] request <site URL> <e-mail>\n       auditctl -c config status <token or slug>\n       auditctl -c config requery <token or slug>")
 	os.Exit(2)
 }
 
@@ -99,6 +104,27 @@ func main() {
 		fmt.Printf("audit %d %s\nstatus: %s %s\nupdated: %s\n", a.ID, a.URL, a.Status, a.Error, a.Updated.Format(time.RFC3339))
 		if a.Result != nil && a.Result.AIError != "" {
 			fmt.Printf("AI error: %s\n", a.Result.AIError)
+		}
+	case "requery":
+		a, err := svc.Store.ByKey(args[1])
+		if err != nil {
+			log.Fatalf("no audit with this token or name: %v", err)
+		}
+		svc.Suggest = &audit.Suggester{Pause: 400 * time.Millisecond}
+		if !cfg.Audit.Suggest {
+			svc.Suggest = nil
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
+		if err := svc.Requery(ctx, a); err != nil {
+			log.Fatalf("requery: %v", err)
+		}
+		fmt.Printf("audit %d %s\n", a.ID, a.URL)
+		for _, q := range a.Result.AI.TargetQueries {
+			fmt.Printf("kept    %-10s %s\n", q.Google, q.Query)
+		}
+		for _, q := range a.Result.AI.DroppedQueries {
+			fmt.Printf("dropped %-10s %s %v\n", q.Google, q.Query, q.GoogleRelated)
 		}
 	default:
 		usage()
