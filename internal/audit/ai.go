@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode"
 )
 
 // ErrAIUnavailable is returned when the model cannot be reached or answers badly.
@@ -115,12 +116,23 @@ var criteria = []struct{ ID, Group, Question string }{
 	{"trust", "content", "Are trust signals present for Google and the reader (who is behind it, expertise, contact details, legal notice)?"},
 }
 
+// toneExample is a conclusion Francis approved (sel-tech.fr, 2026-11-24): the
+// level of language every summary and conclusion must keep.
+const toneExample = "« Sel-Tech a déjà des atouts solides : des chantiers connus, des certifications citées et un parcours de devis simple. " +
+	"Il reste à mieux répondre aux questions que se pose un client avant d'appeler. Les pages Piscine et BTP sont les premières à reprendre, " +
+	"en commençant par les titres et une foire aux questions. »"
+
 // Writing rules for the generated text. Banned phrases live in a data file
 // (translations/audit_banned_phrases.<lang>.txt) because they are in the
 // report language.
 const styleRules = `Writing rules for every text you produce:
 - Write in %s, for a business owner who is not technical. Formal address (in French: "vous", never "tu").
 - Short, concrete sentences. One idea per sentence. Explain any technical word in brackets right after it.
+- Plain words, the ones a shop owner uses about his own business. No marketing or SEO jargon: in French never "message",
+  "cible", "preuves", "appels à l'action", "positionnement", "proposition de valeur", "parcours", "persona", "conversion",
+  "réassurance", "maillage", "contenu" used alone. Say the thing itself: "what you sell and to whom", "the people you want
+  to reach", "what shows a visitor he can trust you (references, reviews, guarantees, years of experience)", "the buttons
+  that let a visitor call you or ask for a quote", "the links between your pages".
 - Never use an em dash or an en dash. No rhetorical questions, no lists of three adjectives, no flattery, no alarmism.
 - Say what is observed, why it matters for the business, and what to do.
 - Density, not occurrence: each of these turns at most once in the whole report: two fragments joined by a comma without a verb,
@@ -267,7 +279,14 @@ func (in *Interpreter) Interpret(ctx context.Context, evidence []EvidenceEntry, 
 		"\nAssessments: " + string(critJSON) + "\nEvidence pack: " + truncate(string(pack), 30000) +
 		"\n\nWrite: a summary of 80 to 130 words; for each priority (same id) the impact for the business in one sentence and one concrete, doable action; " +
 		"up to 3 rewrites of existing elements (quote the current text exactly in 'before', and write 'after' in the language of that page, " +
-		"given by language_declared and its text, never in the report language); a conclusion of 40 to 80 words that makes the reader want to talk about it, with no figure promised."
+		"given by language_declared and its text, never in the report language); a conclusion of 40 to 80 words, with no figure promised." +
+		"\nThe summary and the conclusion are read by the owner of the site, who knows his trade and nothing about SEO. " +
+		"The summary says concretely what is good, what is missing and where, with an example taken from the pages read. " +
+		"The conclusion names the real strengths in concrete terms, then the one or two things to fix first and which pages to start with. " +
+		"When the text of the pages could not be read, say it once in plain words: what was read (how many pages, the technical checks), " +
+		"what could not be judged and why it matters to him (for example whether a visitor understands what he sells, " +
+		"to whom, and why he should call him), and the next step. Never list abstract notions the reader cannot picture." +
+		"\nExample of the expected tone, for another site (take nothing from it but the tone): " + toneExample
 	var writing struct {
 		Summary    string `json:"summary"`
 		Priorities []struct {
@@ -458,7 +477,32 @@ func numbersKnown(text, corpus string) bool {
 	return true
 }
 
-var sentenceRe = regexp.MustCompile(`[^.!?]+[.!?]*\s*`)
+// splitSentences cuts a text after ".", "!" or "?" followed by a space or the
+// end, so a domain or an address ("dev.lafactory.com", "3.5") stays whole.
+func splitSentences(text string) []string {
+	var out []string
+	r := []rune(text)
+	start := 0
+	for i := 0; i < len(r); i++ {
+		if r[i] != '.' && r[i] != '!' && r[i] != '?' {
+			continue
+		}
+		j := i
+		for j+1 < len(r) && (r[j+1] == '.' || r[j+1] == '!' || r[j+1] == '?' || r[j+1] == '»' || r[j+1] == ')' || r[j+1] == '"') {
+			j++
+		}
+		if j+1 == len(r) || unicode.IsSpace(r[j+1]) {
+			if s := strings.TrimSpace(string(r[start : j+1])); s != "" {
+				out = append(out, s)
+			}
+			start, i = j+1, j
+		}
+	}
+	if s := strings.TrimSpace(string(r[start:])); s != "" {
+		out = append(out, s)
+	}
+	return out
+}
 
 var evidenceRefRe = regexp.MustCompile(`\s*\((?:E\d+[\s,;/et&]*)+\)|\bE\d+\b`)
 
@@ -471,9 +515,9 @@ func cleanRefs(text string) string {
 // the evidence, after removing evidence ids.
 func stripUnknownNumbers(text, corpus string) string {
 	var kept []string
-	for _, s := range sentenceRe.FindAllString(cleanRefs(text), -1) {
+	for _, s := range splitSentences(cleanRefs(text)) {
 		if numbersKnown(s, corpus) {
-			kept = append(kept, strings.TrimSpace(s))
+			kept = append(kept, s)
 		}
 	}
 	return strings.Join(kept, " ")

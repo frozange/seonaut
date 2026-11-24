@@ -3,6 +3,19 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.6.2 - 2026-11-24
+
+- Le texte de l'IA parle comme le patron du site, pas comme un consultant : la
+  consigne interdit le jargon (message, cible, preuves, appels à l'action,
+  positionnement, proposition de valeur...) et donne les mots simples à la place.
+  Le résumé et la conclusion disent concrètement ce qui est bien, ce qui manque et
+  par quelles pages commencer ; quand le texte des pages n'a pas pu être lu, ils
+  disent ce qui a été lu, ce qui n'a pas pu être jugé et la suite. La conclusion
+  de sel-tech.fr, validée par Francis, sert d'exemple de ton.
+- Les domaines et adresses ne sont plus coupés (« dev. lafactory. com ») : le
+  filtre des chiffres découpait les phrases à chaque point. Une phrase finit
+  maintenant sur « . », « ! » ou « ? » suivis d'une espace ou de la fin.
+
 ## 1.6.1 - 2026-11-24
 
 - Le script de déploiement sur srv entre dans le dépôt (`deploy/install-lafactory.sh`,

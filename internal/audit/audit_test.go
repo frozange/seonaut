@@ -325,3 +325,12 @@ func TestSlug(t *testing.T) {
 		}
 	}
 }
+
+func TestStripUnknownNumbersKeepsDomains(t *testing.T) {
+	in := "Nous avons lu 37 pages de dev.lafactory.com. Le site https://www.ex.fr/a.html répond. Il y a 99 pages ! Fin (E1)."
+	got := stripUnknownNumbers(in, `"pages": 37`)
+	want := "Nous avons lu 37 pages de dev.lafactory.com. Le site https://www.ex.fr/a.html répond. Fin."
+	if got != want {
+		t.Errorf("got %q\nwant %q", got, want)
+	}
+}
