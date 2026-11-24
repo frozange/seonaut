@@ -3,6 +3,12 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.6.4 - 2026-11-24
+
+- Retour à la sélection des pages clés de 1.6.2 : la 1.6.3 (lecture des pages
+  `noindex`) visait dev.lafactory.com, un banc de test que Francis ne considère
+  pas comme une cible d'audit. Retirée sur sa demande.
+
 ## 1.6.2 - 2026-11-24
 
 - Le texte de l'IA parle comme le patron du site, pas comme un consultant : la
