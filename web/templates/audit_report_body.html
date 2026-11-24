@@ -1,0 +1,364 @@
+{{/*
+	Report body, shared by the standalone page (audit_report) and the fragment a
+	page of the main site frames (audit_fragment). Styles are scoped under .lfr;
+	sizes and fonts come from the site's --lf-* variables, so the framing page's
+	charte applies. Every value is escaped by html/template: crawled and AI text
+	never reaches the page as markup.
+*/}}
+{{ define "lfr_style" }}
+<style>
+	.lfr { --lfr-good: #3ecf8e; --lfr-mid: #f5b942; --lfr-low: #ff5c8a; --lfr-info: #2ea3f2;
+		--lfr-line: #262633; --lfr-panel: #12121a; --lfr-panel-2: #181822;
+		--lfr-text: var(--lf-c-text, #cccccc); --lfr-strong: var(--lf-c-strong, #ffffff); --lfr-muted: var(--lf-c-muted, #b0b4bf);
+		--lfr-figure: var(--lf-c-accent, #ffff00);
+		color: var(--lfr-text); font-size: var(--lf-fs-text, 18px); line-height: 1.6; }
+	.lfr *, .lfr *::before, .lfr *::after { box-sizing: border-box; }
+	.lfr p { margin: 0 0 .8em; padding: 0; }
+	.lfr p:last-child { margin-bottom: 0; }
+	.lfr h2, .lfr h3, .lfr h4, .lfr h5 { color: var(--lfr-strong); margin: 0 0 .5em; padding: 0; line-height: 1.25; }
+	.lfr ul, .lfr ol { margin: 0; padding: 0; list-style: none; }
+	.lfr li { margin: 0; padding: 0; }
+	.lfr a { color: var(--lfr-strong); text-decoration: underline; text-underline-offset: 3px; }
+	.lfr-sec { padding: clamp(48px, 7vw, 88px) 0 0; border: 0; }
+	.lfr-sec-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 32px; margin-bottom: 28px; }
+	.lfr-sec-head h2 { margin: 0; }
+	.lfr-help { color: var(--lfr-muted); font-size: var(--lf-fs-small, 16px); max-width: 68ch; }
+	.lfr-kicker { font-size: var(--lf-fs-label, 15px); text-transform: uppercase; letter-spacing: .1em; color: var(--lfr-muted); font-weight: 600; }
+	.lfr-lead { font-size: var(--lf-fs-lead, 20px); color: var(--lfr-text); max-width: 68ch; }
+	.lfr-small { font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); }
+	.lfr-card { background: var(--lfr-panel); border: 1px solid var(--lfr-line); border-radius: 18px; padding: clamp(20px, 3vw, 32px); }
+	.lfr-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+
+	/* Chips: a state always carries an icon and its word, never color alone. */
+	.lfr-chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 3px 12px 3px 8px; font-size: var(--lf-fs-label, 15px);
+		font-weight: 600; line-height: 1.4; background: rgba(255, 255, 255, .06); color: var(--lfr-strong); white-space: nowrap; }
+	.lfr-chip svg { width: 16px; height: 16px; flex: none; }
+	.lfr-good { --lfr-c: var(--lfr-good); } .lfr-mid { --lfr-c: var(--lfr-mid); } .lfr-low { --lfr-c: var(--lfr-low); }
+	.lfr-info { --lfr-c: var(--lfr-info); } .lfr-none { --lfr-c: var(--lfr-muted); }
+	.lfr-chip { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lfr-c, #888) 45%, transparent); }
+	.lfr-chip svg { color: var(--lfr-c, #888); }
+
+	/* Hero: three gauges and the key figures. */
+	.lfr-hero { padding-top: 8px; }
+	.lfr-hero h1 { word-break: break-word; margin: .2em 0 .3em; }
+	.lfr-gauges { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 36px; }
+	.lfr-gauge { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+	.lfr-ring { position: relative; width: 148px; height: 148px; }
+	.lfr-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+	.lfr-ring .track { stroke: var(--lfr-line); }
+	.lfr-ring .arc { stroke: var(--lfr-c); }
+	.lfr-ring-value { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+	.lfr-ring-value b { font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif); font-size: var(--lf-fs-h2, 40px); color: var(--lfr-strong); line-height: 1; }
+	.lfr-ring-value small { font-size: var(--lf-fs-label, 15px); color: var(--lfr-muted); margin-top: 6px; }
+	.lfr-gauge .lfr-kicker { margin: 0; color: var(--lfr-text); }
+	.lfr-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; margin-top: 36px; background: var(--lfr-line);
+		border: 1px solid var(--lfr-line); border-radius: 18px; overflow: hidden; }
+	.lfr-fact { background: var(--lfr-panel); padding: 22px 24px; }
+	.lfr-fact b { display: block; font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif); font-size: var(--lf-fs-h3, 26px); color: var(--lfr-figure); line-height: 1.1; }
+	.lfr-fact span { display: block; margin-top: 6px; font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); }
+
+	.lfr-summary { border-left: 3px solid var(--lfr-figure); padding: 4px 0 4px clamp(20px, 3vw, 36px); }
+	.lfr-summary .lfr-lead { color: var(--lfr-strong); }
+
+	/* Stacked bars: one segment per category, a 2px gap between, legend under. */
+	.lfr-stack { display: flex; gap: 2px; height: 12px; border-radius: 6px; overflow: hidden; min-width: 200px; flex: 1 1 260px; max-width: 420px; }
+	.lfr-stack i { display: block; background: var(--lfr-c); min-width: 6px; }
+	.lfr-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); }
+	.lfr-legend span { display: inline-flex; align-items: center; gap: 8px; }
+	.lfr-legend span::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--lfr-c); }
+	.lfr-legend b { color: var(--lfr-strong); }
+	.lfr-mix { flex: 1 1 280px; max-width: 420px; }
+
+	/* Priorities */
+	.lfr-prio { display: grid; gap: 16px; counter-reset: lfrprio; }
+	.lfr-prio > li { counter-increment: lfrprio; display: grid; grid-template-columns: 56px 1fr; gap: 0 20px; }
+	.lfr-prio > li::before { content: counter(lfrprio, decimal-leading-zero); font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif);
+		font-size: var(--lf-fs-h3, 26px); color: var(--lfr-muted); line-height: 1; padding-top: 4px; }
+	.lfr-prio h4 { margin: 12px 0 6px; }
+	.lfr-prio .lfr-meta { font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); margin-bottom: 12px; }
+	.lfr-todo { margin-top: 16px; padding: 14px 18px; border-radius: 12px; background: var(--lfr-panel-2); display: flex; gap: 12px; align-items: flex-start; }
+	.lfr-todo svg { width: 20px; height: 20px; flex: none; margin-top: 4px; color: var(--lfr-figure); }
+	.lfr-todo p { color: var(--lfr-strong); }
+	@media (max-width: 600px) { .lfr-prio > li { grid-template-columns: 1fr; } .lfr-prio > li::before { margin-bottom: 8px; } }
+
+	/* Strengths */
+	.lfr-strengths li { display: flex; gap: 14px; align-items: flex-start; }
+	.lfr-strengths svg { width: 24px; height: 24px; flex: none; color: var(--lfr-good); margin-top: 2px; }
+
+	/* Criteria */
+	.lfr-crit h5 { margin: 14px 0 10px; font-family: var(--lf-font-text, 'Barlow', sans-serif); font-weight: 600; }
+	.lfr-crit .verdict { color: var(--lfr-strong); }
+	.lfr-more { margin-top: 12px; border-top: 1px solid var(--lfr-line); padding-top: 12px; }
+	.lfr-more summary { cursor: pointer; font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); font-weight: 600; list-style: none; display: inline-flex; align-items: center; gap: 8px; }
+	.lfr-more summary::-webkit-details-marker { display: none; }
+	.lfr-more summary::before { content: "+"; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--lfr-line); color: var(--lfr-strong); }
+	.lfr-more[open] summary::before { content: "−"; }
+	.lfr-more > p, .lfr-more > ul { margin-top: 10px; font-size: var(--lf-fs-small, 16px); }
+
+	/* Target queries */
+	.lfr-query .path { font-size: var(--lf-fs-label, 15px); color: var(--lfr-muted); word-break: break-all; }
+	.lfr-query .q { font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif); font-size: var(--lf-fs-h4, 22px); color: var(--lfr-strong); line-height: 1.3; margin: 10px 0 14px; }
+	.lfr-meter { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: var(--lf-fs-small, 16px); color: var(--lfr-strong); }
+	.lfr-meter i { display: block; width: 26px; height: 8px; border-radius: 4px; background: var(--lfr-line); }
+	.lfr-meter i.on { background: var(--lfr-c); }
+	.lfr-meter span { margin-left: 4px; }
+
+	/* Rewrites */
+	.lfr-rw .before { color: var(--lfr-muted); text-decoration: line-through; text-decoration-color: rgba(255, 92, 138, .7); }
+	.lfr-rw .after { color: var(--lfr-strong); border-left: 3px solid var(--lfr-good); padding-left: 14px; font-size: var(--lf-fs-lead, 20px); }
+	.lfr-rw .tag { font-size: var(--lf-fs-label, 15px); text-transform: uppercase; letter-spacing: .08em; color: var(--lfr-muted); font-weight: 600; margin: 16px 0 6px; }
+
+	/* Technical issues: one bar per issue type, length = share of read pages. */
+	.lfr-tech h3 { display: flex; align-items: center; gap: 12px; margin: 36px 0 14px; }
+	.lfr-issue { border-bottom: 1px solid var(--lfr-line); }
+	.lfr-issue summary { cursor: pointer; list-style: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 34%) auto; gap: 8px 20px; align-items: center; padding: 16px 0; }
+	.lfr-issue summary::-webkit-details-marker { display: none; }
+	.lfr-issue .name { color: var(--lfr-strong); }
+	.lfr-issue .name::after { content: " +"; color: var(--lfr-muted); }
+	.lfr-issue[open] .name::after { content: " −"; }
+	.lfr-bar { height: 8px; border-radius: 4px; background: var(--lfr-line); overflow: hidden; }
+	.lfr-bar i { display: block; height: 100%; border-radius: 4px; background: var(--lfr-c); }
+	.lfr-issue .count { font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); white-space: nowrap; text-align: right; }
+	.lfr-issue .body { padding: 0 0 18px; font-size: var(--lf-fs-small, 16px); }
+	.lfr-issue .body ul { margin-top: 8px; }
+	.lfr-issue .body li { word-break: break-all; color: var(--lfr-muted); padding: 2px 0; }
+	@media (max-width: 600px) { .lfr-issue summary { grid-template-columns: 1fr auto; } .lfr-issue .lfr-bar { grid-column: 1 / -1; grid-row: 2; } }
+	.lfr-fold { margin-top: 36px; }
+	.lfr-fold > summary { cursor: pointer; font-weight: 600; color: var(--lfr-strong); list-style: none; display: inline-flex; gap: 10px; align-items: center; }
+	.lfr-fold > summary::-webkit-details-marker { display: none; }
+	.lfr-fold > summary::before { content: "+"; display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--lfr-line); }
+	.lfr-fold[open] > summary::before { content: "−"; }
+	.lfr-fold > .lfr-small, .lfr-fold > p { margin-top: 14px; }
+	.lfr-method p { max-width: 75ch; }
+
+	.lfr-conclusion { font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif); font-size: var(--lf-fs-h4, 22px); color: var(--lfr-strong); line-height: 1.45; max-width: 60ch; }
+
+	/* Waiting state */
+	.lfr-status { padding: 24px 0 8px; max-width: 680px; }
+	.lfr-steps { display: grid; gap: 12px; margin: 32px 0; }
+	.lfr-steps li { padding: 14px 18px; border-radius: 12px; border: 1px solid var(--lfr-line); color: var(--lfr-muted); display: flex; align-items: center; gap: 12px; }
+	.lfr-steps li.on { border-color: var(--lfr-figure); color: var(--lfr-strong); }
+	.lfr-steps li.done { color: var(--lfr-text); }
+	.lfr-spinner { width: 16px; height: 16px; border: 2px solid var(--lfr-figure); border-top-color: transparent; border-radius: 50%; animation: lfr-spin 1s linear infinite; flex: none; }
+	@keyframes lfr-spin { to { transform: rotate(360deg); } }
+	@media (prefers-reduced-motion: reduce) { .lfr-spinner { animation: none; } }
+	@media print { .lfr details { display: block; } .lfr details > *:not(summary) { display: block; } }
+</style>
+{{ end }}
+
+{{ define "lfr_icon" }}{{ if eq . "good" }}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ else if or (eq . "partial") (eq . "mid") }}<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 2a6 6 0 010 12z" fill="currentColor"/></svg>{{ else if eq . "none" }}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>{{ else if eq . "info" }}<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 7v4M8 4.6v.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>{{ else }}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>{{ end }}{{ end }}
+
+{{ define "lfr_rating_class" }}{{ if eq . "good" }}lfr-good{{ else if eq . "partial" }}lfr-mid{{ else }}lfr-low{{ end }}{{ end }}
+
+{{ define "lfr_level_chip" }}{{ if eq . 1 }}<span class="lfr-chip lfr-low">{{ template "lfr_icon" "poor" }}{{ trans "AUDIT_LEVEL_1" }}</span>{{ else if eq . 2 }}<span class="lfr-chip lfr-mid">{{ template "lfr_icon" "mid" }}{{ trans "AUDIT_LEVEL_2" }}</span>{{ else }}<span class="lfr-chip lfr-info">{{ template "lfr_icon" "info" }}{{ trans "AUDIT_LEVEL_3" }}</span>{{ end }}{{ end }}
+
+{{ define "lfr_pages" }}{{ if eq . 1 }}{{ trans "AUDIT_PAGE_AFFECTED_ONE" }}{{ else }}{{ trans "AUDIT_PAGES_AFFECTED" . }}{{ end }}{{ end }}
+
+{{ define "lfr_issues" }}
+<ul>
+	{{ range . }}
+	<li><details class="lfr-issue"><summary><span class="name">{{ trans .Type }}</span><span class="lfr-bar"><i style="width: {{ .Pct }}%"></i></span><span class="count">{{ template "lfr_pages" .Pages }}</span></summary>
+		<div class="body"><p>{{ trans (print .Type "_DESC") }}</p>{{ if .Examples }}<ul>{{ range .Examples }}<li>{{ . }}</li>{{ end }}</ul>{{ end }}</div></details></li>
+	{{ end }}
+</ul>
+{{ end }}
+
+{{ define "lfr_criteria" }}
+<div class="lfr-grid">
+	{{ range . }}
+	<article class="lfr-card lfr-crit">
+		<span class="lfr-chip {{ template "lfr_rating_class" .Rating }}">{{ template "lfr_icon" .Rating }}{{ trans (print "AUDIT_RATING_" .Rating) }}</span>
+		<h5>{{ trans (print "AUDIT_CRITERION_" .Question) }}</h5>
+		<p class="verdict">{{ .Verdict }}</p>
+		{{ if .Detail }}<details class="lfr-more"><summary>{{ trans "AUDIT_SHOW_DETAIL" }}</summary><p>{{ .Detail }}</p></details>{{ end }}
+	</article>
+	{{ end }}
+</div>
+{{ end }}
+
+{{ define "lfr_mix" }}
+<div class="lfr-mix" role="img" aria-label="{{ trans "AUDIT_RATING_good" }} {{ .Good }}, {{ trans "AUDIT_RATING_partial" }} {{ .Partial }}, {{ trans "AUDIT_RATING_poor" }} {{ .Poor }}">
+	<div class="lfr-stack">{{ if .Good }}<i class="lfr-good" style="flex: {{ .Good }}"></i>{{ end }}{{ if .Partial }}<i class="lfr-mid" style="flex: {{ .Partial }}"></i>{{ end }}{{ if .Poor }}<i class="lfr-low" style="flex: {{ .Poor }}"></i>{{ end }}</div>
+	<div class="lfr-legend" aria-hidden="true"><span class="lfr-good">{{ trans "AUDIT_RATING_good" }} <b>{{ .Good }}</b></span><span class="lfr-mid">{{ trans "AUDIT_RATING_partial" }} <b>{{ .Partial }}</b></span><span class="lfr-low">{{ trans "AUDIT_RATING_poor" }} <b>{{ .Poor }}</b></span></div>
+</div>
+{{ end }}
+
+{{ define "audit_report_body" }}
+<div class="lfr">
+{{ template "lfr_style" }}
+	<header class="lfr-hero">
+		<p class="lfr-kicker">{{ trans "AUDIT_REPORT_KICKER" }} · {{ .Date }}</p>
+		{{ if not .Embed }}<h1>{{ .Host }}</h1>{{ end }}
+		<p class="lfr-lead">{{ trans "AUDIT_REPORT_LEAD" .Result.Site.PagesCrawled }}</p>
+		<div class="lfr-gauges">
+			{{ range .Scores }}
+			<figure class="lfr-gauge lfr-{{ .Class }}" style="margin: 0">
+				<div class="lfr-ring">
+					<svg viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="52" fill="none" stroke-width="10"/>{{ if .Pct }}<circle class="arc" cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="{{ .Arc }} 400"/>{{ end }}</svg>
+					<div class="lfr-ring-value">{{ if .Value }}<b>{{ .Value }}</b><small>{{ trans "AUDIT_OUT_OF" }}</small>{{ end }}</div>
+				</div>
+				<figcaption><p class="lfr-kicker">{{ trans .Key }}</p></figcaption>
+				<span class="lfr-chip lfr-{{ .Class }}">{{ template "lfr_icon" .Class }}{{ trans (print "AUDIT_GRADE_" .Class) }}</span>
+			</figure>
+			{{ end }}
+		</div>
+		<div class="lfr-facts">
+			<div class="lfr-fact"><b>{{ .Result.Site.PagesCrawled }}</b><span>{{ trans "AUDIT_FACT_PAGES" }}</span></div>
+			<div class="lfr-fact"><b>{{ .Result.PassedCount }}</b><span>{{ trans "AUDIT_FACT_PASSED" }}</span></div>
+			<div class="lfr-fact"><b>{{ .IssueTypes }}</b><span>{{ trans "AUDIT_FACT_ISSUES" }}</span></div>
+			<div class="lfr-fact"><b>{{ len .Result.Priorities }}</b><span>{{ trans "AUDIT_FACT_PRIORITIES" }}</span></div>
+		</div>
+	</header>
+
+	{{ if .HasAI }}{{ with .Result.AI.Summary }}
+	<section class="lfr-sec">
+		<div class="lfr-summary">
+			<h2>{{ trans "AUDIT_SUMMARY" }}</h2>
+			<p class="lfr-lead">{{ . }}</p>
+		</div>
+	</section>
+	{{ end }}{{ else }}
+	<section class="lfr-sec"><div class="lfr-summary"><p class="lfr-lead">{{ trans "AUDIT_NO_AI" }}</p></div></section>
+	{{ end }}
+
+	{{ if .Result.Priorities }}
+	<section class="lfr-sec">
+		<div class="lfr-sec-head">
+			<h2>{{ trans "AUDIT_PRIORITIES" }}</h2>
+			<div class="lfr-mix" role="img" aria-label="{{ range .Levels }}{{ trans (print "AUDIT_LEVEL_" .Level) }} {{ .Count }}. {{ end }}">
+				<div class="lfr-stack">{{ range .Levels }}<i class="{{ if eq .Level 1 }}lfr-low{{ else if eq .Level 2 }}lfr-mid{{ else }}lfr-info{{ end }}" style="flex: {{ .Count }}"></i>{{ end }}</div>
+				<div class="lfr-legend" aria-hidden="true">{{ range .Levels }}<span class="{{ if eq .Level 1 }}lfr-low{{ else if eq .Level 2 }}lfr-mid{{ else }}lfr-info{{ end }}">{{ trans (print "AUDIT_LEVEL_" .Level) }} <b>{{ .Count }}</b></span>{{ end }}</div>
+			</div>
+		</div>
+		<ol class="lfr-prio">
+			{{ range .Result.Priorities }}
+			<li><div class="lfr-card">
+				{{ template "lfr_level_chip" .Level }}
+				<h4>{{ if eq .Source "technical" }}{{ trans .Title }}{{ else }}{{ .Title }}{{ end }}</h4>
+				{{ if .Pages }}<p class="lfr-meta">{{ template "lfr_pages" .Pages }}</p>{{ end }}
+				{{ if .Impact }}<p>{{ .Impact }}</p>{{ else if eq .Source "technical" }}<p>{{ trans (print .Title "_DESC") }}</p>{{ end }}
+				{{ if .Action }}<div class="lfr-todo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h12M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><p><strong>{{ trans "AUDIT_ACTION" }}</strong> {{ .Action }}</p></div>{{ end }}
+			</div></li>
+			{{ end }}
+		</ol>
+	</section>
+	{{ end }}
+
+	{{ if .HasAI }}{{ $v := . }}{{ with .Result.AI }}
+	{{ if .Strengths }}
+	<section class="lfr-sec">
+		<div class="lfr-sec-head"><h2>{{ trans "AUDIT_STRENGTHS" }}</h2></div>
+		<ul class="lfr-grid lfr-strengths">{{ range .Strengths }}<li class="lfr-card">{{ template "lfr_icon" "good" }}<p>{{ .Text }}</p></li>{{ end }}</ul>
+	</section>
+	{{ end }}
+
+	{{ if $v.Copywriting }}
+	<section class="lfr-sec">
+		<div class="lfr-sec-head">
+			<div><h2>{{ trans "AUDIT_COPYWRITING" }}</h2><p class="lfr-help">{{ trans "AUDIT_COPYWRITING_HELP" }}</p></div>
+			{{ template "lfr_mix" $v.CopyMix }}
+		</div>
+		{{ template "lfr_criteria" $v.Copywriting }}
+	</section>
+	{{ end }}
+
+	{{ if $v.Content }}
+	<section class="lfr-sec">
+		<div class="lfr-sec-head">
+			<div><h2>{{ trans "AUDIT_CONTENT" }}</h2><p class="lfr-help">{{ trans "AUDIT_CONTENT_HELP" }}</p></div>
+			{{ template "lfr_mix" $v.ContentMix }}
+		</div>
+		{{ template "lfr_criteria" $v.Content }}
+	</section>
+	{{ end }}
+
+	{{ if $v.Queries }}
+	<section class="lfr-sec">
+		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_QUERIES" }}</h2><p class="lfr-help">{{ trans "AUDIT_QUERIES_HELP" }}</p></div></div>
+		<div class="lfr-grid">
+			{{ range $v.Queries }}
+			<article class="lfr-card lfr-query {{ if eq .Step 3 }}lfr-good{{ else if eq .Step 2 }}lfr-mid{{ else }}lfr-low{{ end }}">
+				<p class="path">{{ trans "AUDIT_QUERIES_PAGE" }} {{ .Path }}</p>
+				<p class="q">« {{ .Query }} »</p>
+				<div class="lfr-meter"><i class="on"></i><i{{ if ge .Step 2 }} class="on"{{ end }}></i><i{{ if ge .Step 3 }} class="on"{{ end }}></i><span>{{ trans "AUDIT_QUERIES_ALIGN" }} : {{ trans (print "AUDIT_ALIGN_" .Alignment) }}</span></div>
+				<p class="lfr-small">{{ .Comment }}</p>
+			</article>
+			{{ end }}
+		</div>
+	</section>
+	{{ end }}
+
+	{{ if .Rewrites }}
+	<section class="lfr-sec">
+		<div class="lfr-sec-head"><h2>{{ trans "AUDIT_REWRITES" }}</h2></div>
+		<div class="lfr-grid">
+			{{ range .Rewrites }}
+			<article class="lfr-card lfr-rw">
+				<p class="lfr-kicker">{{ trans (print "AUDIT_ELEMENT_" .Element) }}</p>
+				<p class="tag">{{ trans "AUDIT_BEFORE" }}</p>
+				<p class="before">{{ .Before }}</p>
+				<p class="tag">{{ trans "AUDIT_AFTER" }}</p>
+				<p class="after">{{ .After }}</p>
+				{{ if .Why }}<details class="lfr-more"><summary>{{ trans "AUDIT_WHY" }}</summary><p>{{ .Why }}</p></details>{{ end }}
+			</article>
+			{{ end }}
+		</div>
+	</section>
+	{{ end }}
+	{{ end }}{{ end }}
+
+	<section class="lfr-sec lfr-tech">
+		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_TECHNICAL" }}</h2><p class="lfr-help">{{ trans "AUDIT_TECHNICAL_HELP" .Result.Site.PagesCrawled .Result.PassedCount }} {{ trans "AUDIT_TECHNICAL_BARS" }}</p></div></div>
+		{{ if .Critical }}<h3>{{ trans "AUDIT_CRITICAL" }} <span class="lfr-chip lfr-low">{{ template "lfr_icon" "poor" }}{{ len .Critical }}</span></h3><div class="lfr-low">{{ template "lfr_issues" .Critical }}</div>{{ end }}
+		{{ if .Alerts }}<h3>{{ trans "AUDIT_ALERTS" }} <span class="lfr-chip lfr-mid">{{ template "lfr_icon" "mid" }}{{ len .Alerts }}</span></h3><div class="lfr-mid">{{ template "lfr_issues" .Alerts }}</div>{{ end }}
+		{{ if .Warnings }}<h3>{{ trans "AUDIT_WARNINGS" }} <span class="lfr-chip lfr-info">{{ template "lfr_icon" "info" }}{{ len .Warnings }}</span></h3><div class="lfr-info">{{ template "lfr_issues" .Warnings }}</div>{{ end }}
+		{{ if .Hygiene }}
+		<details class="lfr-fold">
+			<summary>{{ trans "AUDIT_HYGIENE" }} ({{ len .Hygiene }})</summary>
+			<p class="lfr-small">{{ trans "AUDIT_HYGIENE_HELP" }}</p>
+			<div class="lfr-none">{{ template "lfr_issues" .Hygiene }}</div>
+		</details>
+		{{ end }}
+	</section>
+
+	{{ if .HasAI }}{{ with .Result.AI.Conclusion }}
+	<section class="lfr-sec"><p class="lfr-conclusion">{{ . }}</p></section>
+	{{ end }}{{ end }}
+
+	<section class="lfr-sec lfr-method">
+		<details class="lfr-fold" style="margin-top: 0">
+			<summary>{{ trans "AUDIT_METHOD_SHOW" }}</summary>
+			<p>{{ trans "AUDIT_METHOD_CRAWL" .Result.Site.PagesCrawled }}</p>
+			{{ if .SampleNote }}<p>{{ trans "AUDIT_METHOD_SAMPLE" .Result.Site.CrawlLimit }}</p>{{ end }}
+			<p>{{ trans "AUDIT_METHOD_SCALE" }}</p>
+			{{ if .HasAI }}<p>{{ trans "AUDIT_METHOD_AI" }}</p>{{ end }}
+		</details>
+	</section>
+</div>
+{{ end }}
+
+{{ define "audit_status_body" }}
+<div class="lfr">
+{{ template "lfr_style" }}
+	<div class="lfr-status">
+	{{ if .NotFound }}
+		<h2>{{ trans "AUDIT_STATUS_NOT_FOUND" }}</h2>
+		<p class="lfr-lead">{{ trans "AUDIT_STATUS_GONE" }}</p>
+	{{ else if .Failed }}
+		<p class="lfr-kicker">{{ .Host }}</p>
+		<h2>{{ trans "AUDIT_STATUS_FAILED" }}</h2>
+		<p class="lfr-lead">{{ trans "AUDIT_STATUS_FAILED_HELP" }}</p>
+	{{ else }}
+		<p class="lfr-kicker">{{ .Host }}</p>
+		<h2>{{ trans "AUDIT_STATUS_RUNNING" }}</h2>
+		<p class="lfr-lead">{{ trans "AUDIT_STATUS_HELP" }}</p>
+		<ol class="lfr-steps">
+			<li class="{{ if eq .Status "queued" }}on{{ else }}done{{ end }}">{{ if eq .Status "queued" }}<span class="lfr-spinner"></span>{{ end }}{{ trans "AUDIT_STEP_QUEUED" }}</li>
+			<li class="{{ if eq .Status "crawling" }}on{{ else if eq .Status "analysing" }}done{{ end }}">{{ if eq .Status "crawling" }}<span class="lfr-spinner"></span>{{ end }}{{ trans "AUDIT_STEP_CRAWL" }}</li>
+			<li class="{{ if eq .Status "analysing" }}on{{ end }}">{{ if eq .Status "analysing" }}<span class="lfr-spinner"></span>{{ end }}{{ trans "AUDIT_STEP_ANALYSIS" }}</li>
+		</ol>
+		<p class="lfr-small">{{ trans "AUDIT_STATUS_MAIL" }}</p>
+	{{ end }}
+	</div>
+</div>
+{{ end }}

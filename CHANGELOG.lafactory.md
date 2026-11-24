@@ -3,6 +3,29 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.5.0 - 2026-11-24
+
+Le rapport d'audit s'affiche dans lafactory.com, comme une page du site, et sa
+mise en page est refaite.
+
+- Nouvelle adresse `GET /rapport/{token}/fragment` : le rapport, ou l'état d'un
+  audit en cours, en fragment HTML (ni `html`, ni `head`, ni `h1`, ni appel à
+  l'action), styles limités à `.lfr` et tailles prises dans les variables
+  `--lf-*` du site. Les en-têtes `X-LF-Audit-Status` et `X-LF-Audit-Host`
+  renseignent la page qui l'encadre. Tout texte lu sur le site audité ou écrit
+  par l'IA reste échappé par `html/template`.
+- Réglage `[audit] report_url` (`{token}` remplacé) : quand il est posé, les
+  e-mails, le formulaire et les anciennes adresses `/rapport/{token}` mènent à
+  cette page du site (302). Vide, rien ne change.
+- Mise en page : jauges circulaires pour les trois notes, bandeau de chiffres
+  (pages lues, contrôles sans défaut, problèmes, priorités), barres de
+  répartition des priorités et des critères, une barre par problème technique
+  à la mesure des pages concernées, recherches visées en cartes avec un
+  indicateur de correspondance, réécritures en « aujourd'hui / proposition ».
+  Le détail des critères, les exemples, les relevés hors classement et la
+  méthode se replient. Chaque état porte une icône et un mot, jamais la
+  couleur seule. Plus de dégradé violet ; bouton de la charte (ivoire).
+
 ## 1.4.2 - 2026-11-11
 
 - La consigne de l'IA rangeait E-E-A-T parmi les idées reçues. Google dit que

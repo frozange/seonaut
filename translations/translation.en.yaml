@@ -731,3 +731,19 @@ AUDIT_CTA_TITLE: Let us talk about your website
 AUDIT_CTA_TEXT: We can go through this report with you and decide what to do first.
 AUDIT_CTA_BUTTON: Contact LaFactory
 AUDIT_PAGE_AFFECTED_ONE: "1 page affected"
+AUDIT_OUT_OF: out of 10
+AUDIT_GRADE_good: Good
+AUDIT_GRADE_mid: Needs work
+AUDIT_GRADE_low: Weak
+AUDIT_GRADE_none: Not rated
+AUDIT_FACT_PAGES: pages read
+AUDIT_FACT_PASSED: checks passed
+AUDIT_FACT_ISSUES: issue types found
+AUDIT_FACT_PRIORITIES: priorities
+AUDIT_SHOW_DETAIL: Read the analysis
+AUDIT_BEFORE: Today
+AUDIT_AFTER: Suggestion
+AUDIT_WHY: Why this change
+AUDIT_TECHNICAL_BARS: "The bar shows the share of read pages affected. Click an issue to see examples."
+AUDIT_METHOD_SHOW: How this report is made
+AUDIT_STATUS_GONE: "The link may be incomplete, or the report was removed."

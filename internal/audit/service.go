@@ -43,6 +43,7 @@ type Translate func(lang, key string, args ...interface{}) string
 // Config holds the audit settings.
 type Config struct {
 	BaseURL      string        // public URL of the instance, for report links
+	ReportURL    string        // report address on the main site, {token} replaced; empty: BaseURL/rapport/
 	NotifyEmail  string        // copy of every finished or failed audit
 	DefaultLang  string        // report language
 	LanguageName string        // language name given to the AI, e.g. "French"
@@ -299,7 +300,15 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64) (*Result
 
 // ReportURL is the private address of a report.
 func (s *Service) ReportURL(a *Audit) string {
+	if s.ReportOnSite() {
+		return strings.ReplaceAll(s.Cfg.ReportURL, "{token}", url.PathEscape(a.Token))
+	}
 	return strings.TrimRight(s.Cfg.BaseURL, "/") + "/rapport/" + a.Token
+}
+
+// ReportOnSite tells whether reports are shown by a page of the main site.
+func (s *Service) ReportOnSite() bool {
+	return strings.Contains(s.Cfg.ReportURL, "{token}")
 }
 
 func (s *Service) mailReport(a *Audit, to string) {

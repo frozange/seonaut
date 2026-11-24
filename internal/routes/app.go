@@ -98,6 +98,7 @@ func NewServer(container *services.Container) {
 		http.HandleFunc("GET /audit", auditHandler.formHandler)
 		http.HandleFunc("POST /audit", auditHandler.requestHandler)
 		http.HandleFunc("GET /rapport/{token}", auditHandler.reportHandler)
+		http.HandleFunc("GET /rapport/{token}/fragment", auditHandler.fragmentHandler)
 	}
 
 	// Replay routes

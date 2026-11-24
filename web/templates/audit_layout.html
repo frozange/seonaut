@@ -15,14 +15,13 @@
 			--lf-bg: #0a0a0f; --lf-panel: #12121a; --lf-line: #262633;
 			--lf-text: #cccccc; --lf-strong: #ffffff; --lf-muted: #b0b4bf;
 			--lf-accent: #ffff00; --lf-pink: #de2477; --lf-blue: #2ea3f2; --lf-violet: #8f9cf3;
-			--lf-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 			--lf-font-text: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
 			--lf-font-title: 'Playfair Display', Georgia, serif;
-			--lf-fs-h1: 48px; --lf-fs-h2: 40px; --lf-fs-h3: 26px; --lf-fs-h4: 22px;
+			--lf-fs-h1: 48px; --lf-fs-h2: 40px; --lf-fs-h3: 26px; --lf-fs-h4: 22px; --lf-fs-h5: 20px;
 			--lf-fs-text: 18px; --lf-fs-lead: 20px; --lf-fs-small: 16px; --lf-fs-label: 15px;
 		}
 		@media (max-width: 760px) {
-			:root { --lf-fs-h1: 34px; --lf-fs-h2: 30px; --lf-fs-h3: 23px; --lf-fs-h4: 20px; --lf-fs-text: 17px; }
+			:root { --lf-fs-h1: 34px; --lf-fs-h2: 30px; --lf-fs-h3: 23px; --lf-fs-h4: 20px; --lf-fs-h5: 18px; --lf-fs-text: 17px; }
 		}
 		* { box-sizing: border-box; }
 		html, body { margin: 0; background: var(--lf-bg); color: var(--lf-text); }
@@ -30,16 +29,19 @@
 		a { color: var(--lf-violet); }
 		h1, h2, h3, h4 { font-family: var(--lf-font-title); font-weight: 700; color: var(--lf-strong); line-height: 1.2; margin: 0 0 .6em; }
 		h1 { font-size: var(--lf-fs-h1); } h2 { font-size: var(--lf-fs-h2); } h3 { font-size: var(--lf-fs-h3); } h4 { font-size: var(--lf-fs-h4); }
+		h5 { font: 600 var(--lf-fs-h5) / 1.3 var(--lf-font-text); color: var(--lf-strong); margin: 0 0 .6em; }
 		.wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
 		.topbar { border-bottom: 1px solid var(--lf-line); padding: 18px 0; }
 		.topbar .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 		.brand { color: var(--lf-strong); font-weight: 700; text-decoration: none; letter-spacing: .02em; font-size: var(--lf-fs-lead); }
-		.brand span { background: var(--lf-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 		.label { font-size: var(--lf-fs-label); text-transform: uppercase; letter-spacing: .08em; color: var(--lf-muted); font-weight: 600; }
 		.lead { font-size: var(--lf-fs-lead); color: var(--lf-text); }
 		.small { font-size: var(--lf-fs-small); color: var(--lf-muted); }
-		.btn { display: inline-block; background: var(--lf-grad); color: #fff; border: 0; border-radius: 999px; padding: 14px 30px;
-			font: 600 var(--lf-fs-text) var(--lf-font-text); text-decoration: none; cursor: pointer; }
+		/* Button of the lafactory.com charte: ivory pill. */
+		.btn { display: inline-block; background: #f2efe8; color: #0a0a0f; border: 0; border-radius: 999px; padding: 10px 22px;
+			font: 600 var(--lf-fs-small) / 24px var(--lf-font-text); letter-spacing: .01em; text-decoration: none; cursor: pointer; transition: background .15s; }
+		.btn:hover { background: #ffffff; } .btn:active { background: #d9d5cc; }
+		.cta { text-align: center; padding: 88px 0; }
 		.btn:disabled { opacity: .5; cursor: wait; }
 		.panel { background: var(--lf-panel); border: 1px solid var(--lf-line); border-radius: 16px; padding: 28px; }
 		section { padding: 48px 0; border-bottom: 1px solid var(--lf-line); }
@@ -65,7 +67,7 @@
 <body>
 <div class="topbar">
 	<div class="wrap">
-		<a class="brand" href="https://lafactory.com/">La<span>Factory</span></a>
+		<a class="brand" href="https://lafactory.com/">LaFactory</a>
 		<span class="label">{{ trans "AUDIT_BRAND_TAG" }}</span>
 	</div>
 </div>

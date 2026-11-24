@@ -119,7 +119,7 @@ func TestAuditReportRenders(t *testing.T) {
 	}
 	for name, r := range map[string]*audit.Result{"without AI": res, "with AI": &withAI} {
 		a := &audit.Audit{URL: "https://ex.com/", Result: r}
-		out := render(t, services.RendererConfig{}, "audit_report", newReportView(a, "fr"))
+		out := render(t, services.RendererConfig{}, "audit_report", newReportView(a, "fr", false))
 		for _, s := range []string{"</html>", "6,8", "AUDIT_PAGE_AFFECTED_ONE", "AUDIT_METHOD_SAMPLE", "ERROR_SLOW_TTFB"} {
 			if !strings.Contains(out, s) {
 				t.Errorf("%s: missing %s", name, s)
@@ -134,5 +134,39 @@ func TestAuditReportRenders(t *testing.T) {
 		} else if !strings.Contains(out, "AUDIT_NO_AI") {
 			t.Error("without AI: the report must say the written analysis is missing")
 		}
+	}
+}
+
+// The fragment framed by the main site carries no document, no h1 (the page has
+// its own title) and no call to action, and escapes crawled or AI-written text.
+func TestAuditFragmentRenders(t *testing.T) {
+	copy := 5.0
+	res := &audit.Result{
+		GeneratedAt: time.Date(2026, 11, 24, 0, 0, 0, 0, time.UTC),
+		Site:        audit.SiteFacts{PagesCrawled: 40},
+		Scores:      audit.Scores{Technical: 9.6, Copywriting: &copy},
+		Issues:      []audit.IssueSummary{{Type: "ERROR_SLOW_TTFB", Priority: 2, Pages: 4, Examples: []string{"https://ex.com/<b>x</b>"}}},
+		Priorities:  []audit.Priority{{Source: "editorial", Level: 2, Title: "Titles <script>alert(1)</script>"}},
+		AI: &audit.AIReport{
+			Summary:       "SUMMARY-MARKER",
+			Criteria:      []audit.Criterion{{Group: "copywriting", Question: "value", Rating: "partial", Verdict: "V"}},
+			TargetQueries: []audit.TargetQuery{{Page: "https://ex.com/a%C3%A9/", Query: "q", Alignment: "weak"}},
+		},
+	}
+	a := &audit.Audit{URL: "https://ex.com/", Result: res}
+	out := render(t, services.RendererConfig{}, "audit_fragment", &fragmentView{Report: newReportView(a, "fr", true)})
+	for _, s := range []string{`class="lfr"`, "SUMMARY-MARKER", "9,6", "AUDIT_GRADE_mid", "/aé/", `stroke-dasharray="313.7 400"`, "width: 10%"} {
+		if !strings.Contains(out, s) {
+			t.Errorf("fragment: missing %s", s)
+		}
+	}
+	for _, s := range []string{"<html", "<h1", "AUDIT_CTA_BUTTON", "<script>", "<b>x</b>"} {
+		if strings.Contains(out, s) {
+			t.Errorf("fragment must not contain %s", s)
+		}
+	}
+	status := render(t, services.RendererConfig{}, "audit_fragment", &fragmentView{Status: &auditStatusView{Host: "ex.com", Status: "crawling"}})
+	if !strings.Contains(status, "lfr-spinner") || strings.Contains(status, "refresh") {
+		t.Error("status fragment: spinner expected, no meta refresh (the framing page refreshes)")
 	}
 }

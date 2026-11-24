@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"net/url"
 	"strings"
@@ -82,23 +83,60 @@ func (h *auditHandler) requestHandler(w http.ResponseWriter, r *http.Request) {
 		fail(http.StatusServiceUnavailable, "AUDIT_ERROR_UNAVAILABLE")
 		return
 	}
-	http.Redirect(w, r, "/rapport/"+url.PathEscape(a.Token), http.StatusSeeOther)
+	http.Redirect(w, r, h.AuditService.ReportURL(a), http.StatusSeeOther)
 }
 
-// reportHandler shows the report, or a waiting page that refreshes itself.
+// reportHandler shows the report, or a waiting page that refreshes itself. When
+// the report lives on the main site (report_url), the visitor is sent there:
+// links already mailed keep working.
 func (h *auditHandler) reportHandler(w http.ResponseWriter, r *http.Request) {
 	a, err := h.AuditService.Store.ByToken(r.PathValue("token"))
 	if err != nil {
 		h.renderAudit(w, "audit_status", "AUDIT_PAGE_TITLE", http.StatusNotFound, &auditStatusView{NotFound: true})
 		return
 	}
-	if a.Status != audit.StatusDone || a.Result == nil {
-		h.renderAudit(w, "audit_status", "AUDIT_PAGE_TITLE", http.StatusOK, &auditStatusView{
-			Host: hostOf(a.URL), Status: string(a.Status), Failed: a.Status == audit.StatusFailed,
-		})
+	if h.AuditService.ReportOnSite() {
+		w.Header().Set("Cache-Control", "no-store")
+		http.Redirect(w, r, h.AuditService.ReportURL(a), http.StatusFound)
 		return
 	}
-	h.renderAudit(w, "audit_report", "AUDIT_REPORT_TITLE", http.StatusOK, newReportView(a, h.lang()))
+	if a.Status != audit.StatusDone || a.Result == nil {
+		h.renderAudit(w, "audit_status", "AUDIT_PAGE_TITLE", http.StatusOK, newStatusView(a))
+		return
+	}
+	h.renderAudit(w, "audit_report", "AUDIT_REPORT_TITLE", http.StatusOK, newReportView(a, h.lang(), false))
+}
+
+// fragmentHandler returns the report, or its waiting state, as an HTML fragment
+// for the page of the main site that frames it: no html, head or body, styles
+// scoped under .lfr, every crawled or AI text escaped by html/template. Headers
+// tell the framing page the state and the audited host.
+func (h *auditHandler) fragmentHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-store")
+	a, err := h.AuditService.Store.ByToken(r.PathValue("token"))
+	if err != nil {
+		w.Header().Set("X-LF-Audit-Status", "notfound")
+		h.renderAudit(w, "audit_fragment", "AUDIT_PAGE_TITLE", http.StatusNotFound, &fragmentView{Status: &auditStatusView{NotFound: true}})
+		return
+	}
+	w.Header().Set("X-LF-Audit-Host", hostOf(a.URL))
+	if a.Status != audit.StatusDone || a.Result == nil {
+		w.Header().Set("X-LF-Audit-Status", string(a.Status))
+		h.renderAudit(w, "audit_fragment", "AUDIT_PAGE_TITLE", http.StatusOK, &fragmentView{Status: newStatusView(a)})
+		return
+	}
+	w.Header().Set("X-LF-Audit-Status", string(audit.StatusDone))
+	h.renderAudit(w, "audit_fragment", "AUDIT_REPORT_TITLE", http.StatusOK, &fragmentView{Report: newReportView(a, h.lang(), true)})
+}
+
+// fragmentView carries either a report or a waiting state.
+type fragmentView struct {
+	Report *reportView
+	Status *auditStatusView
+}
+
+func newStatusView(a *audit.Audit) *auditStatusView {
+	return &auditStatusView{Host: hostOf(a.URL), Status: string(a.Status), Failed: a.Status == audit.StatusFailed}
 }
 
 type auditStatusView struct {
@@ -116,23 +154,29 @@ func hostOf(raw string) string {
 	return u.Host
 }
 
-// reportView prepares the result for the template: formatted scores and the
-// issues split by priority.
+// reportView prepares the result for the template: formatted scores, the
+// figures the charts draw, and the issues split by priority.
 type reportView struct {
 	Host        string
 	URL         string
 	Date        string
 	Result      *audit.Result
+	Embed       bool // framed by a page of the main site: no title, no call to action
 	Scores      []scoreCard
-	Critical    []audit.IssueSummary
-	Alerts      []audit.IssueSummary
-	Warnings    []audit.IssueSummary
-	Hygiene     []audit.IssueSummary
+	Critical    []issueRow
+	Alerts      []issueRow
+	Warnings    []issueRow
+	Hygiene     []issueRow
+	IssueTypes  int // critical, alert and warning types found
 	HasAI       bool
 	ContactURL  string
 	SampleNote  bool
 	Copywriting []audit.Criterion
 	Content     []audit.Criterion
+	CopyMix     ratingMix
+	ContentMix  ratingMix
+	Levels      []levelCount
+	Queries     []queryRow
 }
 
 type scoreCard struct {
@@ -140,11 +184,38 @@ type scoreCard struct {
 	Value string // "7,5" or "–"
 	Class string // good, mid, low, none
 	Pct   int    // width of the bar
+	Arc   string // length of the gauge arc, on a circle of radius 52
 }
+
+// ratingMix counts the criteria of a group by rating, for the stacked bar.
+type ratingMix struct {
+	Good, Partial, Poor, Total int
+}
+
+// levelCount is the number of priorities of one level.
+type levelCount struct {
+	Level int
+	Count int
+}
+
+// issueRow is an issue type with the share of read pages it touches.
+type issueRow struct {
+	audit.IssueSummary
+	Pct int // bar length: pages concerned out of pages read, at least visible
+}
+
+// queryRow is a target query with a short page path and its alignment step.
+type queryRow struct {
+	audit.TargetQuery
+	Path string
+	Step int // 3 good, 2 partial, 1 weak
+}
+
+const gaugeCircumference = 2 * math.Pi * 52
 
 func formatScore(v *float64, lang string) scoreCard {
 	if v == nil {
-		return scoreCard{Value: "–", Class: "none"}
+		return scoreCard{Class: "none", Arc: "0"}
 	}
 	s := strings.TrimSuffix(strings.TrimSuffix(fmt.Sprintf("%.1f", *v), "0"), ".")
 	if lang == "fr" {
@@ -157,16 +228,68 @@ func formatScore(v *float64, lang string) scoreCard {
 	case *v >= 5:
 		c = "mid"
 	}
-	return scoreCard{Value: s, Class: c, Pct: int(*v * 10)}
+	pct := int(math.Round(*v * 10))
+	return scoreCard{Value: s, Class: c, Pct: pct, Arc: fmt.Sprintf("%.1f", gaugeCircumference*float64(pct)/100)}
 }
 
-func newReportView(a *audit.Audit, lang string) *reportView {
+func newIssueRows(list []audit.IssueSummary, read int) []issueRow {
+	rows := make([]issueRow, 0, len(list))
+	for _, is := range list {
+		pct := 100
+		if read > 0 {
+			pct = is.Pages * 100 / read
+		}
+		if pct < 3 {
+			pct = 3
+		}
+		if pct > 100 {
+			pct = 100
+		}
+		rows = append(rows, issueRow{IssueSummary: is, Pct: pct})
+	}
+	return rows
+}
+
+func newRatingMix(list []audit.Criterion) ratingMix {
+	var m ratingMix
+	for _, c := range list {
+		switch c.Rating {
+		case "good":
+			m.Good++
+		case "partial":
+			m.Partial++
+		default:
+			m.Poor++
+		}
+	}
+	m.Total = m.Good + m.Partial + m.Poor
+	return m
+}
+
+// pagePath shortens a page address to its path for display.
+func pagePath(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil || u.Host == "" {
+		return raw
+	}
+	p := u.EscapedPath()
+	if p == "" {
+		p = "/"
+	}
+	if dec, err := url.PathUnescape(p); err == nil {
+		p = dec
+	}
+	return p
+}
+
+func newReportView(a *audit.Audit, lang string, embed bool) *reportView {
 	res := a.Result
 	v := &reportView{
 		Host:   hostOf(a.URL),
 		URL:    a.URL,
 		Date:   res.GeneratedAt.Format("02/01/2006"),
 		Result: res,
+		Embed:  embed,
 		HasAI:  res.AI != nil,
 	}
 	if lang == "fr" {
@@ -183,17 +306,34 @@ func newReportView(a *audit.Audit, lang string) *reportView {
 		c.Key = s.key
 		v.Scores = append(v.Scores, c)
 	}
+	var critical, alerts, warnings []audit.IssueSummary
 	for _, is := range res.Issues {
 		switch is.Priority {
 		case 1:
-			v.Critical = append(v.Critical, is)
+			critical = append(critical, is)
 		case 2:
-			v.Alerts = append(v.Alerts, is)
+			alerts = append(alerts, is)
 		default:
-			v.Warnings = append(v.Warnings, is)
+			warnings = append(warnings, is)
 		}
 	}
-	v.Hygiene = res.Hygiene
+	read := res.Site.PagesCrawled
+	v.Critical = newIssueRows(critical, read)
+	v.Alerts = newIssueRows(alerts, read)
+	v.Warnings = newIssueRows(warnings, read)
+	v.Hygiene = newIssueRows(res.Hygiene, read)
+	v.IssueTypes = len(res.Issues)
+
+	counts := map[int]int{}
+	for _, p := range res.Priorities {
+		counts[p.Level]++
+	}
+	for _, l := range []int{1, 2, 3} {
+		if counts[l] > 0 {
+			v.Levels = append(v.Levels, levelCount{Level: l, Count: counts[l]})
+		}
+	}
+
 	if res.AI != nil {
 		for _, c := range res.AI.Criteria {
 			if c.Group == "copywriting" {
@@ -201,6 +341,18 @@ func newReportView(a *audit.Audit, lang string) *reportView {
 			} else {
 				v.Content = append(v.Content, c)
 			}
+		}
+		v.CopyMix = newRatingMix(v.Copywriting)
+		v.ContentMix = newRatingMix(v.Content)
+		for _, q := range res.AI.TargetQueries {
+			step := 1
+			switch q.Alignment {
+			case "good":
+				step = 3
+			case "partial":
+				step = 2
+			}
+			v.Queries = append(v.Queries, queryRow{TargetQuery: q, Path: pagePath(q.Page), Step: step})
 		}
 	}
 	v.SampleNote = res.Site.LimitReached

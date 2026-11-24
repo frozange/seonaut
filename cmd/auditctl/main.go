@@ -60,6 +60,7 @@ func main() {
 		Store: &audit.Store{DB: db},
 		Cfg: audit.Config{
 			BaseURL:     cfg.HTTPServer.URL,
+			ReportURL:   cfg.Audit.ReportURL,
 			DefaultLang: cfg.Audit.Language,
 			DailyCap:    cfg.Audit.DailyCap,
 			PerEmailDay: cfg.Audit.PerEmailPerDay,

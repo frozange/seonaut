@@ -131,6 +131,12 @@ type AuditConfig struct {
 	NotifyEmail  string `mapstructure:"notify_email"`
 	BotEmail     string `mapstructure:"bot_email"`
 
+	// ReportURL is the public address of a report when a page of the main site
+	// frames it, with {token} in place of the token, e.g.
+	// "https://lafactory.com/fr/audit/rapport/{token}/". Empty: reports are served
+	// here, at /rapport/{token}.
+	ReportURL string `mapstructure:"report_url"`
+
 	KeyPages            int  `mapstructure:"key_pages"`
 	MaxPages            int  `mapstructure:"max_pages"` // pages per audit crawl
 	DailyCap            int  `mapstructure:"daily_cap"`

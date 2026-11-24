@@ -731,3 +731,19 @@ AUDIT_CTA_TITLE: Parlons de votre site
 AUDIT_CTA_TEXT: Nous pouvons reprendre ce rapport avec vous et décider ensemble par quoi commencer.
 AUDIT_CTA_BUTTON: Contacter LaFactory
 AUDIT_PAGE_AFFECTED_ONE: "1 page concernée"
+AUDIT_OUT_OF: sur 10
+AUDIT_GRADE_good: Bon
+AUDIT_GRADE_mid: À améliorer
+AUDIT_GRADE_low: Faible
+AUDIT_GRADE_none: Non évalué
+AUDIT_FACT_PAGES: pages lues
+AUDIT_FACT_PASSED: contrôles sans défaut
+AUDIT_FACT_ISSUES: types de problèmes relevés
+AUDIT_FACT_PRIORITIES: priorités retenues
+AUDIT_SHOW_DETAIL: Lire l'analyse
+AUDIT_BEFORE: Aujourd'hui
+AUDIT_AFTER: Proposition
+AUDIT_WHY: Pourquoi ce changement
+AUDIT_TECHNICAL_BARS: "La barre montre la part des pages lues qui sont concernées. Cliquez sur un problème pour voir des exemples."
+AUDIT_METHOD_SHOW: Comment ce rapport est établi
+AUDIT_STATUS_GONE: "Le lien est peut-être incomplet, ou le rapport a été retiré."

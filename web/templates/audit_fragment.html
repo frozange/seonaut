@@ -1,0 +1,2 @@
+{{/* Fragment framed by a page of the main site: no html, head or body. */}}
+{{ with .Data }}{{ if .Report }}{{ template "audit_report_body" .Report }}{{ else }}{{ template "audit_status_body" .Status }}{{ end }}{{ end }}

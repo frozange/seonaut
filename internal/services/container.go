@@ -383,6 +383,7 @@ func (c *Container) InitAuditService() {
 		Trans:       c.Translator.Trans,
 		Cfg: audit.Config{
 			BaseURL:      c.Config.HTTPServer.URL,
+			ReportURL:    ac.ReportURL,
 			NotifyEmail:  ac.NotifyEmail,
 			DefaultLang:  ac.Language,
 			LanguageName: ac.LanguageName,
