@@ -3,6 +3,14 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.6.1 - 2026-11-24
+
+- Le script de déploiement sur srv entre dans le dépôt (`deploy/install-lafactory.sh`,
+  copié dans `/root/claude/seonaut-deploy/install.sh`). Toute écriture dans le
+  compte (archive dépaquetée, binaires, `config`, `run.sh`, crontab, redémarrage)
+  est faite par `lafactor` lui-même via `sudo -u lafactor` : root ne fait que lire
+  l'archive et les secrets, et ne suit donc aucun lien posé dans le compte.
+
 ## 1.6.0 - 2026-11-24
 
 Les adresses de rapport portent le nom du site : le jeton de 43 caractères
