@@ -323,7 +323,7 @@ func TestMeasuredPriorities(t *testing.T) {
 		Speed:      &SpeedReport{Mobile: &SpeedRun{Field: &FieldData{LCP: &FieldMetric{P75: 5000, Rating: "poor"}}}},
 		Structured: &StructuredReport{Families: []SDFamily{{Key: "product", Pages: 3, ErrorPages: 2}}},
 		Duplicates: []DuplicateGroup{{Pages: []string{"a", "b"}}},
-		Linking:    &LinkingReport{Pages: 10, WeakCount: 4},
+		Linking:    &LinkingReport{Pages: 10, WeakCount: 4, Orphans: 1},
 	}
 	ev, ids := MeasureEvidence(res, []EvidenceEntry{{ID: "E1"}})
 	if len(ev) != 5 || ids["speed"] != "E2" || ids["duplicates"] == "" {
@@ -346,5 +346,28 @@ func TestMeasuredPriorities(t *testing.T) {
 		if x.ID == "m:speed" {
 			t.Error("lab data alone never makes a speed priority")
 		}
+	}
+}
+
+// One crawlable link is enough for Google to find a page: pages linked once
+// are information, only pages nobody links to make a priority.
+func TestLinkingPriorityOnlyForOrphans(t *testing.T) {
+	res := &Result{Linking: &LinkingReport{Pages: 38, WeakCount: 4, Weak: []LinkedPage{{Inlinks: 1}, {Inlinks: 1}}},
+		Priorities: []Priority{{ID: "t:X"}, {ID: "m:linking"}, {ID: "e:intent"}}}
+	for _, p := range MeasuredPriorities(res, nil) {
+		if p.ID == "m:linking" {
+			t.Error("pages linked once made a priority")
+		}
+	}
+	RefreshMeasuredPriorities(res)
+	if len(res.Priorities) != 2 || res.Priorities[1].ID != "e:intent" {
+		t.Errorf("saved report keeps a stale priority: %+v", res.Priorities)
+	}
+	res.Linking.Weak = append(res.Linking.Weak, LinkedPage{Inlinks: 0})
+	res.Linking.Orphans = 0
+	res.Priorities = []Priority{{ID: "m:linking"}}
+	RefreshMeasuredPriorities(res)
+	if res.Linking.Orphans != 1 || len(res.Priorities) != 1 {
+		t.Errorf("orphan read from the examples: %+v %+v", res.Linking, res.Priorities)
 	}
 }

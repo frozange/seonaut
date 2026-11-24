@@ -374,6 +374,7 @@
 			<article class="lfr-card lfr-{{ .Class }}">
 				<span class="lfr-chip lfr-{{ .Class }}">{{ template "lfr_icon" .Class }}{{ trans (print "AUDIT_LINKS_STATE_" .Class) }}</span>
 				<h5 class="lfr-card-title">{{ trans "AUDIT_LINKS_WEAK" .WeakCount }}</h5>
+				{{ if .Orphans }}<p>{{ trans "AUDIT_LINKS_ORPHANS" .Orphans }}</p>{{ end }}
 				<p class="lfr-small">{{ trans "AUDIT_LINKS_WEAK_HELP" }}</p>
 				{{ if .Weak }}<details class="lfr-more"><summary>{{ trans "AUDIT_EXAMPLES" }}</summary><ul class="lfr-rows">{{ range .Weak }}<li><span>{{ .Path }}{{ if .Product }} ({{ trans "AUDIT_LINKS_PRODUCT" }}){{ end }}</span><span class="lfr-small">{{ if eq .Inlinks 0 }}{{ trans "AUDIT_LINKS_NONE" }}{{ else }}{{ trans "AUDIT_LINKS_ONE" }}{{ end }}</span></li>{{ end }}</ul></details>{{ end }}
 			</article>

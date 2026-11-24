@@ -323,8 +323,8 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64, signals 
 }
 
 // Requery checks the target searches of a finished report against Google
-// Suggest again, without crawling or calling the AI: for a report made while
-// Suggest did not answer, or before a change of the check.
+// Suggest again and drops the measured priorities the current rules no longer
+// make, without crawling or calling the AI.
 func (s *Service) Requery(ctx context.Context, a *Audit) error {
 	res := a.Result
 	if res == nil || res.AI == nil {
@@ -343,6 +343,7 @@ func (s *Service) Requery(ctx context.Context, a *Audit) error {
 		return err
 	}
 	s.checkQueries(ctx, res, res.KeyPages, u.Host)
+	RefreshMeasuredPriorities(res)
 	return s.Store.SaveResult(a, res)
 }
 

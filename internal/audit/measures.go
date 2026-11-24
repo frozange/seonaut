@@ -213,7 +213,7 @@ func MeasureEvidence(res *Result, evidence []EvidenceEntry) ([]EvidenceEntry, ma
 		}
 		add("linking", "Internal links: how easily visitors and Google's crawler reach each page through the site's own links (LaFactory measure on a 0 to 100 scale, not a score Google uses)", map[string]interface{}{
 			"indexable_pages": l.Pages, "pages_easiest_to_reach": top,
-			"pages_linked_from_one_page_or_none": l.WeakCount, "examples_weakly_linked": weak,
+			"pages_linked_from_one_page_or_none": l.WeakCount, "pages_no_other_page_links_to": l.Orphans, "examples_weakly_linked": weak,
 		})
 	}
 	if len(res.Duplicates) > 0 {
@@ -302,8 +302,10 @@ func MeasuredPriorities(res *Result, ev map[string]string) []Priority {
 	if n := duplicatePages(res.Duplicates); n > 0 {
 		out = append(out, Priority{ID: "m:duplicates", Source: "technical", Level: 3, Title: "AUDIT_PRIO_DUPLICATES", Pages: n, Evidence: evid("duplicates")})
 	}
-	if l := res.Linking; l != nil && l.WeakCount > 0 && l.Pages > 0 && l.WeakCount*10 >= l.Pages {
-		out = append(out, Priority{ID: "m:linking", Source: "technical", Level: 3, Title: "AUDIT_PRIO_LINKING", Pages: l.WeakCount, Evidence: evid("linking")})
+	// Google finds a page through any crawlable link: only a page no other page
+	// links to (found through the sitemap at best) makes a priority.
+	if l := res.Linking; l != nil && l.Orphans > 0 {
+		out = append(out, Priority{ID: "m:linking", Source: "technical", Level: 3, Title: "AUDIT_PRIO_LINKING", Pages: l.Orphans, Evidence: evid("linking")})
 	}
 	return out
 }
@@ -331,4 +333,29 @@ func pageLang(pages []PageFacts) string {
 		return ""
 	}
 	return strings.TrimSpace(pages[0].Lang)
+}
+
+// RefreshMeasuredPriorities drops the measured priorities (m:...) of a saved
+// report that the current rules no longer make, keeping the AI text of the
+// others. Reports saved before the orphan count read it from their examples.
+func RefreshMeasuredPriorities(res *Result) {
+	if l := res.Linking; l != nil && l.Orphans == 0 {
+		for _, p := range l.Weak {
+			if p.Inlinks == 0 {
+				l.Orphans++
+			}
+		}
+	}
+	still := map[string]bool{}
+	for _, p := range MeasuredPriorities(res, nil) {
+		still[p.ID] = true
+	}
+	var kept []Priority
+	for _, p := range res.Priorities {
+		if strings.HasPrefix(p.ID, "m:") && !still[p.ID] {
+			continue
+		}
+		kept = append(kept, p)
+	}
+	res.Priorities = kept
 }

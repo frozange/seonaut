@@ -3,6 +3,18 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.7.4 - 2026-11-24
+
+- Liens internes : seule une page qu'aucune autre page ne relie (trouvée au mieux
+  par le plan du site) crée une priorité. Google documente la découverte : un
+  seul lien explorable suffit pour qu'il trouve une page. Les pages reliées une
+  seule fois restent listées, à titre d'information, sans priorité.
+- `LinkingReport.Orphans` compte ces pages isolées ; la carte du rapport les
+  annonce et passe à « Pages isolées » seulement dans ce cas.
+- `auditctl requery` retire aussi d'un rapport enregistré les priorités
+  mesurées que les règles actuelles ne créent plus (sur sel-tech.fr :
+  « Pages peu reliées », 4 pages reliées une fois).
+
 ## 1.7.3 - 2026-11-24
 
 Les mesures du lot A relues contre la documentation de Google Search Central

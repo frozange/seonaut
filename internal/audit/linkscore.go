@@ -163,6 +163,7 @@ type LinkingReport struct {
 	Top          []LinkedPage `json:"top"`
 	Weak         []LinkedPage `json:"weak"`       // examples, product and key pages first
 	WeakCount    int          `json:"weak_count"` // indexable pages linked from one page or none
+	Orphans      int          `json:"orphans"`    // indexable pages no other page links to (sitemap only)
 	Deep         int          `json:"deep"`       // indexable pages four clicks or more from the home page
 	DeepExamples []LinkedPage `json:"deep_examples,omitempty"`
 }
@@ -209,6 +210,11 @@ func BuildLinking(pages []*PageSignal, home string, important map[string]bool) *
 		}
 	}
 	rep.WeakCount, rep.Deep = len(weak), len(deep)
+	for _, p := range weak {
+		if p.Inlinks == 0 {
+			rep.Orphans++
+		}
+	}
 	rank := func(p LinkedPage) int {
 		switch {
 		case important[p.URL]:
