@@ -334,23 +334,3 @@ func TestStripUnknownNumbersKeepsDomains(t *testing.T) {
 		t.Errorf("got %q\nwant %q", got, want)
 	}
 }
-
-func TestPickKeyPagesNoindex(t *testing.T) {
-	// A normal site: noindex pages (thank-you page) are left out, the home page stays.
-	got := pickKeyPages([]PageFacts{
-		{URL: "https://ex.com/", Depth: 0},
-		{URL: "https://ex.com/merci/", Depth: 1, Inlinks: 9, Noindex: true},
-		{URL: "https://ex.com/services/", Depth: 1, Inlinks: 3},
-	}, "https://ex.com/", 5)
-	if len(got) != 2 || got[1].URL != "https://ex.com/services/" {
-		t.Fatalf("normal site: got %+v", got)
-	}
-	// A site hidden from Google by mistake: its pages are still read.
-	got = pickKeyPages([]PageFacts{
-		{URL: "https://ex.com/", Depth: 0, Noindex: true},
-		{URL: "https://ex.com/services/", Depth: 1, Noindex: true},
-	}, "https://ex.com/", 5)
-	if len(got) != 2 || got[0].URL != "https://ex.com/" {
-		t.Fatalf("noindex site: got %+v", got)
-	}
-}

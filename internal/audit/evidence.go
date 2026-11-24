@@ -96,15 +96,13 @@ var blogPath = regexp.MustCompile(`(?i)/(blog|news|actualites?|articles?|categor
 
 // KeyPages returns the main pages of the site: the home page first, then the
 // shallowest, most linked HTML pages that are not blog posts or listings.
-// Pages marked noindex are read too when the site has no other page: a site
-// hidden from Google by mistake still gets its texts reviewed.
 func (r *CrawlReader) KeyPages(crawlID int64, home string, max int) ([]PageFacts, error) {
 	rows, err := r.DB.Query(`
-		SELECT p.url, p.depth, p.title, p.description, p.h1, p.words, p.lang, p.noindex,
+		SELECT p.url, p.depth, p.title, p.description, p.h1, p.words, p.lang,
 			(SELECT COUNT(*) FROM links l WHERE l.crawl_id = p.crawl_id AND l.url_hash = p.url_hash) AS inlinks
 		FROM pagereports p
 		WHERE p.crawl_id = ? AND p.crawled = 1 AND p.status_code = 200
-			AND p.media_type = 'text/html' AND p.depth <= 3
+			AND p.media_type = 'text/html' AND p.noindex = 0 AND p.depth <= 3
 		ORDER BY p.depth ASC, inlinks DESC
 		LIMIT 400`, crawlID)
 	if err != nil {
@@ -115,7 +113,7 @@ func (r *CrawlReader) KeyPages(crawlID int64, home string, max int) ([]PageFacts
 	var all []PageFacts
 	for rows.Next() {
 		var p PageFacts
-		if err := rows.Scan(&p.URL, &p.Depth, &p.Title, &p.Description, &p.H1, &p.Words, &p.Lang, &p.Noindex, &p.Inlinks); err != nil {
+		if err := rows.Scan(&p.URL, &p.Depth, &p.Title, &p.Description, &p.H1, &p.Words, &p.Lang, &p.Inlinks); err != nil {
 			return nil, err
 		}
 		all = append(all, p)
@@ -123,24 +121,12 @@ func (r *CrawlReader) KeyPages(crawlID int64, home string, max int) ([]PageFacts
 	return pickKeyPages(all, home, max), rows.Err()
 }
 
-// pickKeyPages keeps the home page whatever its robots directive, and other
-// noindex pages only when no other page can be indexed.
 func pickKeyPages(all []PageFacts, home string, max int) []PageFacts {
 	homeNorm := strings.TrimRight(home, "/")
-	indexable := false
-	for _, p := range all {
-		if !p.Noindex && strings.TrimRight(p.URL, "/") != homeNorm {
-			indexable = true
-			break
-		}
-	}
 	var out, rest []PageFacts
 	for _, p := range all {
 		if strings.TrimRight(p.URL, "/") == homeNorm {
 			out = append([]PageFacts{p}, out...)
-			continue
-		}
-		if p.Noindex && indexable {
 			continue
 		}
 		u, err := url.Parse(p.URL)
