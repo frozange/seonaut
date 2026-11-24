@@ -16,8 +16,9 @@
 	.lfr p { margin: 0 0 .8em; padding: 0; }
 	.lfr p:last-child { margin-bottom: 0; }
 	.lfr h2, .lfr h3, .lfr h4, .lfr h5 { color: var(--lfr-strong); margin: 0 0 .5em; padding: 0; line-height: 1.25; }
-	.lfr ul, .lfr ol { margin: 0; padding: 0; list-style: none; }
-	.lfr li { margin: 0; padding: 0; }
+	/* The framing theme styles lists by id (Divi: #left-area ul): the reset must win. */
+	.lfr ul, .lfr ol { margin: 0 !important; padding: 0 !important; list-style: none !important; }
+	.lfr li { margin: 0; padding: 0; list-style: none !important; }
 	.lfr a { color: var(--lfr-strong); text-decoration: underline; text-underline-offset: 3px; }
 	.lfr-sec { padding: clamp(48px, 7vw, 88px) 0 0; border: 0; }
 	.lfr-sec-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 32px; margin-bottom: 28px; }
