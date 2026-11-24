@@ -3,6 +3,16 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.6.3 - 2026-11-24
+
+- Un site dont l'accueil est en `noindex` n'avait aucune page lue par l'IA : les
+  pages clés excluaient toute page `noindex`, et l'accueil de dev.lafactory.com
+  (`noindex, nofollow`, réglage d'un banc) en est un. Un site client oublié en
+  « Demander aux moteurs de ne pas indexer » aurait reçu un rapport sans avis sur
+  ses textes. Désormais l'accueil est toujours lu, et les autres pages `noindex`
+  le sont quand le site n'a aucune autre page indexable. Chaque page lue porte
+  `noindex` dans les éléments donnés à l'IA.
+
 ## 1.6.2 - 2026-11-24
 
 - Le texte de l'IA parle comme le patron du site, pas comme un consultant : la

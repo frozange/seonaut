@@ -91,6 +91,7 @@ type PageFacts struct {
 	H1          string   `json:"h1"`
 	Words       int      `json:"words"`
 	Lang        string   `json:"lang"`
+	Noindex     bool     `json:"noindex,omitempty"` // the page asks search engines not to index it
 	Headings    []string `json:"headings,omitempty"`
 	Text        string   `json:"-"`
 	Footer      string   `json:"-"`
