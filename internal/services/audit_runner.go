@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stjudewashere/seonaut/internal/audit"
 	"github.com/stjudewashere/seonaut/internal/models"
 	"github.com/stjudewashere/seonaut/internal/repository"
 
@@ -26,7 +27,8 @@ type AuditCrawlRunner struct {
 	CrawlRepo *repository.CrawlRepository
 	BotEmail  string
 	UserAgent string
-	MaxPages  int // pages per audit crawl, 0 = the instance limit
+	MaxPages  int              // pages per audit crawl, 0 = the instance limit
+	Signals   *audit.Collector // receives the pages of the audit crawls
 }
 
 // botUser returns the robot account, creating it on first use with a random
@@ -85,6 +87,9 @@ func (r *AuditCrawlRunner) Crawl(ctx context.Context, siteURL string) (int64, in
 	})
 	defer r.Broker.Unsubscribe(sub)
 
+	if r.Signals != nil {
+		r.Signals.Watch(p.Id)
+	}
 	r.Crawler.SetPageLimit(p.Id, r.MaxPages)
 	defer r.Crawler.SetPageLimit(p.Id, 0)
 

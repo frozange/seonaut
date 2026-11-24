@@ -179,6 +179,12 @@ type reportView struct {
 	ContentMix  ratingMix
 	Levels      []levelCount
 	Queries     []queryRow
+	Dropped     []queryRow // target searches Google Suggest does not know
+	Checked     bool       // target searches were checked against Google Suggest
+	Speed       *speedView
+	Structured  *sdView
+	Linking     *linkingView
+	Dups        *dupView
 }
 
 type scoreCard struct {
@@ -209,8 +215,9 @@ type issueRow struct {
 // queryRow is a target query with a short page path and its alignment step.
 type queryRow struct {
 	audit.TargetQuery
-	Path string
-	Step int // 3 good, 2 partial, 1 weak
+	Path        string
+	Step        int    // 3 good, 2 partial, 1 weak
+	GoogleClass string // good, mid, none
 }
 
 const gaugeCircumference = 2 * math.Pi * 52
@@ -284,6 +291,26 @@ func pagePath(raw string) string {
 	return p
 }
 
+func newQueryRow(q audit.TargetQuery) queryRow {
+	step := 1
+	switch q.Alignment {
+	case "good":
+		step = 3
+	case "partial":
+		step = 2
+	}
+	gc := "none"
+	switch q.Google {
+	case audit.QueryConfirmed:
+		gc = "good"
+	case audit.QueryVariant:
+		gc = "mid"
+	case audit.QueryUnknown:
+		gc = "low"
+	}
+	return queryRow{TargetQuery: q, Path: pagePath(q.Page), Step: step, GoogleClass: gc}
+}
+
 func newReportView(a *audit.Audit, lang string, embed bool) *reportView {
 	res := a.Result
 	v := &reportView{
@@ -347,16 +374,17 @@ func newReportView(a *audit.Audit, lang string, embed bool) *reportView {
 		v.CopyMix = newRatingMix(v.Copywriting)
 		v.ContentMix = newRatingMix(v.Content)
 		for _, q := range res.AI.TargetQueries {
-			step := 1
-			switch q.Alignment {
-			case "good":
-				step = 3
-			case "partial":
-				step = 2
-			}
-			v.Queries = append(v.Queries, queryRow{TargetQuery: q, Path: pagePath(q.Page), Step: step})
+			v.Queries = append(v.Queries, newQueryRow(q))
 		}
+		for _, q := range res.AI.DroppedQueries {
+			v.Dropped = append(v.Dropped, newQueryRow(q))
+		}
+		v.Checked = res.AI.QueriesChecked
 	}
+	v.Speed = newSpeedView(res.Speed, lang)
+	v.Structured = newSDView(res.Structured)
+	v.Linking = newLinkingView(res.Linking)
+	v.Dups = newDupView(res)
 	v.SampleNote = res.Site.LimitReached
 	return v
 }

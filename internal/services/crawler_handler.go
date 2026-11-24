@@ -28,6 +28,13 @@ type CrawlerHandler struct {
 	broker              *Broker
 	reportManager       *ReportManager
 	externalLinksStatus map[string]int
+	observer            PageObserver
+}
+
+// PageObserver receives every crawled response with its parsed HTML. The free
+// audit uses it to read structured data and texts without a second visit.
+type PageObserver interface {
+	ObservePage(projectID int64, pr *models.PageReport, doc *html.Node)
 }
 
 type crawlerData struct {
@@ -46,6 +53,9 @@ func NewCrawlerHandler(r CrawlerHandlerRepository, b *Broker, m *ReportManager) 
 		externalLinksStatus: make(map[string]int),
 	}
 }
+
+// SetObserver registers the page observer; call it before any crawl starts.
+func (s *CrawlerHandler) SetObserver(o PageObserver) { s.observer = o }
 
 func (s *CrawlerHandler) archiveWrapper(callback crawler.ResponseCallback, a Archiver) crawler.ResponseCallback {
 	return func(r *crawler.ResponseMessage) {
@@ -208,6 +218,10 @@ func (s *CrawlerHandler) responseCallback(crawl *models.Crawl, p *models.Project
 			} else {
 				log.Printf("crawler service: SavePageReport: %v\n", err)
 			}
+		}
+
+		if s.observer != nil {
+			s.observer.ObservePage(p.Id, pageReport, htmlNode)
 		}
 
 		status := c.GetStatus()

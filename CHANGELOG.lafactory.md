@@ -3,6 +3,52 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.7.0 - 2026-11-24
+
+Lot A de l'étude des outils libres (mémoire lafactory, 2026-11-24) : quatre mesures
+nouvelles, toutes gratuites, et les recherches visées confrontées à Google. Le
+rapport suit l'ordre « juste milieu » de l'étude : synthèse, priorités, points
+forts, recherches, résultats enrichis, vitesse, liens entre les pages, pages en
+concurrence, rédaction, contenu, détail technique.
+
+- Le robot garde de chaque page ce que la base ne stocke pas (données
+  structurées, empreinte du texte principal, liens suivis) pendant l'exploration
+  (`audit.Collector`, branché sur `CrawlerHandler` par `PageObserver`) : aucune
+  seconde visite du site.
+- **Vitesse réelle** (`perf.go`, portage en Go de `audit-seo/audit/perf.py`) :
+  API PageSpeed Insights, téléphone et ordinateur, données de vrais visiteurs
+  (CrUX, page sinon site entier) séparées de la simulation Lighthouse. La clé est
+  lue par son nom (`[audit] psi_key_file`, `psi_key_name`, défaut `PSI_API_KEY`),
+  envoyée dans un en-tête, jamais dans l'adresse ni dans un message. Un appel raté
+  n'enregistre aucun chiffre.
+- **Données structurées** (`structured.go`, `schema_rules.go`) : lecture JSON-LD
+  et microdonnées par `astappiev/microdata` (BSD-2), règles des résultats enrichis
+  portées d'`adobe/structured-data-validator` (Apache-2.0) pour Product, Offer,
+  AggregateOffer, AggregateRating, Review, BreadcrumbList, Organization, livraison
+  et retours, plus LocalBusiness, PostalAddress et FAQPage d'après la
+  documentation de Google. Blocs JSON-LD illisibles comptés.
+- **Liens entre les pages** (`linkscore.go`, portage du Link Score de LibreCrawl,
+  MIT) : PageRank interne de 0 à 100, redirections suivies, pages les plus mises
+  en avant, pages reliées par une page ou aucune (fiches produits et pages clés
+  d'abord), pages à 4 clics ou plus.
+- **Doublons et pages en concurrence** (`duplicates.go`) : textes principaux
+  presque identiques (empreintes de suites de cinq mots, similarité estimée de
+  85 % ou plus) ; paires au titre, à la description et au H1 semblables (poids de
+  LibreCrawl, seuil 0,85) ; pages auxquelles l'IA prête la même recherche.
+  Traductions (langues différentes ou liens hreflang), pages canonisées ailleurs,
+  `noindex` et pagination exclues.
+- **Recherches visées vérifiées** (`suggest.go`) : chaque recherche devinée par
+  l'IA est confrontée à Google Suggest ; gardée si Google la propose ou propose
+  une forme proche (un mot de différence), écartée sinon et listée à part dans
+  le rapport ; marquée « non vérifiée » si Suggest ne répond pas.
+- Plan d'action : vitesse réelle mauvaise ou moyenne, fiches produits en erreur,
+  doublons, pages en concurrence et pages peu reliées entrent dans les priorités ;
+  la simulation seule n'en crée jamais. Les nouvelles mesures entrent dans le
+  dossier de preuves de l'IA, qui a une règle de plus sur la vitesse et les FAQ.
+- Styles ajoutés à la feuille du gabarit (`lfr_style`), pas par-dessus.
+  `THIRD_PARTY_NOTICES` et `licenses/` portent les licences reprises.
+- Les rapports enregistrés avant 1.7.0 s'affichent comme avant.
+
 ## 1.6.4 - 2026-11-24
 
 - Retour à la sélection des pages clés de 1.6.2 : la 1.6.3 (lecture des pages

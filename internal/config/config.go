@@ -146,6 +146,14 @@ type AuditConfig struct {
 	ReuseHours          int  `mapstructure:"reuse_hours"`
 	CrawlTimeoutMinutes int  `mapstructure:"crawl_timeout_minutes"`
 	KeepProjects        bool `mapstructure:"keep_projects"`
+
+	// PSIKeyFile is a dotenv file holding the PageSpeed Insights API key under
+	// the name PSIKeyName (default PSI_API_KEY); the key is read at startup and
+	// never written anywhere. Empty: the report has no speed section.
+	PSIKeyFile string `mapstructure:"psi_key_file"`
+	PSIKeyName string `mapstructure:"psi_key_name"`
+	// Suggest checks the AI's target searches against Google Suggest.
+	Suggest bool `mapstructure:"suggest"`
 }
 
 // NewConfig loads the configuration from the specified file and path.
@@ -180,6 +188,8 @@ func NewConfig(configFile string) (*Config, error) {
 	viper.SetDefault("audit.max_pages", 150)
 	viper.SetDefault("audit.reuse_hours", 24)
 	viper.SetDefault("audit.crawl_timeout_minutes", 45)
+	viper.SetDefault("audit.psi_key_name", "PSI_API_KEY")
+	viper.SetDefault("audit.suggest", true)
 
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, err

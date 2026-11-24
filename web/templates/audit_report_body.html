@@ -132,6 +132,28 @@
 	.lfr-fold > .lfr-small, .lfr-fold > p { margin-top: 14px; }
 	.lfr-method p { max-width: 75ch; }
 
+	/* Rows: a page path, an optional bar, a figure; used by the measurement sections. */
+	.lfr-rows { display: grid; gap: 0; margin-top: 10px !important; }
+	.lfr-rows > li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--lfr-line); font-size: var(--lf-fs-small, 16px); }
+	.lfr-rows > li:last-child { border-bottom: 0; }
+	.lfr-rows > li > span:first-child { color: var(--lfr-strong); word-break: break-word; }
+	.lfr-rows > li:has(.lfr-bar) { grid-template-columns: minmax(0, 1fr) minmax(60px, 30%) auto; }
+	@media (max-width: 600px) { .lfr-rows > li, .lfr-rows > li:has(.lfr-bar) { grid-template-columns: 1fr auto; } .lfr-rows .lfr-bar { grid-column: 1 / -1; grid-row: 2; } }
+	.lfr-card-title { margin: 14px 0 6px; font-family: var(--lf-font-text, 'Barlow', sans-serif); font-weight: 600; }
+	.lfr-card-text { margin-top: 12px; }
+	.lfr-note { margin-top: 18px; max-width: 75ch; }
+	.lfr-google { margin: 0 0 10px; font-size: var(--lf-fs-small, 16px); color: var(--lfr-strong); }
+	.lfr-google .lfr-chip { white-space: normal; }
+
+	/* Speed: one tile per measure, the value large, its rating and threshold under. */
+	.lfr-speed > .lfr-kicker { color: var(--lfr-strong); margin-bottom: 6px; }
+	.lfr-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px; }
+	.lfr-metric { background: var(--lfr-panel-2); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+	.lfr-metric b { font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif); font-size: var(--lf-fs-h3, 26px); color: var(--lfr-figure); line-height: 1.1; }
+	.lfr-metric b small { font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); margin-left: 2px; }
+	.lfr-metric > span:not(.lfr-chip) { font-size: var(--lf-fs-small, 16px); color: var(--lfr-text); }
+	.lfr-metric > small { font-size: var(--lf-fs-label, 15px); color: var(--lfr-muted); }
+
 	.lfr-conclusion { font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif); font-size: var(--lf-fs-h4, 22px); color: var(--lfr-strong); line-height: 1.45; max-width: 60ch; }
 
 	/* Waiting state */
@@ -148,6 +170,8 @@
 {{ end }}
 
 {{ define "lfr_icon" }}{{ if eq . "good" }}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ else if or (eq . "partial") (eq . "mid") }}<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 2a6 6 0 010 12z" fill="currentColor"/></svg>{{ else if eq . "none" }}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>{{ else if eq . "info" }}<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 7v4M8 4.6v.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>{{ else }}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>{{ end }}{{ end }}
+
+{{ define "lfr_metric" }}<div class="lfr-metric lfr-{{ .Class }}"><b>{{ .Value }}</b><span>{{ trans .Key }}</span><span class="lfr-chip lfr-{{ .Class }}">{{ template "lfr_icon" .Class }}{{ trans (print "AUDIT_SPEED_RATING_" .Class) }}</span><small>{{ trans "AUDIT_SPEED_THRESHOLD" .Threshold }}</small></div>{{ end }}
 
 {{ define "lfr_rating_class" }}{{ if eq . "good" }}lfr-good{{ else if eq . "partial" }}lfr-mid{{ else }}lfr-low{{ end }}{{ end }}
 
@@ -245,55 +269,176 @@
 	</section>
 	{{ end }}
 
-	{{ if .HasAI }}{{ $v := . }}{{ with .Result.AI }}
-	{{ if .Strengths }}
+	{{ if .HasAI }}{{ with .Result.AI.Strengths }}
 	<section class="lfr-sec">
 		<div class="lfr-sec-head"><h2>{{ trans "AUDIT_STRENGTHS" }}</h2></div>
-		<ul class="lfr-grid lfr-strengths">{{ range .Strengths }}<li class="lfr-card">{{ template "lfr_icon" "good" }}<p>{{ .Text }}</p></li>{{ end }}</ul>
+		<ul class="lfr-grid lfr-strengths">{{ range . }}<li class="lfr-card">{{ template "lfr_icon" "good" }}<p>{{ .Text }}</p></li>{{ end }}</ul>
 	</section>
-	{{ end }}
+	{{ end }}{{ end }}
 
-	{{ if $v.Copywriting }}
+	{{ if or .Queries .Dropped }}
 	<section class="lfr-sec">
-		<div class="lfr-sec-head">
-			<div><h2>{{ trans "AUDIT_COPYWRITING" }}</h2><p class="lfr-help">{{ trans "AUDIT_COPYWRITING_HELP" }}</p></div>
-			{{ template "lfr_mix" $v.CopyMix }}
-		</div>
-		{{ template "lfr_criteria" $v.Copywriting }}
-	</section>
-	{{ end }}
-
-	{{ if $v.Content }}
-	<section class="lfr-sec">
-		<div class="lfr-sec-head">
-			<div><h2>{{ trans "AUDIT_CONTENT" }}</h2><p class="lfr-help">{{ trans "AUDIT_CONTENT_HELP" }}</p></div>
-			{{ template "lfr_mix" $v.ContentMix }}
-		</div>
-		{{ template "lfr_criteria" $v.Content }}
-	</section>
-	{{ end }}
-
-	{{ if $v.Queries }}
-	<section class="lfr-sec">
-		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_QUERIES" }}</h2><p class="lfr-help">{{ trans "AUDIT_QUERIES_HELP" }}</p></div></div>
+		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_QUERIES" }}</h2><p class="lfr-help">{{ if .Checked }}{{ trans "AUDIT_QUERIES_HELP_CHECKED" }}{{ else }}{{ trans "AUDIT_QUERIES_HELP" }}{{ end }}</p></div></div>
+		{{ if .Queries }}
 		<div class="lfr-grid">
-			{{ range $v.Queries }}
+			{{ range .Queries }}
 			<article class="lfr-card lfr-query {{ if eq .Step 3 }}lfr-good{{ else if eq .Step 2 }}lfr-mid{{ else }}lfr-low{{ end }}">
 				<p class="path">{{ trans "AUDIT_QUERIES_PAGE" }} {{ .Path }}</p>
 				<p class="q">« {{ .Query }} »</p>
 				<div class="lfr-meter"><i class="on"></i><i{{ if ge .Step 2 }} class="on"{{ end }}></i><i{{ if ge .Step 3 }} class="on"{{ end }}></i><span>{{ trans "AUDIT_QUERIES_ALIGN" }} : {{ trans (print "AUDIT_ALIGN_" .Alignment) }}</span></div>
+				{{ if .Google }}<p class="lfr-google"><span class="lfr-chip lfr-{{ .GoogleClass }}">{{ template "lfr_icon" .GoogleClass }}{{ trans (print "AUDIT_GOOGLE_" .Google) }}</span>{{ with .GoogleVariant }} « {{ . }} »{{ end }}</p>{{ end }}
 				<p class="lfr-small">{{ .Comment }}</p>
+				{{ if .GoogleRelated }}<p class="lfr-small">{{ trans "AUDIT_GOOGLE_RELATED" }} {{ range $i, $r := .GoogleRelated }}{{ if $i }}, {{ end }}« {{ $r }} »{{ end }}</p>{{ end }}
 			</article>
 			{{ end }}
+		</div>
+		{{ end }}
+		{{ if .Dropped }}
+		<details class="lfr-fold">
+			<summary>{{ trans "AUDIT_QUERIES_DROPPED" }} ({{ len .Dropped }})</summary>
+			<p class="lfr-small">{{ trans "AUDIT_QUERIES_DROPPED_HELP" }}</p>
+			<ul class="lfr-rows">{{ range .Dropped }}<li><span>« {{ .Query }} »</span><span class="lfr-small">{{ .Path }}</span></li>{{ end }}</ul>
+		</details>
+		{{ end }}
+	</section>
+	{{ end }}
+
+	{{ with .Structured }}
+	<section class="lfr-sec">
+		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_SD" }}</h2><p class="lfr-help">{{ trans "AUDIT_SD_HELP" .PagesRead }}</p></div></div>
+		<div class="lfr-grid">
+			{{ range .Families }}
+			<article class="lfr-card lfr-{{ .Class }}">
+				<span class="lfr-chip lfr-{{ .Class }}">{{ template "lfr_icon" .Class }}{{ trans (print "AUDIT_SD_STATE_" .Class) }}</span>
+				<h5 class="lfr-card-title">{{ trans (print "AUDIT_SD_FAM_" .Key) }}</h5>
+				<p class="lfr-small">{{ trans (print "AUDIT_SD_FAM_" .Key "_DESC") }}</p>
+				{{ if .Pages }}<p>{{ trans "AUDIT_SD_PAGES" .Pages }}{{ if .ErrorPages }} {{ trans "AUDIT_SD_ERROR_PAGES" .ErrorPages }}{{ end }}</p>{{ else }}<p>{{ trans "AUDIT_SD_ABSENT" }}</p>{{ end }}
+				{{ if .Problems }}
+				<details class="lfr-more"><summary>{{ trans "AUDIT_SD_PROBLEMS" }} ({{ len .Problems }})</summary>
+					<ul class="lfr-rows">{{ range .Problems }}<li><span>{{ trans (print "AUDIT_SD_T_" .Type) }} : {{ if eq .Kind "few_items" }}{{ trans "AUDIT_SD_FEW_ITEMS" }}{{ else }}{{ trans (print "AUDIT_SD_K_" .Kind) }} {{ trans (print "AUDIT_SD_F_" .Field) }}{{ end }}{{ if not .Error }} {{ trans "AUDIT_SD_ADVISED" }}{{ end }}</span><span class="lfr-small">{{ template "lfr_pages" .Pages }}, {{ trans "AUDIT_EXAMPLE" }} {{ index .Examples 0 }}</span></li>{{ end }}</ul>
+				</details>
+				{{ else if .Examples }}
+				<details class="lfr-more"><summary>{{ trans "AUDIT_EXAMPLES" }}</summary><ul class="lfr-rows">{{ range .Examples }}<li><span>{{ . }}</span></li>{{ end }}</ul></details>
+				{{ end }}
+			</article>
+			{{ end }}
+		</div>
+		{{ if .Unreadable }}<p class="lfr-small lfr-note">{{ trans "AUDIT_SD_UNREADABLE" .Unreadable }} {{ trans "AUDIT_EXAMPLE" }} {{ index .UnreadableExamples 0 }}</p>{{ end }}
+		{{ with .OtherTypes }}<p class="lfr-small lfr-note">{{ trans "AUDIT_SD_OTHER" }} {{ . }}.</p>{{ end }}
+	</section>
+	{{ end }}
+
+	{{ with .Speed }}
+	<section class="lfr-sec">
+		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_SPEED" }}</h2><p class="lfr-help">{{ trans "AUDIT_SPEED_HELP" .Path }}</p></div></div>
+		{{ with .Mobile }}
+		{{ if .Failed }}<div class="lfr-card"><p>{{ trans "AUDIT_SPEED_FAILED" }}</p></div>{{ else }}
+		<div class="lfr-grid">
+		<div class="lfr-card lfr-speed">
+			<p class="lfr-kicker">{{ trans "AUDIT_SPEED_FIELD" }}</p>
+			{{ if .HasField }}
+			<p class="lfr-small">{{ if eq .FieldScope "site" }}{{ trans "AUDIT_SPEED_FIELD_SITE" }}{{ else }}{{ trans "AUDIT_SPEED_FIELD_PAGE" }}{{ end }}</p>
+			<div class="lfr-metrics">{{ range .Field }}{{ template "lfr_metric" . }}{{ end }}</div>
+			{{ else }}<p>{{ trans "AUDIT_SPEED_NO_FIELD" }}</p>{{ end }}
+		</div>
+		{{ with .Lab }}
+		<div class="lfr-card lfr-speed">
+			<p class="lfr-kicker">{{ trans "AUDIT_SPEED_LAB" }}</p>
+			<p class="lfr-small">{{ trans "AUDIT_SPEED_LAB_HELP" }}</p>
+			<div class="lfr-metrics">
+				{{ if .Score }}<div class="lfr-metric lfr-{{ .ScoreClass }}"><b>{{ .Score }}<small>/100</small></b><span>{{ trans "AUDIT_SPEED_SCORE" }}</span></div>{{ end }}
+				{{ range .Metrics }}{{ template "lfr_metric" . }}{{ end }}
+			</div>
+			{{ if .Opportunities }}
+			<details class="lfr-more"><summary>{{ trans "AUDIT_SPEED_ADVICE" }} ({{ len .Opportunities }})</summary>
+				<ul class="lfr-rows">{{ range .Opportunities }}<li><span>{{ .Title }}</span><span class="lfr-small">{{ trans "AUDIT_SPEED_SAVING" .Saving }}</span></li>{{ end }}</ul>
+			</details>
+			{{ end }}
+		</div>
+		{{ end }}
+		</div>
+		{{ end }}
+		{{ end }}
+		{{ with .Desktop }}{{ if not .Failed }}<p class="lfr-small lfr-note">{{ trans "AUDIT_SPEED_DESKTOP" }}{{ if .HasField }} {{ trans (print "AUDIT_SPEED_OVERALL_" .Overall) }}{{ end }}{{ with .Lab }}{{ if .Score }} {{ trans "AUDIT_SPEED_DESKTOP_LAB" .Score }}{{ end }}{{ end }}</p>{{ end }}{{ end }}
+	</section>
+	{{ end }}
+
+	{{ with .Linking }}
+	<section class="lfr-sec">
+		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_LINKS" }}</h2><p class="lfr-help">{{ trans "AUDIT_LINKS_HELP" .Pages }}</p></div></div>
+		<div class="lfr-grid">
+			<article class="lfr-card">
+				<h5 class="lfr-card-title">{{ trans "AUDIT_LINKS_TOP" }}</h5>
+				<ul class="lfr-rows lfr-good">{{ range .Top }}<li><span>{{ .Path }}</span><span class="lfr-bar"><i style="width: {{ .Bar }}%"></i></span><span class="lfr-small">{{ .Score }}/100</span></li>{{ end }}</ul>
+			</article>
+			<article class="lfr-card lfr-{{ .Class }}">
+				<span class="lfr-chip lfr-{{ .Class }}">{{ template "lfr_icon" .Class }}{{ trans (print "AUDIT_LINKS_STATE_" .Class) }}</span>
+				<h5 class="lfr-card-title">{{ trans "AUDIT_LINKS_WEAK" .WeakCount }}</h5>
+				<p class="lfr-small">{{ trans "AUDIT_LINKS_WEAK_HELP" }}</p>
+				{{ if .Weak }}<details class="lfr-more"><summary>{{ trans "AUDIT_EXAMPLES" }}</summary><ul class="lfr-rows">{{ range .Weak }}<li><span>{{ .Path }}{{ if .Product }} ({{ trans "AUDIT_LINKS_PRODUCT" }}){{ end }}</span><span class="lfr-small">{{ if eq .Inlinks 0 }}{{ trans "AUDIT_LINKS_NONE" }}{{ else }}{{ trans "AUDIT_LINKS_ONE" }}{{ end }}</span></li>{{ end }}</ul></details>{{ end }}
+				{{ if .Deep }}<p>{{ trans "AUDIT_LINKS_DEEP" .Deep }}</p>
+				<details class="lfr-more"><summary>{{ trans "AUDIT_EXAMPLES" }}</summary><ul class="lfr-rows">{{ range .DeepRows }}<li><span>{{ .Path }}</span><span class="lfr-small">{{ trans "AUDIT_LINKS_CLICKS" .Depth }}</span></li>{{ end }}</ul></details>{{ end }}
+			</article>
 		</div>
 	</section>
 	{{ end }}
 
-	{{ if .Rewrites }}
+	{{ with .Dups }}
+	<section class="lfr-sec">
+		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_DUPS" }}</h2><p class="lfr-help">{{ trans "AUDIT_DUPS_HELP" }}</p></div></div>
+		{{ if .Nothing }}
+		<div class="lfr-card lfr-good"><span class="lfr-chip lfr-good">{{ template "lfr_icon" "good" }}{{ trans "AUDIT_DUPS_NONE_CHIP" }}</span><p class="lfr-card-text">{{ trans "AUDIT_DUPS_NONE" .Pages }}</p></div>
+		{{ else }}
+		<div class="lfr-grid">
+			{{ if .Groups }}
+			<article class="lfr-card lfr-mid">
+				<span class="lfr-chip lfr-mid">{{ template "lfr_icon" "mid" }}{{ trans "AUDIT_DUPS_GROUPS" (len .Groups) }}</span>
+				<h5 class="lfr-card-title">{{ trans "AUDIT_DUPS_TEXT" }}</h5>
+				<p class="lfr-small">{{ trans "AUDIT_DUPS_TEXT_HELP" }}</p>
+				<details class="lfr-more"><summary>{{ trans "AUDIT_EXAMPLES" }}</summary><ul class="lfr-rows">{{ range .Groups }}<li><span>{{ range $i, $p := .Paths }}{{ if $i }} · {{ end }}{{ $p }}{{ end }}</span><span class="lfr-small">{{ trans "AUDIT_DUPS_SIMILAR" .Similarity }}</span></li>{{ end }}</ul></details>
+			</article>
+			{{ end }}
+			{{ if .PairCount }}
+			<article class="lfr-card lfr-info">
+				<span class="lfr-chip lfr-info">{{ template "lfr_icon" "info" }}{{ trans "AUDIT_DUPS_PAIRS" .PairCount }}</span>
+				<h5 class="lfr-card-title">{{ trans "AUDIT_DUPS_COMPETE" }}</h5>
+				<p class="lfr-small">{{ trans "AUDIT_DUPS_COMPETE_HELP" }}</p>
+				<details class="lfr-more"><summary>{{ trans "AUDIT_EXAMPLES" }}</summary><ul class="lfr-rows">
+					{{ range .Titles }}<li><span>{{ .A }} · {{ .B }}</span><span class="lfr-small">« {{ .TitleA }} » · « {{ .TitleB }} »</span></li>{{ end }}
+					{{ range .Queries }}<li><span>{{ .A }} · {{ .B }}</span><span class="lfr-small">{{ trans "AUDIT_DUPS_SAME_QUERY" }} « {{ .Query }} »</span></li>{{ end }}
+				</ul></details>
+			</article>
+			{{ end }}
+		</div>
+		{{ end }}
+	</section>
+	{{ end }}
+
+	{{ if .Copywriting }}
+	<section class="lfr-sec">
+		<div class="lfr-sec-head">
+			<div><h2>{{ trans "AUDIT_COPYWRITING" }}</h2><p class="lfr-help">{{ trans "AUDIT_COPYWRITING_HELP" }}</p></div>
+			{{ template "lfr_mix" .CopyMix }}
+		</div>
+		{{ template "lfr_criteria" .Copywriting }}
+	</section>
+	{{ end }}
+
+	{{ if .Content }}
+	<section class="lfr-sec">
+		<div class="lfr-sec-head">
+			<div><h2>{{ trans "AUDIT_CONTENT" }}</h2><p class="lfr-help">{{ trans "AUDIT_CONTENT_HELP" }}</p></div>
+			{{ template "lfr_mix" .ContentMix }}
+		</div>
+		{{ template "lfr_criteria" .Content }}
+	</section>
+	{{ end }}
+
+	{{ if .HasAI }}{{ with .Result.AI.Rewrites }}
 	<section class="lfr-sec">
 		<div class="lfr-sec-head"><h2>{{ trans "AUDIT_REWRITES" }}</h2></div>
 		<div class="lfr-grid">
-			{{ range .Rewrites }}
+			{{ range . }}
 			<article class="lfr-card lfr-rw">
 				<p class="lfr-kicker">{{ trans (print "AUDIT_ELEMENT_" .Element) }}</p>
 				<p class="tag">{{ trans "AUDIT_BEFORE" }}</p>
@@ -305,7 +450,6 @@
 			{{ end }}
 		</div>
 	</section>
-	{{ end }}
 	{{ end }}{{ end }}
 
 	<section class="lfr-sec lfr-tech">
@@ -332,6 +476,11 @@
 			<p>{{ trans "AUDIT_METHOD_CRAWL" .Result.Site.PagesCrawled }}</p>
 			{{ if .SampleNote }}<p>{{ trans "AUDIT_METHOD_SAMPLE" .Result.Site.CrawlLimit }}</p>{{ end }}
 			<p>{{ trans "AUDIT_METHOD_SCALE" }}</p>
+			{{ if .Speed }}<p>{{ trans "AUDIT_METHOD_SPEED" }}</p>{{ end }}
+			{{ if .Structured }}<p>{{ trans "AUDIT_METHOD_SD" }}</p>{{ end }}
+			{{ if .Linking }}<p>{{ trans "AUDIT_METHOD_LINKS" }}</p>{{ end }}
+			{{ if .Dups }}<p>{{ trans "AUDIT_METHOD_DUPS" }}</p>{{ end }}
+			{{ if .Checked }}<p>{{ trans "AUDIT_METHOD_SUGGEST" }}</p>{{ end }}
 			{{ if .HasAI }}<p>{{ trans "AUDIT_METHOD_AI" }}</p>{{ end }}
 		</details>
 	</section>

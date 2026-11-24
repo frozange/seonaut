@@ -1,0 +1,38 @@
+Third-party code in the LaFactory fork of SEOnaut
+==================================================
+
+The fork is distributed under the MIT licence of SEOnaut (LICENSE). The parts
+below come from other projects, under their own licences, whose full texts are
+in the licenses/ folder.
+
+1. adobe/structured-data-validator
+   https://github.com/adobe/structured-data-validator (commit 6918b52)
+   Copyright 2025 Adobe. Licensed under the Apache License, Version 2.0
+   (licenses/adobe-structured-data-validator.LICENSE.txt). The project ships
+   no NOTICE file.
+   Used in: internal/audit/schema_rules.go.
+   Changes made by LaFactory (2026-11-24): the rich result rules of
+   src/types/*.js and the subtree walk of src/validator.js are rewritten in Go
+   on the item model of astappiev/microdata; the audit keeps the types a shop
+   or a local business reports (Product, Offer, AggregateOffer,
+   AggregateRating, Rating, Review, Brand, Person, BreadcrumbList, ListItem,
+   Organization, OfferShippingDetails, MerchantReturnPolicy); the apparel and
+   variant fields of merchant listings and the bestRating and worstRating
+   recommendations are left out; rules for LocalBusiness, PostalAddress and
+   FAQPage, the shippingDetails and hasMerchantReturnPolicy recommendations of
+   offers and the url and logo recommendations of organizations are added from
+   Google's structured data documentation.
+
+2. LibreCrawl
+   https://github.com/PhialsBasement/LibreCrawl (commit 789c236)
+   Copyright (c) 2025 Phiality. MIT License (licenses/LibreCrawl.LICENSE.txt).
+   Used in: internal/audit/linkscore.go (Link Score, from
+   src/core/crawl_analysis.py _link_score) and internal/audit/duplicates.go
+   (weights of the title, description and H1 similarity, from
+   src/core/issue_detector.py _duplication_similarity). Ported to Go.
+
+3. astappiev/microdata
+   https://github.com/astappiev/microdata (v1.2.0, Go module dependency)
+   Copyright (c) 2023 Oleh Astappiev, Copyright (c) 2015 Lars Wiegman.
+   BSD 2-Clause License (licenses/astappiev-microdata.LICENSE.txt).
+   Used as a library to read JSON-LD and microdata.

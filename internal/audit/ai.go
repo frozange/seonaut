@@ -147,6 +147,8 @@ const styleRules = `Writing rules for every text you produce:
   the length of a text, a title or a description, nofollow on ordinary external links, the number of links, the lang attribute,
   keywords in the URL or in meta keywords. E-E-A-T is not a score: it is the set of qualities (experience, expertise,
   authoritativeness, trust first) that Google's systems look for through many signals.
+- Speed: only the field data (real visits) feed Google's page experience, and it weighs little next to relevance; the lab
+  simulation is a diagnosis, never a ranking factor. Google no longer shows FAQ rich results for most sites.
 - Never invent a figure, a statistic, a name or a fact. If something is missing from the evidence, say it is not verified.
 - Never use these phrases: %s`
 

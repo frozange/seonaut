@@ -362,10 +362,29 @@ func (c *Container) InitAuditService() {
 		}
 	}
 
+	signals := audit.NewCollector(0)
+	c.CrawlerService.crawlerHandler.SetObserver(signals)
+	var speed *audit.SpeedTester
+	if ac.PSIKeyFile != "" {
+		key, err := audit.ReadEnvKey(ac.PSIKeyFile, ac.PSIKeyName)
+		if err != nil {
+			log.Printf("audit: no speed measurement: %v", err)
+		} else {
+			speed = &audit.SpeedTester{Key: key, Locale: ac.Language}
+		}
+	}
+	var suggest *audit.Suggester
+	if ac.Suggest {
+		suggest = &audit.Suggester{Pause: 400 * time.Millisecond}
+	}
+
 	c.AuditIPLimiter = security.NewRateLimiter(ac.PerIPPerDay, 24*time.Hour)
 	c.AuditService = &audit.Service{
-		Store:  &audit.Store{DB: c.db},
-		Reader: &audit.CrawlReader{DB: c.db},
+		Signals: signals,
+		Speed:   speed,
+		Suggest: suggest,
+		Store:   &audit.Store{DB: c.db},
+		Reader:  &audit.CrawlReader{DB: c.db},
 		Runner: &AuditCrawlRunner{
 			Projects:  c.ProjectService,
 			Crawler:   c.CrawlerService,
@@ -376,6 +395,7 @@ func (c *Container) InitAuditService() {
 			BotEmail:  ac.BotEmail,
 			UserAgent: c.Config.Crawler.Agent,
 			MaxPages:  crawlLimit,
+			Signals:   signals,
 		},
 		Interpreter: interpreter,
 		Mailer:      c.Mailer,

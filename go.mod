@@ -4,6 +4,7 @@ go 1.25.0
 
 require (
 	github.com/antchfx/htmlquery v1.3.6
+	github.com/astappiev/microdata v1.2.0
 	github.com/go-sql-driver/mysql v1.10.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/goodsign/monday v1.0.2
@@ -18,15 +19,16 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/temoto/robotstxt v1.1.2
 	github.com/turk/go-sitemap v0.0.0-20210912154218-82ad01095e30
-	golang.org/x/crypto v0.53.0
-	golang.org/x/net v0.56.0
-	golang.org/x/text v0.38.0
+	golang.org/x/crypto v0.54.0
+	golang.org/x/net v0.57.0
+	golang.org/x/text v0.40.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/antchfx/xpath v1.3.6 // indirect
+	github.com/astappiev/fixjson v1.1.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
@@ -39,6 +41,6 @@ require (
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )

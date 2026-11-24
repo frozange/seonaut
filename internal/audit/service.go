@@ -67,6 +67,9 @@ type Service struct {
 	HTTP        *http.Client // guarded client for the page text fetches
 	Trans       Translate
 	Cfg         Config
+	Signals     *Collector   // pages seen by the crawler; nil: no structured data, linking or duplicates
+	Speed       *SpeedTester // nil: no speed section
+	Suggest     *Suggester   // nil: target searches are not checked against Google
 
 	wake chan struct{}
 }
@@ -200,6 +203,10 @@ func (s *Service) Run(ctx context.Context, a *Audit) {
 	cctx, cancel := context.WithTimeout(ctx, timeout)
 	pid, cid, err := s.Runner.Crawl(cctx, a.URL)
 	cancel()
+	var signals []*PageSignal
+	if s.Signals != nil && pid > 0 {
+		signals = s.Signals.Take(pid)
+	}
 	if err != nil {
 		fail("crawl", err)
 		return
@@ -210,7 +217,7 @@ func (s *Service) Run(ctx context.Context, a *Audit) {
 	}
 
 	s.Store.SetStatus(a, StatusAnalysing, "")
-	res, err := s.analyse(ctx, a, cid)
+	res, err := s.analyse(ctx, a, cid, signals)
 	if err != nil {
 		fail("analysis", err)
 		return
@@ -227,8 +234,13 @@ func (s *Service) Run(ctx context.Context, a *Audit) {
 	s.notify(a, note)
 }
 
-func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64) (*Result, error) {
+func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64, signals []*PageSignal) (*Result, error) {
 	u, _ := url.Parse(a.URL)
+	var speed chan *SpeedReport
+	if s.Speed != nil {
+		speed = make(chan *SpeedReport, 1)
+		go func() { speed <- s.Speed.Measure(ctx, a.URL) }()
+	}
 	facts, err := s.Reader.Facts(crawlID)
 	if err != nil {
 		return nil, err
@@ -274,10 +286,25 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64) (*Result
 		KeyPages:    pages,
 	}
 	res.Scores.Technical = TechnicalScore(issues, facts.PagesCrawled)
+	if s.Signals != nil {
+		res.Measured = true
+		res.Structured = BuildStructured(signals)
+		res.Linking = BuildLinking(signals, normalizeURL(a.URL), keyURLs(pages))
+		res.Duplicates = NearDuplicates(signals)
+		res.Competing = CompetingPages(signals, res.Duplicates)
+		if len(res.Competing) > 12 {
+			res.Competing = res.Competing[:12]
+		}
+	}
+	if speed != nil {
+		res.Speed = <-speed
+	}
 	res.Evidence = BuildEvidence(facts, pages, issues, func(t string) (string, string) {
 		return s.Trans("en", t), s.Trans("en", t+"_DESC")
 	})
-	priorities := TechnicalPriorities(issues)
+	var evIDs map[string]string
+	res.Evidence, evIDs = MeasureEvidence(res, res.Evidence)
+	priorities := append(TechnicalPriorities(issues), MeasuredPriorities(res, evIDs)...)
 
 	if s.Interpreter == nil {
 		res.AIError = "disabled"
@@ -294,8 +321,32 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64) (*Result
 		res.AI = rep
 		res.Scores.Copywriting = GroupScore(rep.Criteria, "copywriting")
 		res.Scores.Content = GroupScore(rep.Criteria, "content")
+		s.checkQueries(ctx, res, pages, u.Host, signals)
 	}
 	return res, nil
+}
+
+// checkQueries confronts the AI's target searches with Google Suggest, then
+// pairs the key pages left aiming at the same search.
+func (s *Service) checkQueries(ctx context.Context, res *Result, pages []PageFacts, host string, signals []*PageSignal) {
+	rep := res.AI
+	if s.Suggest != nil && len(rep.TargetQueries) > 0 {
+		sg := *s.Suggest
+		if sg.Lang == "" {
+			sg.Lang, sg.Country = SuggestLocale(pageLang(pages), host, s.Cfg.DefaultLang)
+		}
+		rep.TargetQueries, rep.DroppedQueries = sg.CheckQueries(ctx, rep.TargetQueries)
+		rep.QueriesChecked = true
+	}
+	seen := map[string]bool{}
+	for _, c := range res.Competing {
+		seen[c.A+" "+c.B], seen[c.B+" "+c.A] = true, true
+	}
+	for _, c := range SameQueryPairs(rep.TargetQueries, signals) {
+		if !seen[c.A+" "+c.B] {
+			res.Competing = append(res.Competing, c)
+		}
+	}
 }
 
 // ReportURL is the private address of a report.

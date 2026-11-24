@@ -42,17 +42,23 @@ type Audit struct {
 
 // Result is everything the report page needs. It is stored as JSON.
 type Result struct {
-	GeneratedAt time.Time       `json:"generated_at"`
-	Site        SiteFacts       `json:"site"`
-	Scores      Scores          `json:"scores"`
-	Issues      []IssueSummary  `json:"issues"`
-	Hygiene     []IssueSummary  `json:"hygiene,omitempty"` // outside Google ranking, see google.go
-	PassedCount int             `json:"passed_count"`
-	KeyPages    []PageFacts     `json:"key_pages"`
-	Priorities  []Priority      `json:"priorities"`
-	AI          *AIReport       `json:"ai,omitempty"`
-	AIError     string          `json:"ai_error,omitempty"`
-	Evidence    []EvidenceEntry `json:"evidence"`
+	GeneratedAt time.Time         `json:"generated_at"`
+	Site        SiteFacts         `json:"site"`
+	Scores      Scores            `json:"scores"`
+	Issues      []IssueSummary    `json:"issues"`
+	Hygiene     []IssueSummary    `json:"hygiene,omitempty"` // outside Google ranking, see google.go
+	PassedCount int               `json:"passed_count"`
+	KeyPages    []PageFacts       `json:"key_pages"`
+	Priorities  []Priority        `json:"priorities"`
+	Speed       *SpeedReport      `json:"speed,omitempty"`
+	Structured  *StructuredReport `json:"structured,omitempty"`
+	Linking     *LinkingReport    `json:"linking,omitempty"`
+	Duplicates  []DuplicateGroup  `json:"duplicates,omitempty"`
+	Competing   []CompetingPair   `json:"competing,omitempty"`
+	Measured    bool              `json:"measured,omitempty"` // the page signals of 1.7.0 were collected
+	AI          *AIReport         `json:"ai,omitempty"`
+	AIError     string            `json:"ai_error,omitempty"`
+	Evidence    []EvidenceEntry   `json:"evidence"`
 }
 
 // SiteFacts are measured by the crawler.
@@ -130,10 +136,13 @@ type AIReport struct {
 	Criteria      []Criterion   `json:"criteria"`
 	Strengths     []Strength    `json:"strengths"`
 	TargetQueries []TargetQuery `json:"target_queries"`
-	Summary       string        `json:"summary"`
-	Rewrites      []Rewrite     `json:"rewrites"`
-	Conclusion    string        `json:"conclusion"`
-	Corrections   int           `json:"corrections"`
+	// DroppedQueries are guesses Google Suggest does not know.
+	DroppedQueries []TargetQuery `json:"dropped_queries,omitempty"`
+	QueriesChecked bool          `json:"queries_checked,omitempty"`
+	Summary        string        `json:"summary"`
+	Rewrites       []Rewrite     `json:"rewrites"`
+	Conclusion     string        `json:"conclusion"`
+	Corrections    int           `json:"corrections"`
 }
 
 type Business struct {
@@ -169,6 +178,10 @@ type TargetQuery struct {
 	Alignment string   `json:"alignment"` // good, partial, weak
 	Comment   string   `json:"comment"`
 	Evidence  []string `json:"evidence"`
+	// Google Suggest check, see suggest.go.
+	Google        string   `json:"google,omitempty"`
+	GoogleVariant string   `json:"google_variant,omitempty"`
+	GoogleRelated []string `json:"google_related,omitempty"`
 }
 
 type Rewrite struct {
