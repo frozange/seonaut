@@ -212,3 +212,25 @@ func (s *Store) LatestDoneForHost(host string, t time.Time) (*Audit, error) {
 		WHERE status = 'done' AND created >= ? AND (url LIKE ? OR url LIKE ?)
 		ORDER BY id DESC LIMIT 1`, t.UTC(), "https://"+host+"/%", "http://"+host+"/%"))
 }
+
+// DoneSlugs lists the slugs of the sites with a finished audit.
+func (s *Store) DoneSlugs() ([]string, error) {
+	rows, err := s.DB.Query(`SELECT DISTINCT url FROM audits WHERE status = 'done'`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	seen := map[string]bool{}
+	var out []string
+	for rows.Next() {
+		var u string
+		if err := rows.Scan(&u); err != nil {
+			return nil, err
+		}
+		if sl := Slug(u); sl != "" && !seen[sl] {
+			seen[sl] = true
+			out = append(out, sl)
+		}
+	}
+	return out, rows.Err()
+}

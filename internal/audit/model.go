@@ -54,7 +54,9 @@ type Result struct {
 	Structured  *StructuredReport `json:"structured,omitempty"`
 	Linking     *LinkingReport    `json:"linking,omitempty"`
 	Duplicates  []DuplicateGroup  `json:"duplicates,omitempty"`
-	Measured    bool              `json:"measured,omitempty"` // the page signals of 1.7.0 were collected
+	Popularity  *PopularityReport `json:"popularity,omitempty"`
+	Competitors []string          `json:"competitors,omitempty"` // competitor sites given for the comparison
+	Measured    bool              `json:"measured,omitempty"`    // the page signals of 1.7.0 were collected
 	AI          *AIReport         `json:"ai,omitempty"`
 	AIError     string            `json:"ai_error,omitempty"`
 	Evidence    []EvidenceEntry   `json:"evidence"`

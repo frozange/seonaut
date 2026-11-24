@@ -3,6 +3,47 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.8.0 - 2026-11-24
+
+Lot B de l'étude des outils SEO : la popularité, lue dans le graphe des liens
+entre domaines que Common Crawl publie chaque trimestre (gratuit, données
+libres). Aucune métrique inventée : pas de « liens toxiques », pas de clone de
+Domain Authority, pas de Spam Score.
+
+- **Rapport, section « Popularité : les sites qui vous citent »** (après la
+  vitesse) : nombre de sites qui citent le site audité, les dix mieux reliés,
+  gagnés et perdus depuis le trimestre précédent, et le rang de centralité
+  harmonique de Common Crawl présenté comme un repère de LaFactory (Google
+  publie seulement qu'il se sert des liens, « link analysis systems », sans
+  note). Un domaine absent de l'échantillon affiche « Pas encore dans
+  l'échantillon », jamais 0. Note visible : Common Crawl est un échantillon,
+  les chiffres sont plus bas que dans les outils payants.
+- **« Vous face aux concurrents »**, seulement quand des concurrents sont
+  connus (`auditctl -c config popularity <nom> <concurrent> ...`) : les mêmes
+  chiffres pour chacun, et les sites qui citent au moins deux concurrents (ou
+  le seul donné) et pas le site.
+- La popularité entre au dossier de preuves de l'IA, avec la mention
+  d'échantillon ; elle ne crée aucune priorité. Consigne de l'IA : jamais de
+  lien « toxique », jamais de note d'autorité ; tournures bannies ajoutées.
+- **`internal/webgraph` et la commande `webgraph`** : découverte de la
+  dernière publication (une série de HEAD, une fois par jour), téléchargement
+  de `vertices`, `edges` et `ranks` (environ 11 Go) sur une seule connexion,
+  plafonné à 6 Mo/s, repris par plage d'octets, pause de 45 min sur toute
+  réponse d'erreur ; puis index sur disque lu par `mmap` (noms triés, rangs,
+  décalages et sources des liens entrants, environ 12 Go), en deux passes et
+  par paquets pour tenir en mémoire. Deux trimestres gardés (le dernier et
+  celui d'avant, pour les gagnés et perdus), les plus anciens supprimés.
+- Données dans `/srv/seonaut-webgraph` (compte lafactor, hors de `/home`, donc
+  hors des sauvegardes Backuply quotidiennes ; `CACHEDIR.TAG` le sort de
+  l'image Borg). Outil en `/usr/local/bin/seonaut-webgraph`, planifié par
+  `/etc/cron.d/seonaut-webgraph` (`deploy/webgraph-cron.sh`) : téléchargement
+  de la minute 41 à la minute 04 seulement, jamais à 1 h, jamais pendant une
+  commande Common Crawl de Sestaro (lots à la minute 07, miroir à 01:41, même
+  IP ; Common Crawl a déjà bloqué srv pour excès le 2026-09-25). Une fois un
+  trimestre indexé, `auditctl popularity -missing` ajoute la section aux
+  rapports qui ne l'ont pas.
+- `[audit] webgraph_dir` (défaut `/srv/seonaut-webgraph`, vide pour couper).
+
 ## 1.7.4 - 2026-11-24
 
 - Liens internes : seule une page qu'aucune autre page ne relie (trouvée au mieux

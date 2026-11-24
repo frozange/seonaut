@@ -16,6 +16,7 @@ import (
 	"github.com/stjudewashere/seonaut/internal/netguard"
 	"github.com/stjudewashere/seonaut/internal/repository"
 	"github.com/stjudewashere/seonaut/internal/security"
+	"github.com/stjudewashere/seonaut/internal/webgraph"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
@@ -378,8 +379,14 @@ func (c *Container) InitAuditService() {
 		suggest = &audit.Suggester{Pause: 400 * time.Millisecond}
 	}
 
+	var graph *webgraph.Store
+	if ac.WebGraphDir != "" {
+		graph = &webgraph.Store{Dir: ac.WebGraphDir, Log: log.Printf}
+	}
+
 	c.AuditIPLimiter = security.NewRateLimiter(ac.PerIPPerDay, 24*time.Hour)
 	c.AuditService = &audit.Service{
+		Graph:   graph,
 		Signals: signals,
 		Speed:   speed,
 		Suggest: suggest,

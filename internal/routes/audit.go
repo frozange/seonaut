@@ -185,6 +185,7 @@ type reportView struct {
 	Structured  *sdView
 	Linking     *linkingView
 	Dups        *dupView
+	Pop         *popView
 }
 
 type scoreCard struct {
@@ -385,6 +386,7 @@ func newReportView(a *audit.Audit, lang string, embed bool) *reportView {
 	v.Structured = newSDView(res.Structured)
 	v.Linking = newLinkingView(res.Linking)
 	v.Dups = newDupView(res)
+	v.Pop = newPopView(res.Popularity, lang)
 	v.SampleNote = res.Site.LimitReached
 	return v
 }

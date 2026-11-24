@@ -152,6 +152,9 @@ const styleRules = `Writing rules for every text you produce:
 - Never say that pages of the site compete with each other for a search (keyword cannibalization): Google shows several
   results from one site, and covering a subject well takes several pages whose words overlap. Only a near word for word
   copy of a page is a problem, and it is measured, not guessed.
+- Sites linking to the site come from a sample of the web (Common Crawl): the counts are lower than in paid tools, never
+  complete. Never call a link toxic or harmful, never give an authority score (Domain Authority, Spam Score): Google ignores
+  links it judges unnatural and publishes no link score. The rank is a LaFactory benchmark, not a Google score.
 - Never invent a figure, a statistic, a name or a fact. If something is missing from the evidence, say it is not verified.
 - Never use these phrases: %s`
 

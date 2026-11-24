@@ -38,3 +38,10 @@ cannibalisent
 se font concurrence
 se concurrencent
 concurrence interne
+liens toxiques
+lien toxique
+backlinks toxiques
+domain authority
+autorité de domaine
+spam score
+jus de lien

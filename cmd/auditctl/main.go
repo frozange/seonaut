@@ -7,9 +7,15 @@
 //	auditctl -c config [-fresh] request <site URL> <e-mail>
 //	auditctl -c config status <token or slug>
 //	auditctl -c config requery <token or slug>
+//	auditctl -c config popularity <token or slug> [competitor ...]
+//	auditctl -c config popularity -missing
 //
 // requery checks the target searches of a finished report against Google
-// Suggest again, with no crawl and no AI call.
+// Suggest again, with no crawl and no AI call. popularity reads the sites
+// linking to the audited site in the latest Common Crawl graph again, and
+// compares it with the competitor sites given (none: those kept, if any);
+// -missing does it for every site whose latest report lacks it (run by the
+// graph job once a quarter is indexed).
 //
 // -fresh crawls again even when a report of the same site is recent enough to
 // be reused (the form always reuses it).
@@ -30,10 +36,11 @@ import (
 	"github.com/stjudewashere/seonaut/internal/config"
 	"github.com/stjudewashere/seonaut/internal/repository"
 	"github.com/stjudewashere/seonaut/internal/services"
+	"github.com/stjudewashere/seonaut/internal/webgraph"
 )
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: auditctl -c config [-fresh] request <site URL> <e-mail>\n       auditctl -c config status <token or slug>\n       auditctl -c config requery <token or slug>")
+	fmt.Fprintln(os.Stderr, "usage: auditctl -c config [-fresh] request <site URL> <e-mail>\n       auditctl -c config status <token or slug>\n       auditctl -c config requery <token or slug>\n       auditctl -c config popularity <token or slug> [competitor ...]\n       auditctl -c config popularity -missing")
 	os.Exit(2)
 }
 
@@ -125,6 +132,44 @@ func main() {
 		}
 		for _, q := range a.Result.AI.DroppedQueries {
 			fmt.Printf("dropped %-10s %s %v\n", q.Google, q.Query, q.GoogleRelated)
+		}
+	case "popularity":
+		if cfg.Audit.WebGraphDir != "" {
+			svc.Graph = &webgraph.Store{Dir: cfg.Audit.WebGraphDir}
+		}
+		if args[1] == "-missing" {
+			n, err := svc.FillPopularity()
+			if err != nil {
+				log.Fatalf("popularity: %v", err)
+			}
+			fmt.Printf("popularity measured for %d report(s)\n", n)
+			return
+		}
+		a, err := svc.Store.ByKey(args[1])
+		if err != nil {
+			log.Fatalf("no audit with this token or name: %v", err)
+		}
+		var competitors []string
+		if len(args) > 2 {
+			competitors = args[2:]
+		}
+		if err := svc.RefreshPopularity(a, competitors); err != nil {
+			log.Fatalf("popularity: %v", err)
+		}
+		p := a.Result.Popularity
+		fmt.Printf("audit %d %s, graph %s (previous: %s)\n", a.ID, a.URL, p.Release, p.Previous)
+		for _, d := range append([]audit.DomainPop{p.Site}, p.Competitors...) {
+			if !d.Found {
+				fmt.Printf("%-30s not in the sample yet\n", d.Domain)
+				continue
+			}
+			fmt.Printf("%-30s %d referring domains, rank %d\n", d.Domain, d.Referring, d.Rank)
+		}
+		if p.Compared {
+			fmt.Printf("gained %d, lost %d\n", p.GainedCount, p.LostCount)
+		}
+		if p.GapMin > 0 {
+			fmt.Printf("sites linking to competitors and not to the site: %d\n", p.GapCount)
 		}
 	default:
 		usage()

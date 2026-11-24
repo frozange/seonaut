@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/stjudewashere/seonaut/internal/webgraph"
 )
 
 var (
@@ -67,9 +69,10 @@ type Service struct {
 	HTTP        *http.Client // guarded client for the page text fetches
 	Trans       Translate
 	Cfg         Config
-	Signals     *Collector   // pages seen by the crawler; nil: no structured data, linking or duplicates
-	Speed       *SpeedTester // nil: no speed section
-	Suggest     *Suggester   // nil: target searches are not checked against Google
+	Signals     *Collector      // pages seen by the crawler; nil: no structured data, linking or duplicates
+	Speed       *SpeedTester    // nil: no speed section
+	Suggest     *Suggester      // nil: target searches are not checked against Google
+	Graph       *webgraph.Store // nil or no index: no popularity section
 
 	wake chan struct{}
 }
@@ -295,6 +298,7 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64, signals 
 	if speed != nil {
 		res.Speed = <-speed
 	}
+	s.measurePopularity(res, u.Host)
 	res.Evidence = BuildEvidence(facts, pages, issues, func(t string) (string, string) {
 		return s.Trans("en", t), s.Trans("en", t+"_DESC")
 	})
@@ -345,6 +349,91 @@ func (s *Service) Requery(ctx context.Context, a *Audit) error {
 	s.checkQueries(ctx, res, res.KeyPages, u.Host)
 	RefreshMeasuredPriorities(res)
 	return s.Store.SaveResult(a, res)
+}
+
+// measurePopularity reads the sites linking to the audited site, and to the
+// competitors of the result, in the latest Common Crawl graph.
+func (s *Service) measurePopularity(res *Result, host string) {
+	if s.Graph == nil {
+		return
+	}
+	cur, prev, err := s.Graph.Open()
+	if err != nil {
+		if !errors.Is(err, webgraph.ErrNoIndex) {
+			log.Printf("audit: popularity: %v", err)
+		}
+		return
+	}
+	defer cur.Close()
+	defer prev.Close()
+	res.Popularity = BuildPopularity(cur, prev, host, res.Competitors)
+}
+
+// RefreshPopularity measures the popularity of a finished report again,
+// with these competitors when given, without crawling or calling the AI.
+func (s *Service) RefreshPopularity(a *Audit, competitors []string) error {
+	res := a.Result
+	if res == nil {
+		return errors.New("the audit has no report")
+	}
+	if s.Graph == nil {
+		return errors.New("audit.webgraph_dir is empty")
+	}
+	if competitors != nil {
+		res.Competitors = competitors
+	}
+	u, err := url.Parse(a.URL)
+	if err != nil {
+		return err
+	}
+	res.Popularity = nil
+	s.measurePopularity(res, u.Host)
+	if res.Popularity == nil {
+		return webgraph.ErrNoIndex
+	}
+	return s.Store.SaveResult(a, res)
+}
+
+// NeedsPopularity tells whether the latest report of a site should get its
+// popularity measured now: it has none, or it was measured on the current
+// release before the previous quarter was there to compare with. A report
+// measured on an older release keeps it: a new audit brings the new one.
+func NeedsPopularity(p *PopularityReport, cur, prev *webgraph.Release) bool {
+	if cur == nil {
+		return false
+	}
+	if p == nil {
+		return true
+	}
+	return p.Release == cur.Name && p.Previous == "" && prev != nil
+}
+
+// FillPopularity measures the popularity of the latest finished report of
+// each site when NeedsPopularity says so. It returns the reports updated.
+func (s *Service) FillPopularity() (int, error) {
+	if s.Graph == nil {
+		return 0, errors.New("audit.webgraph_dir is empty")
+	}
+	cur, prev := webgraph.Pair(s.Graph.Ready())
+	if cur == nil {
+		return 0, webgraph.ErrNoIndex
+	}
+	slugs, err := s.Store.DoneSlugs()
+	if err != nil {
+		return 0, err
+	}
+	n := 0
+	for _, sl := range slugs {
+		a, err := s.Store.BySlug(sl)
+		if err != nil || a.Status != StatusDone || a.Result == nil || !NeedsPopularity(a.Result.Popularity, cur, prev) {
+			continue
+		}
+		if err := s.RefreshPopularity(a, nil); err != nil {
+			return n, fmt.Errorf("%s: %w", sl, err)
+		}
+		n++
+	}
+	return n, nil
 }
 
 // checkQueries confronts the AI's target searches with Google Suggest.

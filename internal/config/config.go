@@ -154,6 +154,9 @@ type AuditConfig struct {
 	PSIKeyName string `mapstructure:"psi_key_name"`
 	// Suggest checks the AI's target searches against Google Suggest.
 	Suggest bool `mapstructure:"suggest"`
+	// WebGraphDir holds the Common Crawl domain graph indexes kept by
+	// cmd/webgraph. Empty, or no index yet: the report has no popularity section.
+	WebGraphDir string `mapstructure:"webgraph_dir"`
 }
 
 // NewConfig loads the configuration from the specified file and path.
@@ -190,6 +193,7 @@ func NewConfig(configFile string) (*Config, error) {
 	viper.SetDefault("audit.crawl_timeout_minutes", 45)
 	viper.SetDefault("audit.psi_key_name", "PSI_API_KEY")
 	viper.SetDefault("audit.suggest", true)
+	viper.SetDefault("audit.webgraph_dir", "/srv/seonaut-webgraph")
 
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, err

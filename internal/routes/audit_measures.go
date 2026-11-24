@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"math"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/stjudewashere/seonaut/internal/audit"
 )
@@ -284,6 +286,146 @@ func newDupView(res *audit.Result) *dupView {
 			gv.Paths = append(gv.Paths, pagePath(u))
 		}
 		v.Groups = append(v.Groups, gv)
+	}
+	return v
+}
+
+// count groups the thousands: "134 979 706" in French (narrow no-break
+// space), "134,979,706" in English.
+func count(n uint64, lang string) string {
+	s := strconv.FormatUint(n, 10)
+	sep := ","
+	if lang == "fr" {
+		sep = " "
+	}
+	var b strings.Builder
+	for i, c := range s {
+		if i > 0 && (len(s)-i)%3 == 0 {
+			b.WriteString(sep)
+		}
+		b.WriteRune(c)
+	}
+	return b.String()
+}
+
+type popView struct {
+	Start, End         time.Time
+	StartLayout        string // month alone, or with its year across a new year
+	PrevStart, PrevEnd time.Time
+	PrevStartLayout    string
+	HasPrevious        bool
+	Domains            string
+	Site               popDomainView
+	Top                []popRefView
+	Compared           bool
+	NewInSample        bool // absent from the previous quarter's sample
+	Gained, Lost       []popRefView
+	GainedCount        string
+	LostCount          string
+	GainedN, LostN     int
+	Competitors        []popDomainView // the site first
+	Gap                []popGapView
+	GapCount           string
+	GapN, GapMin       int
+	HasCompetitors     bool
+}
+
+type popDomainView struct {
+	Domain     string
+	You        bool
+	Found      bool
+	Referring  string
+	ReferringN int
+	Rank       string
+	TopPct     string // "2" for "among the top 2 %", empty past half the sample
+}
+
+type popRefView struct {
+	Domain string
+	Rank   string
+}
+
+type popGapView struct {
+	Domain string
+	Rank   string
+	Cites  []string
+}
+
+func periodStart(end time.Time) (time.Time, string) {
+	start := end.AddDate(0, -2, 0)
+	if start.Year() != end.Year() {
+		return start, "January 2006"
+	}
+	return start, "January"
+}
+
+// topPct is the share of the sample ranked at or above rank, rounded up.
+func topPct(rank, total uint32, lang string) string {
+	if rank == 0 || total == 0 {
+		return ""
+	}
+	pct := float64(rank) * 100 / float64(total)
+	switch {
+	case pct > 50:
+		return ""
+	case pct < 1:
+		return decimal(math.Max(0.1, math.Ceil(pct*10)/10), 1, lang)
+	}
+	return fmt.Sprint(math.Ceil(pct))
+}
+
+func newPopDomainView(d audit.DomainPop, total uint32, lang string, you bool) popDomainView {
+	v := popDomainView{Domain: d.Domain, You: you, Found: d.Found}
+	if d.Found {
+		v.Referring, v.ReferringN = count(uint64(d.Referring), lang), d.Referring
+		if d.Rank > 0 {
+			v.Rank, v.TopPct = count(uint64(d.Rank), lang), topPct(d.Rank, total, lang)
+		}
+	}
+	return v
+}
+
+func popRefs(l []audit.RefDomain, lang string) []popRefView {
+	var out []popRefView
+	for _, r := range l {
+		v := popRefView{Domain: r.Domain}
+		if r.Rank > 0 {
+			v.Rank = count(uint64(r.Rank), lang)
+		}
+		out = append(out, v)
+	}
+	return out
+}
+
+func newPopView(p *audit.PopularityReport, lang string) *popView {
+	if p == nil {
+		return nil
+	}
+	v := &popView{End: p.ReleaseEnd, Domains: count(uint64(p.Domains), lang),
+		Site: newPopDomainView(p.Site, p.Domains, lang, true), Top: popRefs(p.Top, lang),
+		Compared: p.Compared, Gained: popRefs(p.Gained, lang), Lost: popRefs(p.Lost, lang),
+		GainedN: p.GainedCount, LostN: p.LostCount,
+		GainedCount: count(uint64(p.GainedCount), lang), LostCount: count(uint64(p.LostCount), lang)}
+	v.Start, v.StartLayout = periodStart(p.ReleaseEnd)
+	if p.Previous != "" {
+		v.HasPrevious, v.PrevEnd = true, p.PreviousEnd
+		v.PrevStart, v.PrevStartLayout = periodStart(p.PreviousEnd)
+		v.NewInSample = p.Site.Found && !p.Site.PrevFound
+	}
+	if len(p.Competitors) > 0 {
+		v.HasCompetitors = true
+		v.Competitors = append(v.Competitors, v.Site)
+		for _, c := range p.Competitors {
+			v.Competitors = append(v.Competitors, newPopDomainView(c, p.Domains, lang, false))
+		}
+		v.GapN, v.GapMin, v.GapCount = p.GapCount, p.GapMin, count(uint64(p.GapCount), lang)
+		for _, g := range p.Gap {
+			gv := popGapView{Domain: g.Domain, Cites: g.Cites}
+			if g.Rank > 0 {
+				gv.Rank = count(uint64(g.Rank), lang)
+			}
+			v.Gap = append(v.Gap, gv)
+		}
 	}
 	return v
 }

@@ -34,3 +34,11 @@ in the licenses/ folder.
    Copyright (c) 2023 Oleh Astappiev, Copyright (c) 2015 Lars Wiegman.
    BSD 2-Clause License (licenses/astappiev-microdata.LICENSE.txt).
    Used as a library to read JSON-LD and microdata.
+
+4. Common Crawl web graph (data, no code)
+   https://commoncrawl.org/web-graphs ; terms of use https://commoncrawl.org/terms-of-use
+   The domain-level graph (vertices, edges, harmonic centrality ranks) is
+   downloaded every quarter and turned into a local index by
+   internal/webgraph. The file formats follow commoncrawl/cc-webgraph
+   (https://github.com/commoncrawl/cc-webgraph, Apache License 2.0); no code
+   of that project is copied.

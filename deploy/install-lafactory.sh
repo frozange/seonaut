@@ -101,6 +101,23 @@ if ! as crontab -l 2>/dev/null | grep -qF "$APP/run.sh"; then
   { as crontab -l 2>/dev/null || true; echo "* * * * * $APP/run.sh"; } | as crontab -
 fi
 
+# Common Crawl graph tool (popularity section): root-owned, run as the account
+# by /etc/cron.d/seonaut-webgraph. Taken from the archive, never from the account.
+W=$S/webgraph-stage
+mkdir -p "$W"
+if tar -xzf "$S/release.tgz" -C "$W" ./webgraph ./deploy/webgraph-cron.sh 2>/dev/null; then
+  install -m 755 -o root -g root "$W/webgraph" /usr/local/bin/seonaut-webgraph
+  install -d -m 755 /root/claude/seonaut-webgraph
+  install -m 750 "$W/deploy/webgraph-cron.sh" /root/claude/seonaut-webgraph/webgraph-cron.sh
+  if [ ! -d /srv/seonaut-webgraph ]; then
+    install -d -m 750 -o "$U" -g "$U" /srv/seonaut-webgraph
+  fi
+  if [ ! -f /etc/cron.d/seonaut-webgraph ]; then
+    printf '%s\n' 'SHELL=/bin/bash' 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' 'MAILTO=""' \
+      '41 * * * * root /usr/bin/flock -n /run/lock/seonaut-webgraph.lock /root/claude/seonaut-webgraph/webgraph-cron.sh' > /etc/cron.d/seonaut-webgraph
+  fi
+fi
+
 # Restart: the cron line brings the new binary up within a minute; start it now.
 as pkill -u "$U" -f "^./seonaut -c config" || true
 sleep 1

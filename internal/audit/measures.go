@@ -216,6 +216,9 @@ func MeasureEvidence(res *Result, evidence []EvidenceEntry) ([]EvidenceEntry, ma
 			"pages_linked_from_one_page_or_none": l.WeakCount, "pages_no_other_page_links_to": l.Orphans, "examples_weakly_linked": weak,
 		})
 	}
+	if p := res.Popularity; p != nil {
+		add("popularity", "Sites that link to the audited site, from the Common Crawl domain graph (a sample of the web; the rank is a LaFactory benchmark, Google publishes no link score)", popularityEvidence(p))
+	}
 	if len(res.Duplicates) > 0 {
 		var dups [][]string
 		for _, g := range res.Duplicates {

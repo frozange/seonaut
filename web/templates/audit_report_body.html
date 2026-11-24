@@ -151,6 +151,8 @@
 	.lfr-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 16px; }
 	.lfr-metric { background: var(--lfr-panel-2); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 	.lfr-metric b { font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif); font-size: var(--lf-fs-h3, 26px); color: var(--lfr-figure); line-height: 1.1; }
+	.lfr-pop .lfr-grid + .lfr-grid, .lfr-pop .lfr-card + .lfr-card { margin-top: 20px; }
+	.lfr-pop-figure b { font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif); font-size: var(--lf-fs-h3, 26px); color: var(--lfr-figure); line-height: 1.1; margin-right: 4px; }
 	.lfr-metric b small { font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); margin-left: 2px; }
 	.lfr-metric > span:not(.lfr-chip) { font-size: var(--lf-fs-small, 16px); color: var(--lfr-text); }
 	.lfr-metric > small { font-size: var(--lf-fs-label, 15px); color: var(--lfr-muted); }
@@ -363,6 +365,56 @@
 	</section>
 	{{ end }}
 
+	{{ with .Pop }}
+	<section class="lfr-sec lfr-pop">
+		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_POP" }}</h2><p class="lfr-help">{{ trans "AUDIT_POP_HELP" (trans_date .Start .StartLayout) (trans_date .End "January 2006") }}</p></div></div>
+		{{ if not .Site.Found }}
+		<div class="lfr-card lfr-info"><span class="lfr-chip lfr-info">{{ template "lfr_icon" "info" }}{{ trans "AUDIT_POP_ABSENT_CHIP" }}</span><p class="lfr-card-text">{{ trans "AUDIT_POP_ABSENT" .Site.Domain .Domains }}</p></div>
+		{{ else }}
+		<div class="lfr-grid">
+			<article class="lfr-card">
+				{{ if .Site.ReferringN }}<p class="lfr-pop-figure"><b>{{ .Site.Referring }}</b> {{ if eq .Site.ReferringN 1 }}{{ trans "AUDIT_POP_SITE_ONE" }}{{ else }}{{ trans "AUDIT_POP_SITES" }}{{ end }}</p>{{ else }}<p class="lfr-card-text">{{ trans "AUDIT_POP_NONE" }}</p>{{ end }}
+				{{ if .Site.Rank }}<p>{{ trans "AUDIT_POP_RANK" .Site.Rank .Domains }}{{ with .Site.TopPct }} {{ trans "AUDIT_POP_TOP_PCT" . }}{{ end }}</p><p class="lfr-small">{{ trans "AUDIT_POP_RANK_HELP" }}</p>{{ end }}
+			</article>
+			{{ if .Top }}<article class="lfr-card">
+				<h5 class="lfr-card-title">{{ trans "AUDIT_POP_TOP" }}</h5>
+				<ul class="lfr-rows">{{ range .Top }}<li><span>{{ .Domain }}</span><span class="lfr-small">{{ if .Rank }}{{ trans "AUDIT_POP_RANK_SHORT" .Rank }}{{ end }}</span></li>{{ end }}</ul>
+			</article>{{ end }}
+		</div>
+		{{ if .Compared }}
+		<div class="lfr-grid">
+			<article class="lfr-card lfr-good">
+				<h5 class="lfr-card-title">{{ trans "AUDIT_POP_GAINED" .GainedCount }}</h5>
+				{{ if .Gained }}<ul class="lfr-rows">{{ range .Gained }}<li><span>{{ .Domain }}</span><span class="lfr-small">{{ if .Rank }}{{ trans "AUDIT_POP_RANK_SHORT" .Rank }}{{ end }}</span></li>{{ end }}</ul>{{ end }}
+			</article>
+			<article class="lfr-card{{ if .LostN }} lfr-mid{{ end }}">
+				<h5 class="lfr-card-title">{{ trans "AUDIT_POP_LOST" .LostCount }}</h5>
+				{{ if .Lost }}<ul class="lfr-rows">{{ range .Lost }}<li><span>{{ .Domain }}</span><span class="lfr-small">{{ if .Rank }}{{ trans "AUDIT_POP_RANK_SHORT" .Rank }}{{ end }}</span></li>{{ end }}</ul>{{ end }}
+				{{ if .LostN }}<p class="lfr-small">{{ trans "AUDIT_POP_LOST_HELP" }}</p>{{ end }}
+			</article>
+		</div>
+		{{ else if .NewInSample }}<p class="lfr-small lfr-note">{{ trans "AUDIT_POP_NEW" }}</p>
+		{{ else if not .HasPrevious }}<p class="lfr-small lfr-note">{{ trans "AUDIT_POP_NO_PREVIOUS" }}</p>{{ end }}
+		{{ end }}
+		<p class="lfr-small lfr-note">{{ trans "AUDIT_POP_SAMPLE" }}</p>
+	</section>
+	{{ if .HasCompetitors }}
+	<section class="lfr-sec lfr-pop">
+		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_VS" }}</h2><p class="lfr-help">{{ trans "AUDIT_VS_HELP" }}</p></div></div>
+		<div class="lfr-card">
+			<ul class="lfr-rows">{{ range .Competitors }}<li><span>{{ if .You }}<b>{{ .Domain }}</b> ({{ trans "AUDIT_VS_YOU" }}){{ else }}{{ .Domain }}{{ end }}</span><span class="lfr-small">{{ if .Found }}{{ if eq .ReferringN 1 }}{{ trans "AUDIT_VS_SITES_ONE" }}{{ else }}{{ trans "AUDIT_VS_SITES" .Referring }}{{ end }}{{ if .Rank }}, {{ trans "AUDIT_POP_RANK_SHORT" .Rank }}{{ end }}{{ else }}{{ trans "AUDIT_POP_ABSENT_CHIP" }}{{ end }}</span></li>{{ end }}</ul>
+		</div>
+		{{ if .GapMin }}
+		<div class="lfr-card{{ if .GapN }} lfr-mid{{ end }}">
+			<h5 class="lfr-card-title">{{ trans "AUDIT_VS_GAP" .GapCount }}</h5>
+			<p class="lfr-small">{{ if eq .GapMin 2 }}{{ trans "AUDIT_VS_GAP_HELP_2" }}{{ else }}{{ trans "AUDIT_VS_GAP_HELP_1" }}{{ end }}</p>
+			{{ if .Gap }}<ul class="lfr-rows">{{ range .Gap }}<li><span>{{ .Domain }}<br><span class="lfr-small">{{ trans "AUDIT_VS_CITES" }} {{ range $i, $c := .Cites }}{{ if $i }}, {{ end }}{{ $c }}{{ end }}</span></span><span class="lfr-small">{{ if .Rank }}{{ trans "AUDIT_POP_RANK_SHORT" .Rank }}{{ end }}</span></li>{{ end }}</ul>{{ end }}
+		</div>
+		{{ end }}
+	</section>
+	{{ end }}
+	{{ end }}
+
 	{{ with .Linking }}
 	<section class="lfr-sec">
 		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_LINKS" }}</h2><p class="lfr-help">{{ trans "AUDIT_LINKS_HELP" .Pages }}</p></div></div>
@@ -461,6 +513,7 @@
 			<p>{{ trans "AUDIT_METHOD_SCALE" }}</p>
 			{{ if .Speed }}<p>{{ trans "AUDIT_METHOD_SPEED" }}</p>{{ end }}
 			{{ if .Structured }}<p>{{ trans "AUDIT_METHOD_SD" }}</p>{{ end }}
+			{{ if .Pop }}<p>{{ trans "AUDIT_METHOD_POP" }}</p>{{ end }}
 			{{ if .Linking }}<p>{{ trans "AUDIT_METHOD_LINKS" }}</p>{{ end }}
 			{{ if .Dups }}<p>{{ trans "AUDIT_METHOD_DUPS" }}</p>{{ end }}
 			{{ if .Checked }}<p>{{ trans "AUDIT_METHOD_SUGGEST" }}</p>{{ end }}
