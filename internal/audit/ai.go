@@ -149,6 +149,9 @@ const styleRules = `Writing rules for every text you produce:
   authoritativeness, trust first) that Google's systems look for through many signals.
 - Speed: only the field data (real visits) feed Google's page experience, and it weighs little next to relevance; the lab
   simulation is a diagnosis, never a ranking factor. Google no longer shows FAQ rich results for most sites.
+- Never say that pages of the site compete with each other for a search (keyword cannibalization): Google shows several
+  results from one site, and covering a subject well takes several pages whose words overlap. Only a near word for word
+  copy of a page is a problem, and it is measured, not guessed.
 - Never invent a figure, a statistic, a name or a fact. If something is missing from the evidence, say it is not verified.
 - Never use these phrases: %s`
 

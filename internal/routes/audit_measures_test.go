@@ -51,7 +51,6 @@ func lotAResult() *audit.Result {
 			Weak:         []audit.LinkedPage{{URL: "https://ex.com/p9", Score: 1, Product: true}, {URL: "https://ex.com/z", Inlinks: 1}},
 			DeepExamples: []audit.LinkedPage{{URL: "https://ex.com/deep", Depth: 5}}},
 		Duplicates: []audit.DuplicateGroup{{Pages: []string{"https://ex.com/a", "https://ex.com/b"}, Similarity: 93}},
-		Competing:  []audit.CompetingPair{{A: "https://ex.com/c", B: "https://ex.com/d", Reason: "titles", TitleA: "T1", TitleB: "T2", Similarity: 90}, {A: "https://ex.com/e", B: "https://ex.com/f", Reason: "query", Query: "pompe piscine"}},
 		AI: &audit.AIReport{
 			Summary:        "SUMMARY",
 			Criteria:       []audit.Criterion{{Group: "copywriting", Question: "value", Rating: "partial", Verdict: "V"}},
@@ -74,7 +73,7 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 	if i := strings.Index(out, "AUDIT_"); i >= 0 {
 		t.Fatalf("untranslated key: %s", out[i:i+60])
 	}
-	order := []string{"La recherche que chaque page", "Ce que Google peut afficher", "La vitesse vécue", "Les liens entre vos pages", "Les pages qui se font concurrence", "La façon dont la page d&#39;accueil"}
+	order := []string{"La recherche que chaque page", "Ce que Google peut afficher", "La vitesse vécue", "Les liens entre vos pages", "Les pages copiées", "La façon dont la page d&#39;accueil"}
 	last := -1
 	for _, s := range order {
 		i := strings.Index(out, s)
@@ -84,10 +83,10 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 		last = i
 	}
 	for _, s := range []string{
-		"1,8 s", "134 ms", "0,31", "bon jusqu&#39;à 2,5 s", "Note de la simulation", "46", "Réduisez le JavaScript inutilisé", "gain possible : 0,9 s",
+		"1,8\u00a0s", "134\u00a0ms", "0,31", "bon jusqu&#39;à 2,5\u00a0s", "Note de la simulation", "46", "Réduisez le JavaScript inutilisé", "gain possible : 0,9\u00a0s",
 		"Offre : il manque le prix", "(conseillé par Google)", "Fil d&#39;Ariane : une seule étape", "Commerce ou entreprise locale : format incorrect pour le prix, la note ou un avis",
-		"Recherches écartées (1)", "zzz inconnu", "Google propose plutôt : « zzz connu »", "4,0 s", "Proposée par Google", "« électrolyseur piscine »", "« pompe piscine prix »",
-		"Pages peu reliées : 9", "/p9 (fiche produit)", "5 clics", "texte commun à 93 %", "même recherche visée", "Paires : 2",
+		"Recherches écartées (1)", "zzz inconnu", "Google propose plutôt : « zzz connu »", "4,0\u00a0s", "Proposée par Google", "« électrolyseur piscine »", "« pompe piscine prix »",
+		"Pages peu reliées : 9", "/p9 (fiche produit)", "5 clics", "texte commun à 93 %", "Groupes de copies : 1",
 		"sur l&#39;ensemble du site", "Vitesse vécue par vos visiteurs sur téléphone",
 	} {
 		if !strings.Contains(out, s) {
@@ -97,6 +96,11 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 	if strings.Contains(out, "Sur ordinateur") {
 		t.Error("the failed desktop measurement must show no line and no figure")
 	}
+	for _, s := range []string{"concurrence", "même recherche visée"} {
+		if strings.Contains(out, s) {
+			t.Errorf("pages are never presented as competing: %q", s)
+		}
+	}
 	if strings.Contains(out, "https://x") {
 		t.Error("Markdown links of Lighthouse titles must be reduced to their text")
 	}
@@ -105,11 +109,11 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 // A report saved before 1.7.0 has none of the new data: no new section shows.
 func TestOldReportShowsNoLotASection(t *testing.T) {
 	res := lotAResult()
-	res.Speed, res.Structured, res.Linking, res.Duplicates, res.Competing, res.Measured = nil, nil, nil, nil, nil, false
+	res.Speed, res.Structured, res.Linking, res.Duplicates, res.Measured = nil, nil, nil, nil, false
 	res.AI.QueriesChecked, res.AI.DroppedQueries = false, nil
 	res.AI.TargetQueries = []audit.TargetQuery{{Page: "https://ex.com/", Query: "q", Alignment: "good"}}
 	out := renderFR(t, "audit_fragment", &fragmentView{Report: newReportView(&audit.Audit{URL: "https://ex.com/", Result: res}, "fr", true)})
-	for _, s := range []string{"Ce que Google peut afficher", "La vitesse vécue", "Les liens entre vos pages", "Les pages qui se font concurrence", "Proposée par Google", "Recherches écartées"} {
+	for _, s := range []string{"Ce que Google peut afficher", "La vitesse vécue", "Les liens entre vos pages", "Les pages copiées", "Proposée par Google", "Recherches écartées"} {
 		if strings.Contains(out, s) {
 			t.Errorf("old report shows %q", s)
 		}

@@ -148,7 +148,7 @@
 	/* Speed: one tile per measure, the value large, its rating and threshold under. */
 	.lfr-grid:has(> .lfr-speed) { align-items: start; }
 	.lfr-speed > .lfr-kicker { color: var(--lfr-strong); margin-bottom: 6px; }
-	.lfr-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 16px; }
+	.lfr-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 16px; }
 	.lfr-metric { background: var(--lfr-panel-2); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 	.lfr-metric b { font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif); font-size: var(--lf-fs-h3, 26px); color: var(--lfr-figure); line-height: 1.1; }
 	.lfr-metric b small { font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); margin-left: 2px; }
@@ -386,30 +386,14 @@
 	{{ with .Dups }}
 	<section class="lfr-sec">
 		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_DUPS" }}</h2><p class="lfr-help">{{ trans "AUDIT_DUPS_HELP" }}</p></div></div>
-		{{ if .Nothing }}
-		<div class="lfr-card lfr-good"><span class="lfr-chip lfr-good">{{ template "lfr_icon" "good" }}{{ trans "AUDIT_DUPS_NONE_CHIP" }}</span><p class="lfr-card-text">{{ trans "AUDIT_DUPS_NONE" .Pages }}</p></div>
-		{{ else }}
-		<div class="lfr-grid">
-			{{ if .Groups }}
-			<article class="lfr-card lfr-mid">
-				<span class="lfr-chip lfr-mid">{{ template "lfr_icon" "mid" }}{{ trans "AUDIT_DUPS_GROUPS" (len .Groups) }}</span>
-				<h5 class="lfr-card-title">{{ trans "AUDIT_DUPS_TEXT" }}</h5>
-				<p class="lfr-small">{{ trans "AUDIT_DUPS_TEXT_HELP" }}</p>
-				<details class="lfr-more"><summary>{{ trans "AUDIT_EXAMPLES" }}</summary><ul class="lfr-rows">{{ range .Groups }}<li><span>{{ range $i, $p := .Paths }}{{ if $i }} · {{ end }}{{ $p }}{{ end }}</span><span class="lfr-small">{{ trans "AUDIT_DUPS_SIMILAR" .Similarity }}</span></li>{{ end }}</ul></details>
-			</article>
-			{{ end }}
-			{{ if .PairCount }}
-			<article class="lfr-card lfr-info">
-				<span class="lfr-chip lfr-info">{{ template "lfr_icon" "info" }}{{ trans "AUDIT_DUPS_PAIRS" .PairCount }}</span>
-				<h5 class="lfr-card-title">{{ trans "AUDIT_DUPS_COMPETE" }}</h5>
-				<p class="lfr-small">{{ trans "AUDIT_DUPS_COMPETE_HELP" }}</p>
-				<details class="lfr-more"><summary>{{ trans "AUDIT_EXAMPLES" }}</summary><ul class="lfr-rows">
-					{{ range .Titles }}<li><span>{{ .A }} · {{ .B }}</span><span class="lfr-small">« {{ .TitleA }} » · « {{ .TitleB }} »</span></li>{{ end }}
-					{{ range .Queries }}<li><span>{{ .A }} · {{ .B }}</span><span class="lfr-small">{{ trans "AUDIT_DUPS_SAME_QUERY" }} « {{ .Query }} »</span></li>{{ end }}
-				</ul></details>
-			</article>
-			{{ end }}
+		{{ if .Groups }}
+		<div class="lfr-card lfr-mid">
+			<span class="lfr-chip lfr-mid">{{ template "lfr_icon" "mid" }}{{ trans "AUDIT_DUPS_GROUPS" (len .Groups) }}</span>
+			<p class="lfr-card-text">{{ trans "AUDIT_DUPS_TEXT_HELP" }}</p>
+			<details class="lfr-more"><summary>{{ trans "AUDIT_EXAMPLES" }}</summary><ul class="lfr-rows">{{ range .Groups }}<li><span>{{ range $i, $p := .Paths }}{{ if $i }} · {{ end }}{{ $p }}{{ end }}</span><span class="lfr-small">{{ trans "AUDIT_DUPS_SIMILAR" .Similarity }}</span></li>{{ end }}</ul></details>
 		</div>
+		{{ else }}
+		<div class="lfr-card lfr-good"><span class="lfr-chip lfr-good">{{ template "lfr_icon" "good" }}{{ trans "AUDIT_DUPS_NONE_CHIP" }}</span><p class="lfr-card-text">{{ trans "AUDIT_DUPS_NONE" .Pages }}</p></div>
 		{{ end }}
 	</section>
 	{{ end }}

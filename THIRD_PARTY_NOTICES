@@ -27,9 +27,7 @@ in the licenses/ folder.
    https://github.com/PhialsBasement/LibreCrawl (commit 789c236)
    Copyright (c) 2025 Phiality. MIT License (licenses/LibreCrawl.LICENSE.txt).
    Used in: internal/audit/linkscore.go (Link Score, from
-   src/core/crawl_analysis.py _link_score) and internal/audit/duplicates.go
-   (weights of the title, description and H1 similarity, from
-   src/core/issue_detector.py _duplication_similarity). Ported to Go.
+   src/core/crawl_analysis.py _link_score). Ported to Go.
 
 3. astappiev/microdata
    https://github.com/astappiev/microdata (v1.2.0, Go module dependency)

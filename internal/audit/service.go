@@ -291,10 +291,6 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64, signals 
 		res.Structured = BuildStructured(signals)
 		res.Linking = BuildLinking(signals, normalizeURL(a.URL), keyURLs(pages))
 		res.Duplicates = NearDuplicates(signals)
-		res.Competing = CompetingPages(signals, res.Duplicates)
-		if len(res.Competing) > 12 {
-			res.Competing = res.Competing[:12]
-		}
 	}
 	if speed != nil {
 		res.Speed = <-speed
@@ -321,7 +317,7 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64, signals 
 		res.AI = rep
 		res.Scores.Copywriting = GroupScore(rep.Criteria, "copywriting")
 		res.Scores.Content = GroupScore(rep.Criteria, "content")
-		s.checkQueries(ctx, res, pages, u.Host, signals)
+		s.checkQueries(ctx, res, pages, u.Host)
 	}
 	return res, nil
 }
@@ -342,24 +338,16 @@ func (s *Service) Requery(ctx context.Context, a *Audit) error {
 		all[i].Google, all[i].GoogleVariant, all[i].GoogleRelated = "", "", nil
 	}
 	res.AI.TargetQueries, res.AI.DroppedQueries = all, nil
-	var kept []CompetingPair
-	for _, c := range res.Competing {
-		if c.Reason != "query" {
-			kept = append(kept, c)
-		}
-	}
-	res.Competing = kept
 	u, err := url.Parse(a.URL)
 	if err != nil {
 		return err
 	}
-	s.checkQueries(ctx, res, res.KeyPages, u.Host, nil)
+	s.checkQueries(ctx, res, res.KeyPages, u.Host)
 	return s.Store.SaveResult(a, res)
 }
 
-// checkQueries confronts the AI's target searches with Google Suggest, then
-// pairs the key pages left aiming at the same search.
-func (s *Service) checkQueries(ctx context.Context, res *Result, pages []PageFacts, host string, signals []*PageSignal) {
+// checkQueries confronts the AI's target searches with Google Suggest.
+func (s *Service) checkQueries(ctx context.Context, res *Result, pages []PageFacts, host string) {
 	rep := res.AI
 	if s.Suggest != nil && len(rep.TargetQueries) > 0 {
 		sg := *s.Suggest
@@ -368,15 +356,6 @@ func (s *Service) checkQueries(ctx context.Context, res *Result, pages []PageFac
 		}
 		rep.TargetQueries, rep.DroppedQueries = sg.CheckQueries(ctx, rep.TargetQueries)
 		rep.QueriesChecked = true
-	}
-	seen := map[string]bool{}
-	for _, c := range res.Competing {
-		seen[c.A+" "+c.B], seen[c.B+" "+c.A] = true, true
-	}
-	for _, c := range SameQueryPairs(rep.TargetQueries, signals) {
-		if !seen[c.A+" "+c.B] {
-			res.Competing = append(res.Competing, c)
-		}
 	}
 }
 

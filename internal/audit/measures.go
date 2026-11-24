@@ -216,17 +216,13 @@ func MeasureEvidence(res *Result, evidence []EvidenceEntry) ([]EvidenceEntry, ma
 			"pages_linked_from_one_page_or_none": l.WeakCount, "examples_weakly_linked": weak, "pages_four_clicks_or_more_from_home": l.Deep,
 		})
 	}
-	if len(res.Duplicates) > 0 || len(res.Competing) > 0 {
+	if len(res.Duplicates) > 0 {
 		var dups [][]string
 		for _, g := range res.Duplicates {
 			dups = append(dups, g.Pages)
 		}
-		var comp []string
-		for _, c := range res.Competing {
-			comp = append(comp, c.A+" / "+c.B)
-		}
-		add("duplicates", "Pages with near identical main text, and pages competing for the same search (same title, description and H1, or same target search)", map[string]interface{}{
-			"near_duplicate_groups": dups, "competing_pairs": comp,
+		add("duplicates", "Groups of pages whose main text is a near identical copy (menus and footer aside, translations excluded)", map[string]interface{}{
+			"near_duplicate_groups": dups,
 		})
 	}
 	return evidence, ids
@@ -305,13 +301,6 @@ func MeasuredPriorities(res *Result, ev map[string]string) []Priority {
 	}
 	if n := duplicatePages(res.Duplicates); n > 0 {
 		out = append(out, Priority{ID: "m:duplicates", Source: "technical", Level: 2, Title: "AUDIT_PRIO_DUPLICATES", Pages: n, Evidence: evid("duplicates")})
-	}
-	if len(res.Competing) > 0 {
-		pages := map[string]bool{}
-		for _, c := range res.Competing {
-			pages[c.A], pages[c.B] = true, true
-		}
-		out = append(out, Priority{ID: "m:competing", Source: "technical", Level: 3, Title: "AUDIT_PRIO_COMPETING", Pages: len(pages), Evidence: evid("duplicates")})
 	}
 	if l := res.Linking; l != nil && l.WeakCount > 0 && l.Pages > 0 && l.WeakCount*10 >= l.Pages {
 		out = append(out, Priority{ID: "m:linking", Source: "technical", Level: 3, Title: "AUDIT_PRIO_LINKING", Pages: l.WeakCount, Evidence: evid("linking")})

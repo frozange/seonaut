@@ -3,6 +3,27 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.7.2 - 2026-11-24
+
+- **Plus de « pages qui se font concurrence »** (Francis : la cannibalisation est
+  un mythe ; Google montre plusieurs résultats d'un même site, et traiter un
+  sujet en expert demande plusieurs pages dont les mots se recoupent). Retirés :
+  la comparaison titre, description et H1 (`CompetingPages`), les paires de pages
+  à qui l'IA prête la même recherche (`SameQueryPairs`), la priorité
+  `m:competing`, la carte du rapport et ses textes. Le poids LibreCrawl de cette
+  comparaison sort de `THIRD_PARTY_NOTICES`.
+- Seules restent les **pages copiées** : texte principal presque mot pour mot le
+  même (85 % de suites de cinq mots communes), traductions exclues. La section
+  s'appelle « Les pages copiées » et ne parle jamais de concurrence.
+- La consigne de l'IA interdit de dire que des pages du site se font concurrence ;
+  « cannibalisation », « se font concurrence », « se concurrencent »,
+  « cannibalisent » et « concurrence interne » entrent dans les tournures
+  bannies. La description du contrôle d'origine des titres en double ne dit plus
+  que les pages « se concurrencent » : elle reprend la recommandation de Google
+  (un titre propre à chaque page).
+- Vitesse : une espace insécable lie chaque chiffre à son unité (« 2,5 s » ne se
+  coupe plus) ; deux mesures par ligne dans les cartes de vitesse.
+
 ## 1.7.1 - 2026-11-24
 
 Corrections vues sur le premier rapport réel en 1.7.0 (sel-tech.fr).

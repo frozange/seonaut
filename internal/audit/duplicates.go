@@ -15,7 +15,6 @@ const (
 	shingleWords   = 5    // words per shingle
 	sketchSize     = 256  // bottom-k sketch kept per page
 	nearDupMin     = 0.85 // estimated Jaccard similarity of the main texts
-	competeMin     = 0.85 // weighted title, description, H1 and length similarity
 	minDupWords    = 60   // shorter texts are left out: an empty template is not content
 	maxComparisons = 3000 // pages compared at most
 )
@@ -105,17 +104,6 @@ func Tokens(text string) []string {
 type DuplicateGroup struct {
 	Pages      []string `json:"pages"`
 	Similarity int      `json:"similarity"` // percent, lowest pair kept in the group
-}
-
-// CompetingPair is two pages that answer the same search.
-type CompetingPair struct {
-	A          string `json:"a"`
-	B          string `json:"b"`
-	Reason     string `json:"reason"` // "titles" or "query"
-	Similarity int    `json:"similarity,omitempty"`
-	TitleA     string `json:"title_a,omitempty"`
-	TitleB     string `json:"title_b,omitempty"`
-	Query      string `json:"query,omitempty"`
 }
 
 var paginated = regexp.MustCompile(`(?i)(/page/\d+/?$)|([?&](page|paged|p)=\d+)`)
@@ -226,125 +214,10 @@ func NearDuplicates(pages []*PageSignal) []DuplicateGroup {
 	return out
 }
 
-// Weights of LibreCrawl's near-duplicate score (issue_detector.py
-// _duplication_similarity, MIT): Dice similarity of the words of the title,
-// the description and the H1, plus the ratio of the word counts.
-const (
-	wTitle = 0.35
-	wDesc  = 0.35
-	wH1    = 0.20
-	wWords = 0.10
-)
-
-func wordSet(s string) map[string]bool {
-	m := map[string]bool{}
-	for _, t := range Tokens(s) {
-		m[t] = true
-	}
-	return m
-}
-
-func dice(a, b map[string]bool) float64 {
-	if len(a) == 0 || len(b) == 0 {
-		return 0
-	}
-	n := 0
-	for t := range a {
-		if b[t] {
-			n++
-		}
-	}
-	return 2 * float64(n) / float64(len(a)+len(b))
-}
-
-func lengthSimilarity(a, b int) float64 {
-	if a <= 0 || b <= 0 {
-		return 0
-	}
-	return math.Min(float64(a), float64(b)) / math.Max(float64(a), float64(b))
-}
-
-// CompetingPages finds pairs of pages whose title, description and H1 say the
-// same thing: Google sees two candidates for one search and may show neither
-// well. Pairs already reported as near duplicates and translations are left out.
-func CompetingPages(pages []*PageSignal, dups []DuplicateGroup) []CompetingPair {
-	inDup := map[string]int{}
-	for i, g := range dups {
-		for _, u := range g.Pages {
-			inDup[u] = i + 1
-		}
-	}
-	type fields struct{ title, desc, h1 map[string]bool }
-	cand := comparable(pages)
-	f := make([]fields, len(cand))
-	for i, p := range cand {
-		f[i] = fields{wordSet(p.Title), wordSet(p.Description), wordSet(p.H1)}
-	}
-	var out []CompetingPair
-	for i := range cand {
-		if len(f[i].title) == 0 && len(f[i].desc) == 0 {
-			continue
-		}
-		for j := i + 1; j < len(cand); j++ {
-			a, b := cand[i], cand[j]
-			if (inDup[a.URL] != 0 && inDup[a.URL] == inDup[b.URL]) || translations(a, b) {
-				continue
-			}
-			s := dice(f[i].title, f[j].title) * wTitle
-			if s+wDesc+wH1+wWords < competeMin {
-				continue
-			}
-			s += dice(f[i].desc, f[j].desc)*wDesc + dice(f[i].h1, f[j].h1)*wH1 + lengthSimilarity(a.Words, b.Words)*wWords
-			if s >= competeMin {
-				out = append(out, CompetingPair{A: a.URL, B: b.URL, Reason: "titles", Similarity: int(math.Floor(s * 100)), TitleA: a.Title, TitleB: b.Title})
-			}
-		}
-	}
-	sort.SliceStable(out, func(i, j int) bool { return out[i].Similarity > out[j].Similarity })
-	return out
-}
-
 // QueryKey normalises a search so that two pages aimed at the same words in
 // another order, case or accent compare equal.
 func QueryKey(q string) string {
 	t := ContentTokens(q)
 	sort.Strings(t)
 	return strings.Join(t, " ")
-}
-
-// SameQueryPairs pairs the key pages to which the AI gave the same target search.
-func SameQueryPairs(queries []TargetQuery, pages []*PageSignal) []CompetingPair {
-	byURL := map[string]*PageSignal{}
-	for _, p := range pages {
-		byURL[p.URL] = p
-	}
-	byKey := map[string][]TargetQuery{}
-	var keys []string
-	for _, q := range queries {
-		k := QueryKey(q.Query)
-		if k == "" {
-			continue
-		}
-		if _, ok := byKey[k]; !ok {
-			keys = append(keys, k)
-		}
-		byKey[k] = append(byKey[k], q)
-	}
-	var out []CompetingPair
-	for _, k := range keys {
-		qs := byKey[k]
-		for i := 0; i < len(qs); i++ {
-			for j := i + 1; j < len(qs); j++ {
-				a, b := normalizeURL(qs[i].Page), normalizeURL(qs[j].Page)
-				if a == b {
-					continue
-				}
-				if pa, pb := byURL[a], byURL[b]; pa != nil && pb != nil && translations(pa, pb) {
-					continue
-				}
-				out = append(out, CompetingPair{A: a, B: b, Reason: "query", Query: qs[i].Query})
-			}
-		}
-	}
-	return out
 }

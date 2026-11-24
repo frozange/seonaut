@@ -10,7 +10,7 @@ import (
 )
 
 // View of the measurements added in 1.7.0: speed, structured data, internal
-// links, duplicate and competing pages. Figures are formatted here so the
+// links and near duplicate pages. Figures are formatted here so the
 // template only places them; a measurement that failed carries no figure.
 
 type speedView struct {
@@ -66,9 +66,10 @@ func decimal(v float64, digits int, lang string) string {
 	return s
 }
 
-func seconds(ms float64, lang string) string { return decimal(ms/1000, 1, lang) + " s" }
+// A no-break space keeps a figure and its unit on one line.
+func seconds(ms float64, lang string) string { return decimal(ms/1000, 1, lang) + "\u00a0s" }
 
-func millis(ms float64) string { return fmt.Sprintf("%.0f ms", ms) }
+func millis(ms float64) string { return fmt.Sprintf("%.0f\u00a0ms", ms) }
 
 func newSpeedView(s *audit.SpeedReport, lang string) *speedView {
 	if s == nil {
@@ -261,13 +262,8 @@ func newLinkingView(l *audit.LinkingReport) *linkingView {
 }
 
 type dupView struct {
-	Groups    []dupGroupView
-	Titles    []compRow
-	Queries   []compRow
-	Pages     int // indexable pages compared
-	PairCount int
-	Nothing   bool
-	Available bool
+	Groups []dupGroupView
+	Pages  int // indexable pages compared
 }
 
 type dupGroupView struct {
@@ -275,18 +271,11 @@ type dupGroupView struct {
 	Similarity int
 }
 
-type compRow struct {
-	A, B           string
-	TitleA, TitleB string
-	Similarity     int
-	Query          string
-}
-
 func newDupView(res *audit.Result) *dupView {
 	if !res.Measured {
 		return nil
 	}
-	v := &dupView{Available: true}
+	v := &dupView{}
 	if res.Structured != nil {
 		v.Pages = res.Structured.PagesRead
 	}
@@ -297,15 +286,5 @@ func newDupView(res *audit.Result) *dupView {
 		}
 		v.Groups = append(v.Groups, gv)
 	}
-	for _, c := range res.Competing {
-		row := compRow{A: pagePath(c.A), B: pagePath(c.B), TitleA: c.TitleA, TitleB: c.TitleB, Similarity: c.Similarity, Query: c.Query}
-		if c.Reason == "query" {
-			v.Queries = append(v.Queries, row)
-		} else {
-			v.Titles = append(v.Titles, row)
-		}
-	}
-	v.PairCount = len(v.Titles) + len(v.Queries)
-	v.Nothing = len(v.Groups) == 0 && v.PairCount == 0
 	return v
 }

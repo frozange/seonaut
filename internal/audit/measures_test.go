@@ -127,33 +127,6 @@ func TestNearDuplicatesSkipTranslationsAndCanonicals(t *testing.T) {
 	}
 }
 
-func TestCompetingPages(t *testing.T) {
-	mk := func(u, title, h1 string) *PageSignal {
-		p := &PageSignal{URL: u, Status: 200, Lang: "fr-FR", Title: title, H1: h1, Description: "Traitement de l'eau de piscine par électrolyse", Words: 500}
-		return p
-	}
-	pages := []*PageSignal{
-		mk("https://ex.com/electrolyse", "Électrolyseur piscine au sel | SelTech", "Électrolyseur piscine"),
-		mk("https://ex.com/electrolyseur", "Electrolyseur piscine au sel - SelTech", "Électrolyseurs piscine"),
-		mk("https://ex.com/page/2", "Électrolyseur piscine au sel | SelTech", "Électrolyseur piscine"),
-		mk("https://ex.com/contact", "Contact SelTech", "Nous contacter"),
-	}
-	en := mk("https://ex.com/en/electrolyse", "Électrolyseur piscine au sel | SelTech", "Électrolyseur piscine")
-	en.Lang = "en"
-	pages = append(pages, en)
-	c := CompetingPages(pages, nil)
-	if len(c) != 1 || c[0].A != "https://ex.com/electrolyse" || c[0].B != "https://ex.com/electrolyseur" || c[0].Similarity < 85 {
-		t.Fatalf("pairs %+v", c)
-	}
-	if got := CompetingPages(pages, []DuplicateGroup{{Pages: []string{c[0].A, c[0].B}}}); len(got) != 0 {
-		t.Errorf("near duplicates are not repeated as competing pages: %+v", got)
-	}
-	q := SameQueryPairs([]TargetQuery{{Page: "https://ex.com/a", Query: "Électrolyseurs piscine"}, {Page: "https://ex.com/b", Query: "piscine electrolyseur"}, {Page: "https://ex.com/c", Query: "contact"}}, nil)
-	if len(q) != 1 || q[0].Reason != "query" {
-		t.Errorf("same query pairs %+v", q)
-	}
-}
-
 func TestMatchSuggestions(t *testing.T) {
 	sugg := []string{"électrolyseur piscine sel", "électrolyseur piscine prix", "pompe piscine"}
 	if r := matchSuggestions("Electrolyseurs piscine", sugg); r.Status != QueryConfirmed || len(r.Related) != 2 {
@@ -350,11 +323,10 @@ func TestMeasuredPriorities(t *testing.T) {
 		Speed:      &SpeedReport{Mobile: &SpeedRun{Field: &FieldData{LCP: &FieldMetric{P75: 5000, Rating: "poor"}}}},
 		Structured: &StructuredReport{Families: []SDFamily{{Key: "product", Pages: 3, ErrorPages: 2}}},
 		Duplicates: []DuplicateGroup{{Pages: []string{"a", "b"}}},
-		Competing:  []CompetingPair{{A: "a", B: "c"}},
 		Linking:    &LinkingReport{Pages: 10, WeakCount: 4},
 	}
 	ev, ids := MeasureEvidence(res, []EvidenceEntry{{ID: "E1"}})
-	if len(ev) != 5 || ids["speed"] != "E2" {
+	if len(ev) != 5 || ids["speed"] != "E2" || ids["duplicates"] == "" {
 		t.Errorf("evidence %v %v", len(ev), ids)
 	}
 	p := MeasuredPriorities(res, ids)
@@ -362,7 +334,7 @@ func TestMeasuredPriorities(t *testing.T) {
 	for _, x := range p {
 		got[x.ID] = x.Level
 	}
-	want := map[string]int{"m:speed": 2, "m:structured": 2, "m:duplicates": 2, "m:competing": 3, "m:linking": 3}
+	want := map[string]int{"m:speed": 2, "m:structured": 2, "m:duplicates": 2, "m:linking": 3}
 	for k, v := range want {
 		if got[k] != v {
 			t.Errorf("%s: level %d, want %d", k, got[k], v)
