@@ -3,6 +3,11 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.8.1 - 2026-11-24
+
+- Popularité : la seconde carte de chaque rangée n'est plus décalée de 20 px
+  (l'espacement ne vise plus que les blocs empilés de la section).
+
 ## 1.8.0 - 2026-11-24
 
 Lot B de l'étude des outils SEO : la popularité, lue dans le graphe des liens
