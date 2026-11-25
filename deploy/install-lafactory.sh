@@ -109,6 +109,9 @@ if tar -xzf "$S/release.tgz" -C "$W" ./webgraph ./deploy/webgraph-cron.sh 2>/dev
   install -m 755 -o root -g root "$W/webgraph" /usr/local/bin/seonaut-webgraph
   install -d -m 755 /root/claude/seonaut-webgraph
   install -m 750 "$W/deploy/webgraph-cron.sh" /root/claude/seonaut-webgraph/webgraph-cron.sh
+  if [ ! -d /srv/seonaut-exclude ]; then
+    install -d -m 750 -o "$U" -g "$U" /srv/seonaut-exclude
+  fi
   if [ ! -d /srv/seonaut-webgraph ]; then
     install -d -m 750 -o "$U" -g "$U" /srv/seonaut-webgraph
   fi

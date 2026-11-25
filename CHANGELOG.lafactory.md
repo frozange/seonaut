@@ -3,6 +3,19 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.9.0 - 2026-11-25
+
+- **Adresses laissées de côté à la demande du propriétaire** : une liste par
+  site, `/srv/seonaut-exclude/<nom-du-site>.txt` (`[audit] exclude_dir`), une
+  adresse complète, un chemin ou un préfixe `/chemin/*` par ligne. Le robot ne
+  les demande jamais et ne suit pas leurs liens, plan du site compris. Le
+  rapport le dit dans la méthode (« %1% adresses ont été laissées de côté »),
+  et l'IA reçoit la même information pour ne pas en tirer de constat.
+  Premier usage : le blog de lafactory.com (602 articles et leurs étiquettes),
+  dont les articles sont à la racine comme les pages.
+- `auditctl cancel <id>` : marque un audit en file ou interrompu comme
+  annulé, pour qu'un redémarrage ne le relance pas.
+
 ## 1.8.2 - 2026-11-24
 
 - Graphe Common Crawl : un refus du serveur (« 503 SlowDown », revenu deux fois

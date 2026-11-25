@@ -510,6 +510,7 @@
 			<summary>{{ trans "AUDIT_METHOD_SHOW" }}</summary>
 			<p>{{ trans "AUDIT_METHOD_CRAWL" .Result.Site.PagesCrawled }}</p>
 			{{ if .SampleNote }}<p>{{ trans "AUDIT_METHOD_SAMPLE" .Result.Site.CrawlLimit }}</p>{{ end }}
+			{{ if .Result.Site.Excluded }}<p>{{ trans "AUDIT_METHOD_EXCLUDED" .Result.Site.Excluded }}</p>{{ end }}
 			<p>{{ trans "AUDIT_METHOD_SCALE" }}</p>
 			{{ if .Speed }}<p>{{ trans "AUDIT_METHOD_SPEED" }}</p>{{ end }}
 			{{ if .Structured }}<p>{{ trans "AUDIT_METHOD_SD" }}</p>{{ end }}

@@ -77,6 +77,11 @@ func (s *Store) ByToken(token string) (*Audit, error) {
 	return scanAudit(s.DB.QueryRow(selectAudit+` WHERE token = ?`, token))
 }
 
+// ByID returns the audit with this id.
+func (s *Store) ByID(id int64) (*Audit, error) {
+	return scanAudit(s.DB.QueryRow(selectAudit+` WHERE id = ?`, id))
+}
+
 var (
 	slugInvalid = regexp.MustCompile(`[^a-z0-9]+`)
 	slugValid   = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)

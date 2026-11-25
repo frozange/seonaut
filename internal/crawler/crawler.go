@@ -32,6 +32,7 @@ const (
 var ErrBlockedByRobotstxt = errors.New("blocked by robots.txt")
 var ErrVisited = errors.New("URL already visited")
 var ErrDomainNotAllowed = errors.New("domain not allowed")
+var ErrExcluded = errors.New("URL excluded")
 
 type Client interface {
 	Get(urlStr string) (*ClientResponse, error)
@@ -48,6 +49,9 @@ type Options struct {
 	IncludeNoindex  bool
 	CrawlSitemap    bool
 	AllowSubdomains bool
+	// Exclude leaves out the addresses it matches: they are never requested
+	// and their links are never followed.
+	Exclude func(*url.URL) bool
 }
 
 type Status struct {
@@ -189,6 +193,10 @@ func (c *Crawler) AddRequest(r *RequestMessage) error {
 
 	if !c.domainIsAllowed(r.URL.Host) && !r.IgnoreDomain {
 		return ErrDomainNotAllowed
+	}
+
+	if c.options.Exclude != nil && c.options.Exclude(r.URL) {
+		return ErrExcluded
 	}
 
 	if !c.options.IgnoreRobotsTxt && c.robotsChecker.IsBlocked(r.URL) {
@@ -350,6 +358,9 @@ func (c *Crawler) queueSitemapURLs() {
 			c.storage.Add(v)
 			u, err := url.Parse(v)
 			if err != nil {
+				return
+			}
+			if c.options.Exclude != nil && c.options.Exclude(u) {
 				return
 			}
 

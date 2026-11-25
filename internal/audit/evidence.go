@@ -332,6 +332,12 @@ func BuildEvidence(site SiteFacts, pages []PageFacts, issues []IssueSummary, iss
 		"robots_txt_found": site.RobotstxtExists, "sitemap_found": site.SitemapExists,
 		"pages_blocked_by_robots_txt": site.BlockedByRobots, "noindex_pages": site.Noindex,
 	})
+	if site.Excluded > 0 {
+		add("Addresses left out at the site owner's request", map[string]interface{}{
+			"excluded_addresses": site.Excluded,
+			"note":               "These addresses (for example the blog) were not read on purpose. Their absence is not a finding.",
+		})
+	}
 	for i, p := range pages {
 		label := "Key page: " + p.URL
 		if i == 0 {

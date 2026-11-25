@@ -9,6 +9,7 @@
 //	auditctl -c config requery <token or slug>
 //	auditctl -c config popularity <token or slug> [competitor ...]
 //	auditctl -c config popularity -missing
+//	auditctl -c config cancel <audit id>
 //
 // requery checks the target searches of a finished report against Google
 // Suggest again, with no crawl and no AI call. popularity reads the sites
@@ -16,6 +17,9 @@
 // compares it with the competitor sites given (none: those kept, if any);
 // -missing does it for every site whose latest report lacks it (run by the
 // graph job once a quarter is indexed).
+//
+// cancel marks a queued or interrupted audit as failed, so a restart does not
+// queue it again; stop the server first when it is the one running.
 //
 // -fresh crawls again even when a report of the same site is recent enough to
 // be reused (the form always reuses it).
@@ -30,6 +34,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/stjudewashere/seonaut/internal/audit"
@@ -40,7 +45,7 @@ import (
 )
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: auditctl -c config [-fresh] request <site URL> <e-mail>\n       auditctl -c config status <token or slug>\n       auditctl -c config requery <token or slug>\n       auditctl -c config popularity <token or slug> [competitor ...]\n       auditctl -c config popularity -missing")
+	fmt.Fprintln(os.Stderr, "usage: auditctl -c config [-fresh] request <site URL> <e-mail>\n       auditctl -c config status <token or slug>\n       auditctl -c config requery <token or slug>\n       auditctl -c config popularity <token or slug> [competitor ...]\n       auditctl -c config popularity -missing\n       auditctl -c config cancel <audit id>")
 	os.Exit(2)
 }
 
@@ -133,6 +138,22 @@ func main() {
 		for _, q := range a.Result.AI.DroppedQueries {
 			fmt.Printf("dropped %-10s %s %v\n", q.Google, q.Query, q.GoogleRelated)
 		}
+	case "cancel":
+		id, err := strconv.ParseInt(args[1], 10, 64)
+		if err != nil {
+			usage()
+		}
+		a, err := svc.Store.ByID(id)
+		if err != nil {
+			log.Fatalf("no audit %d: %v", id, err)
+		}
+		if a.Status == audit.StatusDone || a.Status == audit.StatusFailed {
+			log.Fatalf("audit %d is already %s", id, a.Status)
+		}
+		if err := svc.Store.SetStatus(a, audit.StatusFailed, "cancelled by the owner"); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("audit %d %s cancelled\n", a.ID, a.URL)
 	case "popularity":
 		if cfg.Audit.WebGraphDir != "" {
 			svc.Graph = &webgraph.Store{Dir: cfg.Audit.WebGraphDir}

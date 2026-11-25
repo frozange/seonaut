@@ -725,6 +725,7 @@ AUDIT_HYGIENE_HELP: "Ces relevés ne pèsent pas sur la note : Google indique da
 AUDIT_METHOD: Méthode
 AUDIT_METHOD_CRAWL: "Le robot a suivi les liens du site depuis sa page d'accueil et son sitemap, et a lu %1% pages comme le ferait celui d'un moteur de recherche. Il respecte le fichier robots.txt."
 AUDIT_METHOD_SAMPLE: "Le site compte plus de pages que les %1% lues pour cet audit gratuit. Les chiffres techniques portent sur les pages lues, pas sur tout le site."
+AUDIT_METHOD_EXCLUDED: "À la demande du propriétaire du site, %1% adresses ont été laissées de côté (par exemple le blog). Elles n'ont pas été lues, et les chiffres n'en tiennent pas compte."
 AUDIT_METHOD_SCALE: "La note technique part de 10 points et retire 1,2 par type de problème critique, 0,6 par alerte et 0,2 par avertissement : la moitié dès qu'une page est concernée, la totalité quand toutes le sont. Les notes de rédaction et de contenu font la moyenne des critères (satisfaisant 10, partiel 5, insuffisant 0)."
 AUDIT_METHOD_AI: L'analyse rédigée est produite par une IA qui n'utilise que les mesures et les textes de pages repris dans ce rapport. Chaque affirmation doit s'y appuyer, et une seconde lecture retire ce qui ne l'est pas.
 AUDIT_CTA_TITLE: Parlons de votre site

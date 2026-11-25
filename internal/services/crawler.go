@@ -59,6 +59,7 @@ type CrawlerService struct {
 	ArchiveService   *ArchiveService
 	crawlers         map[int64]*crawler.Crawler
 	pageLimits       map[int64]int // per-project page caps below the instance limit
+	excludes         map[int64]func(*url.URL) bool
 	lock             *sync.RWMutex
 	maxConcurrent    int
 	denyIgnoreRobots bool
@@ -76,6 +77,7 @@ func NewCrawlerService(r CrawlerServiceRepository, s CrawlerServicesContainer) *
 		denyIgnoreRobots: s.DenyIgnoreRobots,
 		crawlers:         make(map[int64]*crawler.Crawler),
 		pageLimits:       make(map[int64]int),
+		excludes:         make(map[int64]func(*url.URL) bool),
 		lock:             &sync.RWMutex{},
 	}
 }
@@ -193,6 +195,18 @@ func (s *CrawlerService) SetPageLimit(projectID int64, pages int) {
 	}
 }
 
+// SetExclude makes a project's next crawls leave out the addresses match
+// accepts; nil removes it. The audit uses it for the owner's exclusion list.
+func (s *CrawlerService) SetExclude(projectID int64, match func(*url.URL) bool) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	if match != nil {
+		s.excludes[projectID] = match
+	} else {
+		delete(s.excludes, projectID)
+	}
+}
+
 // AddCrawler creates a new project crawler and adds it to the crawlers map. It returns the crawler
 // on success otherwise it returns an error indicating the crawler already exists or there was an
 // error creating it.
@@ -228,6 +242,7 @@ func (s *CrawlerService) addCrawler(u *url.URL, p *models.Project, b *models.Bas
 		IncludeNoindex:  p.IncludeNoindex,
 		CrawlSitemap:    p.CrawlSitemap,
 		AllowSubdomains: p.AllowSubdomains,
+		Exclude:         s.excludes[p.Id],
 	}
 
 	mainDomain := strings.TrimPrefix(u.Host, "www.")

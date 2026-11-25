@@ -157,6 +157,9 @@ type AuditConfig struct {
 	// WebGraphDir holds the Common Crawl domain graph indexes kept by
 	// cmd/webgraph. Empty, or no index yet: the report has no popularity section.
 	WebGraphDir string `mapstructure:"webgraph_dir"`
+	// ExcludeDir holds per-site lists of addresses the audit leaves out, named
+	// after the site slug (see audit.Exclusion). Empty: nothing is excluded.
+	ExcludeDir string `mapstructure:"exclude_dir"`
 }
 
 // NewConfig loads the configuration from the specified file and path.
@@ -194,6 +197,7 @@ func NewConfig(configFile string) (*Config, error) {
 	viper.SetDefault("audit.psi_key_name", "PSI_API_KEY")
 	viper.SetDefault("audit.suggest", true)
 	viper.SetDefault("audit.webgraph_dir", "/srv/seonaut-webgraph")
+	viper.SetDefault("audit.exclude_dir", "/srv/seonaut-exclude")
 
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, err

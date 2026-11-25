@@ -78,6 +78,7 @@ type SiteFacts struct {
 	AlertIssues      int    `json:"alert_issues"`
 	WarningIssues    int    `json:"warning_issues"`
 	DurationSeconds  int    `json:"duration_seconds"`
+	Excluded         int    `json:"excluded,omitempty"` // entries of the owner's exclusion list
 }
 
 // IssueSummary is one issue type found by the SEOnaut reporters.

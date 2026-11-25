@@ -51,6 +51,7 @@ type Config struct {
 	LanguageName string        // language name given to the AI, e.g. "French"
 	UserAgent    string        // user agent of the page text fetches
 	CrawlLimit   int           // pages per crawl, shown in the report
+	ExcludeDir   string        // per-site exclusion lists, see Exclusion
 	KeyPages     int           // main pages read by the AI, home page included
 	DailyCap     int           // audits per day for the whole instance, 0 = no cap
 	PerEmailDay  int           // audits per day for one address, 0 = no cap
@@ -250,6 +251,9 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64, signals 
 	}
 	facts.URL, facts.Host, facts.CrawlLimit = a.URL, u.Host, s.Cfg.CrawlLimit
 	facts.LimitReached = s.Cfg.CrawlLimit > 0 && facts.PagesCrawled >= s.Cfg.CrawlLimit
+	if ex, err := LoadExclusion(s.Cfg.ExcludeDir, a.URL); err == nil {
+		facts.Excluded = ex.Len()
+	}
 	if facts.PagesCrawled == 0 {
 		return nil, errors.New("the site returned no page")
 	}

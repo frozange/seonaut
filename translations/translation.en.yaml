@@ -725,6 +725,7 @@ AUDIT_HYGIENE_HELP: "These findings do not weigh on the score: Google's document
 AUDIT_METHOD: Method
 AUDIT_METHOD_CRAWL: "The crawler followed the links of the site from its home page and its sitemap, and read %1% pages, like a search engine robot. It respects robots.txt."
 AUDIT_METHOD_SAMPLE: "The site has more pages than the %1% read for this free audit. Technical figures cover the pages read, not the whole site."
+AUDIT_METHOD_EXCLUDED: "At the site owner's request, %1% addresses were left out (for example the blog). They were not read, and the figures leave them aside."
 AUDIT_METHOD_SCALE: "Technical score: 10 points, minus 1.2 per critical issue type, 0.6 per alert, 0.2 per warning, half of it as soon as one page is affected and all of it when every page is. Copywriting and content scores: average of the criteria, good 10, partial 5, insufficient 0."
 AUDIT_METHOD_AI: The written analysis is produced by an AI that only uses the measurements and the page texts shown in this report. Every statement must rely on them, and a second reading removes what is not supported.
 AUDIT_CTA_TITLE: Let us talk about your website

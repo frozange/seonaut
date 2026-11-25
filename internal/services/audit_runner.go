@@ -29,6 +29,8 @@ type AuditCrawlRunner struct {
 	UserAgent string
 	MaxPages  int              // pages per audit crawl, 0 = the instance limit
 	Signals   *audit.Collector // receives the pages of the audit crawls
+	// ExcludeDir holds the per-site exclusion lists (see audit.Exclusion).
+	ExcludeDir string
 }
 
 // botUser returns the robot account, creating it on first use with a random
@@ -92,6 +94,14 @@ func (r *AuditCrawlRunner) Crawl(ctx context.Context, siteURL string) (int64, in
 	}
 	r.Crawler.SetPageLimit(p.Id, r.MaxPages)
 	defer r.Crawler.SetPageLimit(p.Id, 0)
+	ex, err := audit.LoadExclusion(r.ExcludeDir, siteURL)
+	if err != nil {
+		return p.Id, 0, fmt.Errorf("exclusion list: %w", err)
+	}
+	if ex != nil {
+		r.Crawler.SetExclude(p.Id, ex.Match)
+		defer r.Crawler.SetExclude(p.Id, nil)
+	}
 
 	// The instance may already run its maximum of crawls: wait for a free slot.
 	for {
