@@ -104,6 +104,8 @@ type PageFacts struct {
 	Footer      string   `json:"-"`
 	Actions     []string `json:"-"`
 	Contacts    []string `json:"-"`
+	Forms       []string `json:"-"`
+	Alternates  []string `json:"-"`
 }
 
 // Scores are computed from a fixed, published scale (see scoring.go).

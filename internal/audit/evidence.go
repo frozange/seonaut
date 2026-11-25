@@ -157,6 +157,11 @@ type PageContent struct {
 	Footer   string   // footer text: legal notice, address and phone usually live there
 	Actions  []string // buttons and button-like links, header included
 	Contacts []string // tel: and mailto: links
+	// Forms the page shows, one line each: visible fields and button. The text
+	// extraction skips forms, so without this a contact page reads as empty.
+	Forms []string
+	// Other language versions the page declares (hreflang), "lang: url".
+	Alternates []string
 }
 
 // PageText fetches a page through the guarded client and returns its content.
@@ -182,6 +187,8 @@ func PageText(ctx context.Context, client *http.Client, userAgent, pageURL strin
 	pc.Text, pc.Headings = extractText(doc)
 	pc.Text = firstWords(pc.Text, maxWords)
 	pc.Footer, pc.Actions, pc.Contacts = extractChrome(doc)
+	pc.Forms = extractForms(doc)
+	pc.Alternates = extractAlternates(doc)
 	return pc, nil
 }
 
@@ -233,6 +240,104 @@ func extractChrome(doc *html.Node) (footer string, actions, contacts []string) {
 	}
 	walk(doc)
 	return firstWords(strings.Join(footers, " "), 250), actions, contacts
+}
+
+// extractForms describes each form by its visible fields and its button.
+func extractForms(doc *html.Node) []string {
+	labels := map[string]string{}
+	var collect func(n *html.Node)
+	collect = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "label" && attr(n, "for") != "" {
+			labels[attr(n, "for")] = strings.Join(strings.Fields(nodeText(n)), " ")
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			collect(c)
+		}
+	}
+	collect(doc)
+
+	var out []string
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "form" && !unseen(n) && len(out) < 5 {
+			var fields []string
+			button := ""
+			var inner func(c *html.Node)
+			inner = func(c *html.Node) {
+				if c.Type == html.ElementNode && !unseen(c) {
+					switch c.Data {
+					case "input", "textarea", "select":
+						typ := strings.ToLower(attr(c, "type"))
+						switch typ {
+						case "hidden":
+						case "submit", "button", "image":
+							if button == "" {
+								button = attr(c, "value")
+							}
+						default:
+							name := labels[attr(c, "id")]
+							if name == "" && strings.Contains(strings.ToLower(attr(c, "class")+" "+attr(c, "name")), "captcha") {
+								name = "captcha"
+							}
+							for _, k := range []string{"aria-label", "placeholder", "title", "name"} {
+								if name == "" {
+									name = strings.TrimSpace(attr(c, k))
+								}
+							}
+							if name != "" && len(fields) < 12 {
+								fields = append(fields, name)
+							}
+						}
+					case "button":
+						if button == "" {
+							button = strings.Join(strings.Fields(nodeText(c)), " ")
+						}
+					}
+				}
+				for k := c.FirstChild; k != nil; k = k.NextSibling {
+					inner(k)
+				}
+			}
+			inner(n)
+			if len(fields) > 0 {
+				line := "fields: " + strings.Join(fields, ", ")
+				if attr(n, "role") == "search" {
+					line = "search form; " + line
+				}
+				if button != "" {
+					line += "; button: " + button
+				}
+				out = append(out, line)
+			}
+			return
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			walk(c)
+		}
+	}
+	walk(doc)
+	return out
+}
+
+// extractAlternates lists the language versions the page declares by hreflang.
+func extractAlternates(doc *html.Node) []string {
+	var out []string
+	seen := map[string]bool{}
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "link" && strings.EqualFold(attr(n, "rel"), "alternate") {
+			lang, href := strings.ToLower(strings.TrimSpace(attr(n, "hreflang"))), strings.TrimSpace(attr(n, "href"))
+			if lang != "" && lang != "x-default" && href != "" && !seen[lang] && len(out) < 12 {
+				seen[lang] = true
+				out = append(out, lang+": "+href)
+			}
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			walk(c)
+		}
+	}
+	walk(doc)
+	return out
 }
 
 func attr(n *html.Node, key string) string {
@@ -350,6 +455,10 @@ func BuildEvidence(site SiteFacts, pages []PageFacts, issues []IssueSummary, iss
 			"headings":                    p.Headings,
 			"buttons_and_calls_to_action": p.Actions,
 			"phone_and_email_links":       p.Contacts,
+			"forms_shown":                 p.Forms,
+		}
+		if len(p.Alternates) > 0 {
+			data["other_language_versions_declared"] = p.Alternates
 		}
 		if i == 0 {
 			data["footer_text"] = p.Footer

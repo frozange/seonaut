@@ -738,9 +738,13 @@ AUDIT_GRADE_mid: À améliorer
 AUDIT_GRADE_low: Faible
 AUDIT_GRADE_none: Non évalué
 AUDIT_FACT_PAGES: pages lues
+AUDIT_FACT_PAGES_ONE: page lue
 AUDIT_FACT_PASSED: contrôles sans défaut
+AUDIT_FACT_PASSED_ONE: contrôle sans défaut
 AUDIT_FACT_ISSUES: types de problèmes relevés
+AUDIT_FACT_ISSUES_ONE: type de problème relevé
 AUDIT_FACT_PRIORITIES: priorités retenues
+AUDIT_FACT_PRIORITIES_ONE: priorité retenue
 AUDIT_SHOW_DETAIL: Lire l'analyse
 AUDIT_BEFORE: Aujourd'hui
 AUDIT_AFTER: Proposition
@@ -882,7 +886,7 @@ AUDIT_SPEED_DESKTOP_LAB: "note de la simulation %1% sur 100."
 AUDIT_LINKS: "Les liens entre vos pages"
 AUDIT_LINKS_HELP: "Les liens entre vos pages permettent aux visiteurs, et au robot de Google qui découvre les pages en suivant les liens, d'atteindre chacune d'elles. Nous avons mesuré pour chacune des %1% pages que Google peut afficher la facilité à l'atteindre par vos liens, de 0 (presque isolée) à 100 (la plus accessible). C'est un repère de LaFactory, pas une note de Google."
 AUDIT_LINKS_TOP: "Les pages les plus faciles à atteindre"
-AUDIT_LINKS_STATE_good: "Toutes reliées"
+AUDIT_LINKS_STATE_good: "Aucune page isolée"
 AUDIT_LINKS_STATE_mid: "Pages isolées"
 AUDIT_LINKS_WEAK: "Pages peu reliées : %1%"
 AUDIT_LINKS_WEAK_HELP: "Elles reçoivent un lien d'une seule autre page, ou d'aucune. Un seul lien suffit à Google pour trouver une page ; un lien de plus depuis les pages proches aide surtout vos visiteurs, si ces pages comptent pour vous."
@@ -918,7 +922,7 @@ AUDIT_POP_SITES: "sites vous citent"
 AUDIT_POP_SITE_ONE: "site vous cite"
 AUDIT_POP_NONE: "Votre site figure dans l'échantillon, mais aucun des sites explorés ce trimestre ne lui fait encore de lien."
 AUDIT_POP_RANK: "Votre site occupe le rang %1% sur %2%."
-AUDIT_POP_TOP_PCT: "Il fait partie des %1% % les mieux reliés au reste du web."
+AUDIT_POP_TOP_PCT: "Il fait partie des %1% % de sites les mieux reliés de cet échantillon."
 AUDIT_POP_RANK_HELP: "Ce rang est un repère de LaFactory. Common Crawl le calcule d'après les liens entre tous les sites de l'échantillon (centralité harmonique) : plus il est petit, plus votre site est proche des autres par les liens. Google ne publie aucune note de liens, et ce rang ne prétend pas en être une."
 AUDIT_NUM: "%1%"
 AUDIT_POP_COL_SITE: "Site"
@@ -926,7 +930,7 @@ AUDIT_POP_COL_RANK: "Rang"
 AUDIT_POP_RANK_SHORT: "rang %1%"
 AUDIT_POP_TOP: "Les sites les mieux reliés qui vous citent"
 AUDIT_POP_GAINED: "Nouveaux depuis le trimestre précédent : %1%"
-AUDIT_POP_LOST: "Plus vus ce trimestre : %1%"
+AUDIT_POP_LOST: "Liens non retrouvés ce trimestre : %1%"
 AUDIT_POP_LOST_HELP: "Un site sort de cette liste quand Common Crawl ne retrouve plus son lien. Bien souvent, il n'a simplement pas revisité la page qui le portait."
 AUDIT_POP_NEW: "Votre site n'était pas dans l'échantillon du trimestre précédent. La comparaison d'un trimestre à l'autre commencera avec la prochaine publication."
 AUDIT_POP_NO_PREVIOUS: "La comparaison avec le trimestre précédent apparaîtra avec la prochaine publication de Common Crawl."

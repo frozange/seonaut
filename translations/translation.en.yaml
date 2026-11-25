@@ -738,9 +738,13 @@ AUDIT_GRADE_mid: Needs work
 AUDIT_GRADE_low: Weak
 AUDIT_GRADE_none: Not rated
 AUDIT_FACT_PAGES: pages read
+AUDIT_FACT_PAGES_ONE: page read
 AUDIT_FACT_PASSED: checks passed
+AUDIT_FACT_PASSED_ONE: check passed
 AUDIT_FACT_ISSUES: issue types found
+AUDIT_FACT_ISSUES_ONE: issue type found
 AUDIT_FACT_PRIORITIES: priorities
+AUDIT_FACT_PRIORITIES_ONE: priority
 AUDIT_SHOW_DETAIL: Read the analysis
 AUDIT_BEFORE: Today
 AUDIT_AFTER: Suggestion
@@ -882,7 +886,7 @@ AUDIT_SPEED_DESKTOP_LAB: "simulation score %1% out of 100."
 AUDIT_LINKS: "The links between your pages"
 AUDIT_LINKS_HELP: "The links between your pages let visitors, and Google's robot which finds pages by following links, reach each of them. For each of the %1% pages Google can show, we measured how easily your links reach it, from 0 (nearly isolated) to 100 (easiest to reach). It is a LaFactory benchmark, not a Google score."
 AUDIT_LINKS_TOP: "The pages easiest to reach"
-AUDIT_LINKS_STATE_good: "All linked"
+AUDIT_LINKS_STATE_good: "No isolated page"
 AUDIT_LINKS_STATE_mid: "Isolated pages"
 AUDIT_LINKS_WEAK: "Weakly linked pages: %1%"
 AUDIT_LINKS_WEAK_HELP: "They receive a link from one other page only, or none. One link is enough for Google to find a page; another link from related pages mostly helps your visitors, if these pages matter to you."
@@ -918,7 +922,7 @@ AUDIT_POP_SITES: "sites cite you"
 AUDIT_POP_SITE_ONE: "site cites you"
 AUDIT_POP_NONE: "Your site is in the sample, but none of the sites crawled this quarter links to it yet."
 AUDIT_POP_RANK: "Your site ranks %1% out of %2%."
-AUDIT_POP_TOP_PCT: "It is among the %1%% best linked to the rest of the web."
+AUDIT_POP_TOP_PCT: "It is among the %1%% best linked sites of this sample."
 AUDIT_POP_RANK_HELP: "This rank is a LaFactory benchmark. Common Crawl computes it from the links between all the sites of the sample (harmonic centrality): the smaller it is, the closer your site is to the others through links. Google publishes no link score, and this rank does not claim to be one."
 AUDIT_NUM: "%1%"
 AUDIT_POP_COL_SITE: "Site"
@@ -926,7 +930,7 @@ AUDIT_POP_COL_RANK: "Rank"
 AUDIT_POP_RANK_SHORT: "rank %1%"
 AUDIT_POP_TOP: "The best linked sites that cite you"
 AUDIT_POP_GAINED: "New since the previous quarter: %1%"
-AUDIT_POP_LOST: "Not seen this quarter: %1%"
+AUDIT_POP_LOST: "Links not found again this quarter: %1%"
 AUDIT_POP_LOST_HELP: "A site leaves this list when Common Crawl no longer finds its link. Quite often it simply did not crawl the page carrying it again."
 AUDIT_POP_NEW: "Your site was not in the previous quarter's sample. The quarter to quarter comparison starts with the next release."
 AUDIT_POP_NO_PREVIOUS: "The comparison with the previous quarter will appear with the next Common Crawl release."

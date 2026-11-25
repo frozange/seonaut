@@ -264,10 +264,10 @@
 			{{ end }}
 		</div>
 		<div class="lfr-facts">
-			<div class="lfr-fact"><b>{{ .Result.Site.PagesCrawled }}</b><span>{{ trans "AUDIT_FACT_PAGES" }}</span></div>
-			<div class="lfr-fact"><b>{{ .Result.PassedCount }}</b><span>{{ trans "AUDIT_FACT_PASSED" }}</span></div>
-			<div class="lfr-fact"><b>{{ .IssueTypes }}</b><span>{{ trans "AUDIT_FACT_ISSUES" }}</span></div>
-			<div class="lfr-fact"><b>{{ len .Result.Priorities }}</b><span>{{ trans "AUDIT_FACT_PRIORITIES" }}</span></div>
+			<div class="lfr-fact"><b>{{ .Result.Site.PagesCrawled }}</b><span>{{ if eq .Result.Site.PagesCrawled 1 }}{{ trans "AUDIT_FACT_PAGES_ONE" }}{{ else }}{{ trans "AUDIT_FACT_PAGES" }}{{ end }}</span></div>
+			<div class="lfr-fact"><b>{{ .Result.PassedCount }}</b><span>{{ if eq .Result.PassedCount 1 }}{{ trans "AUDIT_FACT_PASSED_ONE" }}{{ else }}{{ trans "AUDIT_FACT_PASSED" }}{{ end }}</span></div>
+			<div class="lfr-fact"><b>{{ .IssueTypes }}</b><span>{{ if eq .IssueTypes 1 }}{{ trans "AUDIT_FACT_ISSUES_ONE" }}{{ else }}{{ trans "AUDIT_FACT_ISSUES" }}{{ end }}</span></div>
+			<div class="lfr-fact"><b>{{ len .Result.Priorities }}</b><span>{{ if eq (len .Result.Priorities) 1 }}{{ trans "AUDIT_FACT_PRIORITIES_ONE" }}{{ else }}{{ trans "AUDIT_FACT_PRIORITIES" }}{{ end }}</span></div>
 		</div>
 	</header>
 

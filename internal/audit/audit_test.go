@@ -334,3 +334,25 @@ func TestStripUnknownNumbersKeepsDomains(t *testing.T) {
 		t.Errorf("got %q\nwant %q", got, want)
 	}
 }
+
+func TestExtractFormsAndLanguages(t *testing.T) {
+	doc, _ := html.Parse(strings.NewReader(`<html lang="en"><head>
+		<link rel="alternate" href="https://ex.com/contact/" hreflang="en" />
+		<link rel="alternate" href="https://ex.com/fr/contact/" hreflang="fr" />
+		<link rel="alternate" href="https://ex.com/contact/" hreflang="x-default" />
+	</head><body><main><p>Contact us</p>
+		<form method="post"><input type="hidden" name="nonce" value="1">
+			<input type="text" name="n" placeholder="Name"><label for="m">Email Address</label><input id="m" type="email" name="m">
+			<textarea name="msg" placeholder="Message"></textarea><input type="text" class="captcha" name="c">
+			<button type="submit">Submit</button></form>
+		<form role="search"><input type="search" name="s" aria-label="Search"></form>
+	</main></body></html>`))
+	forms := extractForms(doc)
+	if len(forms) != 2 || forms[0] != "fields: Name, Email Address, Message, captcha; button: Submit" || forms[1] != "search form; fields: Search" {
+		t.Errorf("forms = %q", forms)
+	}
+	alts := extractAlternates(doc)
+	if strings.Join(alts, "|") != "en: https://ex.com/contact/|fr: https://ex.com/fr/contact/" {
+		t.Errorf("alternates = %q", alts)
+	}
+}

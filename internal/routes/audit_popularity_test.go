@@ -42,8 +42,8 @@ func TestPopularityRendersInFrench(t *testing.T) {
 	out := renderPop(t, popResult())
 	for _, s := range []string{
 		"Popularité : les sites qui vous citent", "août à octobre 2026", "<b>1 234</b> sites vous citent",
-		"rang 2 345 678 sur 134 979 706", "des 2 % les mieux reliés", "repère de LaFactory", "ne publie aucune note de liens",
-		"wikipedia.org</span><span class=\"lfr-small lfr-num\">12</span>", "<span>Site</span><span>Rang</span>", "petit-blog.fr", "Nouveaux depuis le trimestre précédent : 40", "nouveau.fr", "Plus vus ce trimestre : 6", "parti.fr",
+		"rang 2 345 678 sur 134 979 706", "des 2 % de sites les mieux reliés de cet échantillon", "repère de LaFactory", "ne publie aucune note de liens",
+		"wikipedia.org</span><span class=\"lfr-small lfr-num\">12</span>", "<span>Site</span><span>Rang</span>", "petit-blog.fr", "Nouveaux depuis le trimestre précédent : 40", "nouveau.fr", "Liens non retrouvés ce trimestre : 6", "parti.fr",
 		"plus bas que dans les outils payants",
 		"Vous face aux concurrents", "<b>ex.com</b> (vous)", "1 site le cite", "absent.fr", "Pas encore dans l&#39;échantillon",
 		"Sites qui citent vos concurrents et pas vous : 3", "annuaire.fr", "cite rival.fr", "aucun lien de « toxique »",
@@ -106,7 +106,7 @@ func TestPopularityVariants(t *testing.T) {
 	if !strings.Contains(out, "<b>1</b> site vous cite") || !strings.Contains(out, "n&#39;était pas dans l&#39;échantillon du trimestre précédent") {
 		t.Error("new in the sample")
 	}
-	if strings.Contains(out, "les mieux reliés au reste du web") {
+	if strings.Contains(out, "les mieux reliés de cet échantillon") {
 		t.Error("a rank in the second half of the sample shows a share")
 	}
 	// No report part when there is no index.

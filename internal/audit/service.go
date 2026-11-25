@@ -279,6 +279,7 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64, signals 
 		if pc, err := PageText(fctx, s.HTTP, s.Cfg.UserAgent, pages[i].URL, max); err == nil {
 			pages[i].Text, pages[i].Headings = pc.Text, pc.Headings
 			pages[i].Footer, pages[i].Actions, pages[i].Contacts = pc.Footer, pc.Actions, pc.Contacts
+			pages[i].Forms, pages[i].Alternates = pc.Forms, pc.Alternates
 		}
 		cancel()
 	}

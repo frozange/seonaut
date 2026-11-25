@@ -3,6 +3,33 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.9.2 - 2026-11-25
+
+Défauts relevés par une relecture du rapport de lafactory.com.
+
+- **Formulaires vus par l'IA** : l'extraction du texte saute les formulaires,
+  si bien qu'une page Contact avec nom, e-mail, message et captcha passait
+  pour vide (« la page Contact ne contient presque rien », six fois dans le
+  rapport). Chaque page lue transmet maintenant ses formulaires (champs
+  visibles, bouton), et la consigne dit qu'une page de contact se juge à son
+  formulaire et à ses coordonnées, jamais à son nombre de mots.
+- **Versions en d'autres langues** : les liens hreflang de chaque page sont
+  transmis à l'IA, qui ne peut plus écrire qu'elle n'a pas vérifié si une
+  version française existe quand la page la déclare.
+- Recherches visées : 2 à 4 mots, comme un client les tape, dans la langue
+  de la page et non dans celle du rapport (elles étaient en français pour des
+  pages anglaises, et Google Suggest était interrogé dans la langue de la
+  page).
+- **Typographie française** : espace insécable avant « : » et « » », après
+  « « », espace fine insécable avant « ; ! ? % », sur tout le texte du
+  rapport, textes de l'IA compris (le balisage, les styles et les scripts ne
+  sont pas touchés). Un deux-points ne commence plus une ligne.
+- Textes : « 1 type de problème relevé » (singulier), « Liens non retrouvés ce
+  trimestre » au lieu de « Plus vus ce trimestre », « des 3 % de sites les
+  mieux reliés de cet échantillon » au lieu de « du web », « Aucune page
+  isolée » au lieu de « Toutes reliées » au-dessus de « Pages peu reliées »,
+  notes toujours à une décimale (« 8,0 » à côté de « 9,9 »).
+
 ## 1.9.1 - 2026-11-25
 
 - **Rapport plus lisible sur toutes les largeurs** : les grilles ne laissent

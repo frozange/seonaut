@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"log"
@@ -30,7 +31,13 @@ func (h *auditHandler) renderAudit(w http.ResponseWriter, tpl, title string, sta
 	if status != http.StatusOK {
 		w.WriteHeader(status)
 	}
-	h.Renderer.RenderTemplate(w, tpl, pv, h.lang())
+	if h.lang() != "fr" {
+		h.Renderer.RenderTemplate(w, tpl, pv, h.lang())
+		return
+	}
+	var buf bytes.Buffer
+	h.Renderer.RenderTemplate(&buf, tpl, pv, h.lang())
+	w.Write(frenchSpacing(buf.Bytes()))
 }
 
 // formHandler shows the free audit form.
@@ -227,7 +234,7 @@ func formatScore(v *float64, lang string) scoreCard {
 	if v == nil {
 		return scoreCard{Class: "none", Arc: "0"}
 	}
-	s := strings.TrimSuffix(strings.TrimSuffix(fmt.Sprintf("%.1f", *v), "0"), ".")
+	s := fmt.Sprintf("%.1f", *v)
 	if lang == "fr" {
 		s = strings.ReplaceAll(s, ".", ",")
 	}
