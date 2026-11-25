@@ -3,6 +3,26 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.9.1 - 2026-11-25
+
+- **Rapport plus lisible sur toutes les largeurs** : les grilles ne laissent
+  plus de colonne vide (`auto-fit`) ; sur téléphone, le rapport prend toute la
+  largeur moins 16 px au lieu des 10 % de marge du thème, les trois notes
+  tiennent en trois lignes compactes, les chiffres clés restent en 2 x 2 (4 en
+  ligne dès 700 px) et les volets ont une zone de clic de 44 px.
+- Lignes des listes : le chiffre reste sur la ligne du libellé et ne passe
+  dessous que si les deux ne tiennent pas (avant : toujours dessous sur
+  téléphone).
+- **Popularité** : la carte du nombre de sites et du rang prend toute la
+  largeur, les trois listes se partagent la ligne du dessous ; le mot « rang »
+  n'est plus répété à chaque ligne, une ligne d'en-tête « Site / Rang » le dit
+  une fois (aussi dans la liste des sites qui citent vos concurrents).
+- Vitesse : tuiles de mesure en 2 x 2, seuil sur une ligne, pastilles alignées.
+- Corrigé : les cartes « Ce qui fonctionne déjà » n'avaient aucune marge
+  intérieure et plusieurs marges (notes sous les cartes, aide sous les titres)
+  valaient 0, écrasées par les remises à zéro du gabarit, désormais en
+  `:where()`.
+
 ## 1.9.0 - 2026-11-25
 
 - **Adresses laissées de côté à la demande du propriétaire** : une liste par

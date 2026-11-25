@@ -43,13 +43,21 @@ func TestPopularityRendersInFrench(t *testing.T) {
 	for _, s := range []string{
 		"Popularité : les sites qui vous citent", "août à octobre 2026", "<b>1 234</b> sites vous citent",
 		"rang 2 345 678 sur 134 979 706", "des 2 % les mieux reliés", "repère de LaFactory", "ne publie aucune note de liens",
-		"wikipedia.org", "rang 12", "petit-blog.fr", "Nouveaux depuis le trimestre précédent : 40", "nouveau.fr", "Plus vus ce trimestre : 6", "parti.fr",
+		"wikipedia.org</span><span class=\"lfr-small lfr-num\">12</span>", "<span>Site</span><span>Rang</span>", "petit-blog.fr", "Nouveaux depuis le trimestre précédent : 40", "nouveau.fr", "Plus vus ce trimestre : 6", "parti.fr",
 		"plus bas que dans les outils payants",
 		"Vous face aux concurrents", "<b>ex.com</b> (vous)", "1 site le cite", "absent.fr", "Pas encore dans l&#39;échantillon",
 		"Sites qui citent vos concurrents et pas vous : 3", "annuaire.fr", "cite rival.fr", "aucun lien de « toxique »",
 	} {
 		if !strings.Contains(out, s) {
 			t.Errorf("missing %q", s)
+		}
+	}
+	// Ranked lists name the column once, not the word on every line.
+	i := strings.Index(out, "Les sites les mieux reliés")
+	lists := out[i : i+strings.Index(out[i:], "Vous face aux concurrents")]
+	for _, s := range []string{"rang 12", "rang 99", "rang 5"} {
+		if strings.Contains(lists, s) || strings.Contains(out, "annuaire.fr<br>") && strings.Contains(out, ">rang 5") {
+			t.Errorf("rank word repeated in a list: %q", s)
 		}
 	}
 	// The section sits between speed and internal links.
