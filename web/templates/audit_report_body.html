@@ -196,7 +196,7 @@
 	}
 	@container lfr (min-width: 900px) {
 		.lfr-metrics:has(> :nth-child(4):last-child) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-		.lfr-metrics:has(> :nth-child(4):last-child) > * { grid-column: auto; }
+		.lfr-metrics:has(> :nth-child(4):last-child) > :nth-child(n) { grid-column: auto; }
 	}
 	.lfr-metric { background: var(--lfr-panel-2); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 	.lfr-metric b { font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif); font-size: var(--lf-fs-h3, 26px); color: var(--lfr-figure); line-height: 1.1; }

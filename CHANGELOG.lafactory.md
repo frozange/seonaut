@@ -3,6 +3,25 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.10.3 - 2026-11-26
+
+Disposition du rapport à toutes les largeurs (Francis : « pour les audits je
+veux une disposition harmonieuse dans toutes les tailles »).
+
+- **Plus de ligne de cartes incomplète** : sur grand écran, une grille de 4
+  cartes se lit 2 + 2, de 5 cartes 3 + 2, de 7 cartes 3 + 2 + 2, au lieu
+  d'une dernière ligne à une carte et deux cases vides (données structurées de
+  bigneurons.com). Sur tablette, une carte en nombre impair prend toute la
+  largeur ; une carte seule aussi (« Les liens entre vos pages » n'occupe plus
+  une demi-largeur).
+- **Priorités** : en nombre impair, la dernière prend toute la largeur.
+- **Vitesse** : les deux cartes s'empilent en pleine largeur. Côte à côte, la
+  carte « Vos vrais visiteurs », souvent une seule phrase, faisait le tiers de
+  la hauteur de sa voisine. Les tuiles de mesure remplissent leurs lignes :
+  4 sur une ligne sur grand écran, 2 + 2 sur tablette et téléphone.
+- Vérifié sur les rapports de lafactory.com et bigneurons.com à 1440, 1024,
+  800, 768 et 375 px : chaque ligne pleine, aucun défilement horizontal.
+
 ## 1.10.2 - 2026-11-26
 
 - **Sens des canoniques donné à l'IA** : pour les pages dont la canonique est
