@@ -90,6 +90,8 @@ type IssueSummary struct {
 	// Context tells the AI what an example means when the URL alone cannot,
 	// e.g. "<page> (lang en) names as canonical <url> (lang fr)".
 	Context []string `json:"context,omitempty"`
+	// Langs holds the [page language, canonical language] pairs behind Context.
+	Langs [][2]string `json:"langs,omitempty"`
 }
 
 // PageFacts describe a key page of the site, from the crawl and a fresh fetch.

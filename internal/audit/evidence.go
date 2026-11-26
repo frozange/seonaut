@@ -82,7 +82,7 @@ func (r *CrawlReader) Issues(crawlID int64, examples int) ([]IssueSummary, int, 
 		}
 		ex.Close()
 		if out[i].Type == "ERROR_CANONICAL_OTHER_LANGUAGE" {
-			out[i].Context = r.canonicalContext(crawlID, examples)
+			out[i].Context, out[i].Langs = r.canonicalContext(crawlID, examples)
 		}
 	}
 
@@ -523,7 +523,7 @@ func clamp(v, lo, hi int) int {
 // which language points to which: without it the AI guessed the direction and
 // wrote that French pages pointed abroad when the reverse was true
 // (bigneurons.com, audit 23).
-func (r *CrawlReader) canonicalContext(crawlID int64, limit int) []string {
+func (r *CrawlReader) canonicalContext(crawlID int64, limit int) ([]string, [][2]string) {
 	rows, err := r.DB.Query(`
 		SELECT a.url, a.lang, b.url, b.lang
 		FROM issues
@@ -532,19 +532,23 @@ func (r *CrawlReader) canonicalContext(crawlID int64, limit int) []string {
 		INNER JOIN pagereports AS b ON b.crawl_id = a.crawl_id AND b.url = a.canonical
 		WHERE issues.crawl_id = ? AND issue_types.type = "ERROR_CANONICAL_OTHER_LANGUAGE"
 		ORDER BY a.depth ASC, a.url ASC
-		LIMIT ?`, crawlID, limit)
+		LIMIT ?`, crawlID, 200)
 	if err != nil {
-		return nil
+		return nil, nil
 	}
 	defer rows.Close()
 	var out []string
+	var langs [][2]string
 	for rows.Next() {
 		var u, l, c, cl string
 		if rows.Scan(&u, &l, &c, &cl) == nil {
-			out = append(out, canonicalLine(u, l, c, cl))
+			if len(out) < limit {
+				out = append(out, canonicalLine(u, l, c, cl))
+			}
+			langs = append(langs, [2]string{l, cl})
 		}
 	}
-	return out
+	return out, langs
 }
 
 func canonicalLine(page, lang, canonical, canonicalLang string) string {

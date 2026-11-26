@@ -3,6 +3,17 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.10.4 - 2026-11-26
+
+- **Le sens des canoniques n'est plus confié à l'IA** : même avec les exemples
+  orientés (1.10.2), elle a écrit deux fois l'inverse de la réalité sur
+  bigneurons.com (« Google risque de montrer à un client français la version
+  anglaise »). La conséquence de cette priorité est désormais écrite par le
+  code à partir des langues mesurées : « Vos pages en anglais et en
+  monténégrin indiquent une page en français comme version principale. Google
+  risque de ne garder que cette page et de retirer vos traductions de ses
+  résultats. »
+
 ## 1.10.3 - 2026-11-26
 
 Disposition du rapport à toutes les largeurs (Francis : « pour les audits je

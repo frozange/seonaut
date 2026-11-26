@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -386,5 +387,26 @@ func TestCanonicalLineSaysTheDirection(t *testing.T) {
 	got := canonicalLine("https://x.com/me/", "sr-Latn-ME", "https://x.com/", "fr")
 	if got != "https://x.com/me/ (written in sr-Latn-ME) names as its canonical https://x.com/ (written in fr)" {
 		t.Errorf("got %q", got)
+	}
+}
+
+func TestCanonicalLangs(t *testing.T) {
+	from, to := canonicalLangs([][2]string{{"sr-Latn-ME", "fr"}, {"en", "fr-FR"}, {"en-GB", "fr"}})
+	if strings.Join(from, ",") != "me,en" || strings.Join(to, ",") != "fr" {
+		t.Errorf("from %v to %v", from, to)
+	}
+	if got := joinAnd([]string{"anglais", "monténégrin", "allemand"}, "et"); got != "anglais, monténégrin et allemand" {
+		t.Errorf("joinAnd = %q", got)
+	}
+}
+
+func TestFixedFactsOverrideTheAI(t *testing.T) {
+	s := &Service{Trans: func(lang, key string, args ...interface{}) string {
+		return key + fmt.Sprint(args...)
+	}}
+	res := &Result{Priorities: []Priority{{ID: "t:ERROR_CANONICAL_OTHER_LANGUAGE", Impact: "a French client may see the English page"}}}
+	s.fixedFacts(res, []IssueSummary{{Type: "ERROR_CANONICAL_OTHER_LANGUAGE", Langs: [][2]string{{"en", "fr"}}}}, "fr")
+	if !strings.HasPrefix(res.Priorities[0].Impact, "AUDIT_PRIO_CANONICAL_LANG") {
+		t.Errorf("impact = %q", res.Priorities[0].Impact)
 	}
 }

@@ -314,10 +314,12 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64, signals 
 	if s.Interpreter == nil {
 		res.AIError = "disabled"
 		res.Priorities = rankPriorities(priorities, 8)
+		s.fixedFacts(res, issues, a.Lang)
 		return res, nil
 	}
 	rep, prio, err := s.Interpreter.Interpret(ctx, res.Evidence, priorities)
 	res.Priorities = rankPriorities(prio, 8)
+	s.fixedFacts(res, issues, a.Lang)
 	if err != nil {
 		res.AIError = err.Error()
 		log.Printf("audit %d: AI: %v", a.ID, err)
@@ -504,4 +506,80 @@ func limitReached(pages, limit int) bool {
 		slack = 1
 	}
 	return pages >= limit-slack
+}
+
+// fixedFacts writes from the measures the consequence of a priority whose
+// direction the AI got wrong twice even with the examples spelled out
+// (bigneurons.com, audits 23 and 25: "a French client may see the English
+// page", when English and Montenegrin pages pointed to the French one).
+func (s *Service) fixedFacts(res *Result, issues []IssueSummary, lang string) {
+	if s.Trans == nil {
+		return
+	}
+	for _, is := range issues {
+		if is.Type != "ERROR_CANONICAL_OTHER_LANGUAGE" || len(is.Langs) == 0 {
+			continue
+		}
+		from, to := canonicalLangs(is.Langs)
+		if len(from) == 0 || len(to) == 0 {
+			continue
+		}
+		name := func(codes []string) string {
+			var names []string
+			for _, c := range codes {
+				names = append(names, s.Trans(lang, "AUDIT_IN")+" "+s.Trans(lang, "AUDIT_LANG_"+c))
+			}
+			return joinAnd(names, s.Trans(lang, "AUDIT_AND"))
+		}
+		text := s.Trans(lang, "AUDIT_PRIO_CANONICAL_LANG", name(from), name(to))
+		for i := range res.Priorities {
+			if res.Priorities[i].ID == "t:"+is.Type {
+				res.Priorities[i].Impact = text
+			}
+		}
+	}
+}
+
+// knownLangs are the languages the report can name; others read "other".
+var knownLangs = map[string]bool{"fr": true, "en": true, "de": true, "es": true, "it": true, "nl": true, "pt": true, "me": true, "sr": true, "hr": true, "bs": true}
+
+// langKey reduces a lang attribute to a name key: Montenegrin is told by its
+// region (sr-Latn-ME), the rest by the base language.
+func langKey(code string) string {
+	parts := strings.Split(strings.ToLower(strings.ReplaceAll(code, "_", "-")), "-")
+	if len(parts) > 1 && parts[len(parts)-1] == "me" {
+		return "me"
+	}
+	if knownLangs[parts[0]] {
+		return parts[0]
+	}
+	return "other"
+}
+
+// canonicalLangs lists, in order of appearance, the languages of the pages
+// and those of the pages they name as canonical.
+func canonicalLangs(pairs [][2]string) (from, to []string) {
+	seenF, seenT := map[string]bool{}, map[string]bool{}
+	for _, p := range pairs {
+		f, t := langKey(p[0]), langKey(p[1])
+		if !seenF[f] {
+			seenF[f] = true
+			from = append(from, f)
+		}
+		if !seenT[t] {
+			seenT[t] = true
+			to = append(to, t)
+		}
+	}
+	return from, to
+}
+
+func joinAnd(items []string, and string) string {
+	switch len(items) {
+	case 0:
+		return ""
+	case 1:
+		return items[0]
+	}
+	return strings.Join(items[:len(items)-1], ", ") + " " + and + " " + items[len(items)-1]
 }
