@@ -3,6 +3,20 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.10.9 - 2026-11-26
+
+Passe aux huit largeurs (390 à 2560 px, Chromium et WebKit) sur la 1.10.8.
+
+- **Vitesse côte à côte seulement quand les deux cartes ont des mesures** :
+  quand Google n'a pas de données sur le terrain, cette carte n'est qu'une
+  phrase. Posée à côté des quatre tuiles de laboratoire, elle laissait une
+  demi-colonne vide (1024 px et plus). Les cartes s'empilent alors.
+- **La pastille « Amélioration nécessaire » ne déborde plus** : elle sortait de
+  sa tuile à 390 et 1024 px, et faisait défiler la page de côté sur téléphone.
+  Les tuiles suivent la largeur de leur carte, pas celle de l'écran : une
+  colonne sous 560 px de carte, deux jusqu'à 1100, puis des lignes pleines de
+  trois ou quatre.
+
 ## 1.10.8 - 2026-11-26
 
 - **Vocabulaire de Google imposé au rendu** : malgré la consigne donnée à

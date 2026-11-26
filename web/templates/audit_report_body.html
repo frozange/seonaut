@@ -186,11 +186,9 @@
 	/* The two speed cards stack at full width: side by side, the real-visitor card (often one sentence)
 	   stood beside four tiles at a third of their height. The tiles fill their rows like the cards. */
 	.lfr-speed-cards { display: grid; gap: 20px; }
+	/* Side by side only when both cards hold tiles: a card with one sentence beside four tiles left half a column empty. */
 	@container lfr (min-width: 680px) {
-		.lfr-speed-cards:has(> .lfr-card + .lfr-card) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-		.lfr-speed-cards:has(> .lfr-card + .lfr-card) .lfr-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-		.lfr-speed-cards:has(> .lfr-card + .lfr-card) .lfr-metrics > * { grid-column: auto; }
-		.lfr-speed-cards:has(> .lfr-card + .lfr-card) .lfr-metrics > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+		.lfr-speed-cards:has(> .lfr-speed:first-child .lfr-metrics):has(> .lfr-speed + .lfr-speed .lfr-metrics) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	}
 	.lfr-pair { display: grid; column-gap: 40px; }
 	@container lfr (min-width: 680px) {
@@ -200,19 +198,23 @@
 	}
 	.lfr-speed > .lfr-kicker { color: var(--lfr-strong); margin-bottom: 6px; }
 	.lfr-speed > .lfr-small { max-width: 75ch; }
-	.lfr-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
-	@container lfr (max-width: 679.98px) { .lfr-metrics > :last-child:nth-child(odd) { grid-column: 1 / -1; } }
-	@container lfr (min-width: 680px) {
+	/* Tiles follow their own card's width, not the window's: Google's rating label (« Amélioration nécessaire »)
+	   needs about 230 px of tile. One column under 560 px of card, two up to 1100, then full rows of three or four. */
+	.lfr-speed { container: lfrspeed / inline-size; }
+	.lfr-metrics { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 16px; }
+	@container lfrspeed (min-width: 560px) { .lfr-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+	@container lfrspeed (min-width: 560px) and (max-width: 1099.98px) { .lfr-metrics > :last-child:nth-child(odd) { grid-column: 1 / -1; } }
+	@container lfrspeed (min-width: 1100px) {
 		.lfr-metrics { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 		.lfr-metrics > * { grid-column: span 2; }
 		.lfr-metrics > :only-child { grid-column: 1 / -1; }
 		.lfr-metrics:has(> :last-child:nth-child(3n+2)) > :nth-last-child(-n+2),
 		.lfr-metrics:has(> :last-child:nth-child(3n+4)) > :nth-last-child(-n+4) { grid-column: span 3; }
-	}
-	@container lfr (min-width: 900px) {
 		.lfr-metrics:has(> :nth-child(4):last-child) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 		.lfr-metrics:has(> :nth-child(4):last-child) > :nth-child(n) { grid-column: auto; }
 	}
+	/* Safety net: a longer label wraps inside its tile rather than crossing it. */
+	.lfr-metric .lfr-chip { max-width: 100%; white-space: normal; }
 	.lfr-metric { background: var(--lfr-panel-2); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 	.lfr-metric b { font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif); font-size: var(--lf-fs-h3, 26px); color: var(--lfr-figure); line-height: 1.1; }
 	.lfr-pop > * + .lfr-grid, .lfr-pop > .lfr-card + .lfr-card { margin-top: 20px; }
