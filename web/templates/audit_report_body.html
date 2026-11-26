@@ -26,6 +26,8 @@
 	.lfr-sec { padding: clamp(48px, 7vw, 88px) 0 0; border: 0; }
 	.lfr-sec-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 32px; margin-bottom: 28px; }
 	.lfr-sec-head h2 { margin: 0; }
+	/* Phones: the title, then its bar and legend, stacked; not a row pushed to both edges. */
+	@container lfr (max-width: 559.98px) { .lfr-sec-head { flex-direction: column; align-items: stretch; } .lfr-sec-head > .lfr-mix { flex: none; } }
 	.lfr-sec-head h2 + .lfr-help { margin-top: 10px; }
 	.lfr-help { color: var(--lfr-muted); font-size: var(--lf-fs-small, 16px); max-width: 68ch; }
 	.lfr-kicker { font-size: var(--lf-fs-label, 15px); text-transform: uppercase; letter-spacing: .1em; color: var(--lfr-muted); font-weight: 600; }
@@ -161,10 +163,11 @@
 
 	/* Rows: a page path, an optional bar, a figure; used by the measurement sections. */
 	.lfr-rows { display: grid; gap: 0; margin-top: 10px !important; }
-	.lfr-rows > li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--lfr-line); font-size: var(--lf-fs-small, 16px); }
+	/* Label left, value right in its own column: a long path wraps in its column, the value never drops under it. */
+	.lfr-rows > li { display: grid; grid-template-columns: minmax(0, 1fr) fit-content(45%); gap: 4px 16px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--lfr-line); font-size: var(--lf-fs-small, 16px); }
 	.lfr-rows > li:last-child { border-bottom: 0; }
 	.lfr-rows > li > span:first-child { flex: 1 1 auto; min-width: 0; color: var(--lfr-strong); overflow-wrap: anywhere; }
-	.lfr-rows > li > span + span { margin-left: auto; text-align: right; max-width: 100%; overflow-wrap: anywhere; }
+	.lfr-rows > li > span + span { text-align: right; overflow-wrap: anywhere; }
 	.lfr-rows > li:has(.lfr-bar) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(60px, 30%) auto; align-items: center; }
 	.lfr-rows > li:has(.lfr-bar) > span + span { margin-left: 0; }
 	@media (max-width: 600px) { .lfr-rows > li:has(.lfr-bar) { grid-template-columns: 1fr auto; } .lfr-rows .lfr-bar { grid-column: 1 / -1; grid-row: 2; } }

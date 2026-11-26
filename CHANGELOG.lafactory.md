@@ -3,6 +3,19 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.10.7 - 2026-11-26
+
+Passe aux huit largeurs (390 à 2560 px, Chromium et WebKit) sur les rapports
+de lafactory.com et bigneurons.com.
+
+- **Une valeur ne tombe plus sous son libellé** : dans les listes (pages en
+  double, pages peu reliées, conseils de vitesse, données structurées), la
+  valeur a sa colonne à droite et un chemin long passe à la ligne dans la
+  sienne. « texte commun à 100 % » passait sous le chemin à 820 et 900 px,
+  « un seul lien reçu » à 390 px.
+- **En-têtes de section sur téléphone** : le titre, puis sa barre et sa
+  légende, l'un sous l'autre.
+
 ## 1.10.6 - 2026-11-26
 
 - **Le rapport prend la largeur du site** : 1280 px au plus, comme le menu de
