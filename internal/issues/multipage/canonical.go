@@ -90,6 +90,9 @@ func (sr *SqlReporter) CanonicalizedToError(c *models.Crawl) *models.MultipageIs
 // canonicalized to a page written in another language. Google asks for a canonical in the
 // same language: a translation pointing to the original gets dropped from the results.
 // https://developers.google.com/search/docs/specialty/international/localized-versions
+// Google does not read the lang attribute: a page carrying the same main heading as
+// its canonical is a copy whose template declares the wrong language (bigneurons.com
+// publishes its English articles under /big-bang/ with lang="fr"), not a translation.
 func (sr *SqlReporter) CanonicalizedToOtherLanguage(c *models.Crawl) *models.MultipageIssueReporter {
 	query := `
 		SELECT
@@ -104,7 +107,8 @@ func (sr *SqlReporter) CanonicalizedToOtherLanguage(c *models.Crawl) *models.Mul
 			AND b.crawled = 1
 			AND a.lang != ""
 			AND b.lang != ""
-			AND LOWER(SUBSTRING_INDEX(REPLACE(a.lang, "_", "-"), "-", 1)) != LOWER(SUBSTRING_INDEX(REPLACE(b.lang, "_", "-"), "-", 1))`
+			AND LOWER(SUBSTRING_INDEX(REPLACE(a.lang, "_", "-"), "-", 1)) != LOWER(SUBSTRING_INDEX(REPLACE(b.lang, "_", "-"), "-", 1))
+			AND (COALESCE(a.h1, "") = "" OR COALESCE(a.h1, "") <> COALESCE(b.h1, ""))`
 
 	return &models.MultipageIssueReporter{
 		Pstream:   sr.pageReportsQuery(query, c.Id, c.Id),

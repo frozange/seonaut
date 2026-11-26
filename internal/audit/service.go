@@ -520,18 +520,10 @@ func (s *Service) fixedFacts(res *Result, issues []IssueSummary, lang string) {
 		if is.Type != "ERROR_CANONICAL_OTHER_LANGUAGE" || len(is.Langs) == 0 {
 			continue
 		}
-		from, to := canonicalLangs(is.Langs)
-		if len(from) == 0 || len(to) == 0 {
+		text := canonicalSentence(is.Langs, func(key string, args ...interface{}) string { return s.Trans(lang, key, args...) })
+		if text == "" {
 			continue
 		}
-		name := func(codes []string) string {
-			var names []string
-			for _, c := range codes {
-				names = append(names, s.Trans(lang, "AUDIT_IN")+" "+s.Trans(lang, "AUDIT_LANG_"+c))
-			}
-			return joinAnd(names, s.Trans(lang, "AUDIT_AND"))
-		}
-		text := s.Trans(lang, "AUDIT_PRIO_CANONICAL_LANG", name(from), name(to))
 		for i := range res.Priorities {
 			if res.Priorities[i].ID == "t:"+is.Type {
 				res.Priorities[i].Impact = text
@@ -556,22 +548,45 @@ func langKey(code string) string {
 	return "other"
 }
 
-// canonicalLangs lists, in order of appearance, the languages of the pages
-// and those of the pages they name as canonical.
-func canonicalLangs(pairs [][2]string) (from, to []string) {
-	seenF, seenT := map[string]bool{}, map[string]bool{}
+// canonicalSentence states, for each language pointed to, which languages
+// point to it: "Vos pages en anglais et en monténégrin indiquent une page en
+// français comme version principale."
+func canonicalSentence(pairs [][2]string, tr func(key string, args ...interface{}) string) string {
+	var targets []string
+	from := map[string][]string{}
+	seen := map[string]bool{}
 	for _, p := range pairs {
 		f, t := langKey(p[0]), langKey(p[1])
-		if !seenF[f] {
-			seenF[f] = true
-			from = append(from, f)
+		if f == t {
+			continue
 		}
-		if !seenT[t] {
-			seenT[t] = true
-			to = append(to, t)
+		if _, ok := from[t]; !ok {
+			targets = append(targets, t)
+		}
+		if !seen[f+">"+t] {
+			seen[f+">"+t] = true
+			from[t] = append(from[t], f)
 		}
 	}
-	return from, to
+	if len(targets) == 0 {
+		return ""
+	}
+	in := func(code string) string { return tr("AUDIT_IN") + " " + tr("AUDIT_LANG_"+code) }
+	var clauses []string
+	for i, t := range targets {
+		var names []string
+		for _, f := range from[t] {
+			names = append(names, in(f))
+		}
+		key := "AUDIT_PRIO_CANONICAL_CLAUSE"
+		if i > 0 {
+			key = "AUDIT_PRIO_CANONICAL_CLAUSE_NEXT" // "celles en allemand, une page en anglais"
+		}
+		clauses = append(clauses, tr(key, joinAnd(names, tr("AUDIT_AND")), in(t)))
+	}
+	text := strings.Join(clauses, tr("AUDIT_CLAUSE_SEP"))
+	text = strings.ToUpper(text[:1]) + text[1:]
+	return tr("AUDIT_PRIO_CANONICAL_LANG", text)
 }
 
 func joinAnd(items []string, and string) string {

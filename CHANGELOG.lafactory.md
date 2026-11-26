@@ -3,6 +3,21 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.10.5 - 2026-11-26
+
+- **Canonique dans une autre langue, sans faux constat** : Google ne lit pas
+  l'attribut `lang`. bigneurons.com publie ses articles anglais sous /big-bang/
+  avec `lang="fr"` et une canonique juste vers /en/blog/ : le contrôle les
+  comptait. Une page dont le titre principal (H1) est celui de sa canonique est
+  une copie, pas une traduction : elle n'est plus relevée.
+- **Phrase construite par langue cible** : « Vos pages en monténégrin et en
+  anglais désignent une page en français comme version principale. Google
+  risque de ne garder que les pages désignées et de retirer vos traductions de
+  ses résultats. » Avec deux cibles, la seconde clause s'abrège (« celles en
+  allemand, une page en anglais »). La 1.10.4 mélangeait les sens (« vos pages
+  en monténégrin, en anglais et en français indiquent une page en français et
+  en anglais »).
+
 ## 1.10.4 - 2026-11-26
 
 - **Le sens des canoniques n'est plus confié à l'IA** : même avec les exemples

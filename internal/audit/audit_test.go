@@ -390,13 +390,29 @@ func TestCanonicalLineSaysTheDirection(t *testing.T) {
 	}
 }
 
-func TestCanonicalLangs(t *testing.T) {
-	from, to := canonicalLangs([][2]string{{"sr-Latn-ME", "fr"}, {"en", "fr-FR"}, {"en-GB", "fr"}})
-	if strings.Join(from, ",") != "me,en" || strings.Join(to, ",") != "fr" {
-		t.Errorf("from %v to %v", from, to)
+func TestCanonicalSentence(t *testing.T) {
+	fr := map[string]string{"AUDIT_IN": "en", "AUDIT_AND": "et", "AUDIT_CLAUSE_SEP": " ; ", "AUDIT_LANG_fr": "français",
+		"AUDIT_LANG_en": "anglais", "AUDIT_LANG_me": "monténégrin", "AUDIT_LANG_de": "allemand",
+		"AUDIT_PRIO_CANONICAL_CLAUSE":      "vos pages %1% désignent une page %2% comme version principale",
+		"AUDIT_PRIO_CANONICAL_CLAUSE_NEXT": "celles %1%, une page %2%",
+		"AUDIT_PRIO_CANONICAL_LANG":        "%1%. Google risque de ne garder que les pages désignées."}
+	tr := func(key string, args ...interface{}) string {
+		s := fr[key]
+		for i, a := range args {
+			s = strings.ReplaceAll(s, fmt.Sprintf("%%%d%%", i+1), fmt.Sprint(a))
+		}
+		return s
 	}
-	if got := joinAnd([]string{"anglais", "monténégrin", "allemand"}, "et"); got != "anglais, monténégrin et allemand" {
-		t.Errorf("joinAnd = %q", got)
+	got := canonicalSentence([][2]string{{"sr-Latn-ME", "fr"}, {"en", "fr-FR"}, {"en-GB", "fr"}}, tr)
+	if got != "Vos pages en monténégrin et en anglais désignent une page en français comme version principale. Google risque de ne garder que les pages désignées." {
+		t.Errorf("one target: %q", got)
+	}
+	got = canonicalSentence([][2]string{{"en", "fr"}, {"de", "en"}}, tr)
+	if got != "Vos pages en anglais désignent une page en français comme version principale ; celles en allemand, une page en anglais. Google risque de ne garder que les pages désignées." {
+		t.Errorf("two targets: %q", got)
+	}
+	if joinAnd([]string{"a", "b", "c"}, "et") != "a, b et c" {
+		t.Error("joinAnd")
 	}
 }
 
