@@ -19,7 +19,37 @@ var (
 	frBeforeNarrow = regexp.MustCompile(` ([;!?%])`)
 )
 
+// googleVocab puts Google's own French words back where the report's AI
+// paraphrased them ("titre Google", "plan du site"), despite its writing rules
+// (Francis, 2026-11-26: « ça te couterait quoi de prendre le vocabulaire Google
+// au lieu d'inventer le tien ? »). Text tokens are raw HTML: "<" is written
+// "&lt;" and an apostrophe "&#39;", as the template escapes them.
+var googleVocab = []struct {
+	re  *regexp.Regexp
+	rep string
+}{
+	{regexp.MustCompile(`plan du site([^()]{0,80}?)\s*\((?:le |un )?sitemap[^)]*\)`), "sitemap$1"},
+	{regexp.MustCompile(`plans du site`), "sitemaps"},
+	{regexp.MustCompile(`plan du site`), "sitemap"},
+	{regexp.MustCompile(`titres Google`), "éléments &lt;title&gt;"},
+	{regexp.MustCompile(`\b([Ll])e titre Google`), "${1}&#39;élément &lt;title&gt;"},
+	{regexp.MustCompile(`\bdu titre Google`), "de l&#39;élément &lt;title&gt;"},
+	{regexp.MustCompile(`\bau titre Google`), "à l&#39;élément &lt;title&gt;"},
+	{regexp.MustCompile(`titre Google`), "élément &lt;title&gt;"},
+	{regexp.MustCompile(`descriptions? (?:affichées? par|lues? par|données à) Google`), "meta description"},
+	{regexp.MustCompile(`descriptions Google`), "meta descriptions"},
+	{regexp.MustCompile(`description Google`), "meta description"},
+}
+
+func googleWords(s string) string {
+	for _, g := range googleVocab {
+		s = g.re.ReplaceAllString(s, g.rep)
+	}
+	return s
+}
+
 func frenchText(s string) string {
+	s = googleWords(s)
 	s = frBeforeWide.ReplaceAllString(s, " $1")
 	s = frAfterWide.ReplaceAllString(s, "« ")
 	return frBeforeNarrow.ReplaceAllString(s, " $1")

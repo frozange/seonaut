@@ -45,3 +45,7 @@ domain authority
 autorité de domaine
 spam score
 jus de lien
+titre Google
+description Google
+plan du site
+note de la simulation

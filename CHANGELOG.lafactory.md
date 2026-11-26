@@ -3,6 +3,16 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.10.8 - 2026-11-26
+
+- **Vocabulaire de Google imposé au rendu** : malgré la consigne donnée à
+  l'IA (1.10.6), le rapport écrivait encore « titre Google », « plan du site »
+  ou « description affichée par Google ». Le filtre de typographie française
+  qui s'applique au rendu remet les mots de Google (« élément <title> »,
+  « sitemap », « meta description ») et retire la parenthèse « (sitemap) »
+  devenue inutile. Il vaut aussi pour les rapports déjà enregistrés. Ces
+  tournures rejoignent la liste des phrases interdites à l'IA.
+
 ## 1.10.7 - 2026-11-26
 
 Passe aux huit largeurs (390 à 2560 px, Chromium et WebKit) sur les rapports
