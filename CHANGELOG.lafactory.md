@@ -3,6 +3,16 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.10.2 - 2026-11-26
+
+- **Sens des canoniques donné à l'IA** : pour les pages dont la canonique est
+  dans une autre langue, l'IA reçoit avec les exemples la langue de la page et
+  celle de la page désignée. Faute de quoi elle avait écrit, sur bigneurons.com
+  (audit 23), qu'une page française désignait sa version étrangère, alors que
+  c'est l'inverse.
+- Priorité « Pages au texte copié » renommée « Pages en double », comme la
+  section du rapport.
+
 ## 1.10.1 - 2026-11-26
 
 Relecture du rapport régénéré de bigneurons.com (audit 22).

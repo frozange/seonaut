@@ -87,6 +87,9 @@ type IssueSummary struct {
 	Priority int      `json:"priority"` // 1 critical, 2 alert, 3 warning
 	Pages    int      `json:"pages"`
 	Examples []string `json:"examples"`
+	// Context tells the AI what an example means when the URL alone cannot,
+	// e.g. "<page> (lang en) names as canonical <url> (lang fr)".
+	Context []string `json:"context,omitempty"`
 }
 
 // PageFacts describe a key page of the site, from the crawl and a fresh fetch.

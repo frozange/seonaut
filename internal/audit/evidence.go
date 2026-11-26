@@ -81,6 +81,9 @@ func (r *CrawlReader) Issues(crawlID int64, examples int) ([]IssueSummary, int, 
 			}
 		}
 		ex.Close()
+		if out[i].Type == "ERROR_CANONICAL_OTHER_LANGUAGE" {
+			out[i].Context = r.canonicalContext(crawlID, examples)
+		}
 	}
 
 	var total int
@@ -493,10 +496,14 @@ func BuildEvidence(site SiteFacts, pages []PageFacts, issues []IssueSummary, iss
 	var measured []map[string]interface{}
 	for _, is := range issues {
 		name, what := issueText(is.Type)
-		measured = append(measured, map[string]interface{}{
+		m := map[string]interface{}{
 			"issue": name, "what_it_checks": what, "priority": []string{"", "critical", "alert", "warning"}[clamp(is.Priority, 1, 3)],
 			"pages_affected": is.Pages, "examples": is.Examples,
-		})
+		}
+		if len(is.Context) > 0 {
+			m["examples_explained"] = is.Context
+		}
+		measured = append(measured, m)
 	}
 	add("Technical issues measured by the crawler", measured)
 	return out
@@ -510,4 +517,36 @@ func clamp(v, lo, hi int) int {
 		return hi
 	}
 	return v
+}
+
+// canonicalContext says, for a few pages canonicalized to another language,
+// which language points to which: without it the AI guessed the direction and
+// wrote that French pages pointed abroad when the reverse was true
+// (bigneurons.com, audit 23).
+func (r *CrawlReader) canonicalContext(crawlID int64, limit int) []string {
+	rows, err := r.DB.Query(`
+		SELECT a.url, a.lang, b.url, b.lang
+		FROM issues
+		INNER JOIN issue_types ON issue_types.id = issues.issue_type_id
+		INNER JOIN pagereports AS a ON a.id = issues.pagereport_id
+		INNER JOIN pagereports AS b ON b.crawl_id = a.crawl_id AND b.url = a.canonical
+		WHERE issues.crawl_id = ? AND issue_types.type = "ERROR_CANONICAL_OTHER_LANGUAGE"
+		ORDER BY a.depth ASC, a.url ASC
+		LIMIT ?`, crawlID, limit)
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+	var out []string
+	for rows.Next() {
+		var u, l, c, cl string
+		if rows.Scan(&u, &l, &c, &cl) == nil {
+			out = append(out, canonicalLine(u, l, c, cl))
+		}
+	}
+	return out
+}
+
+func canonicalLine(page, lang, canonical, canonicalLang string) string {
+	return fmt.Sprintf("%s (written in %s) names as its canonical %s (written in %s)", page, lang, canonical, canonicalLang)
 }

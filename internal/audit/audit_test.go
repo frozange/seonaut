@@ -381,3 +381,10 @@ func TestLimitReached(t *testing.T) {
 		}
 	}
 }
+
+func TestCanonicalLineSaysTheDirection(t *testing.T) {
+	got := canonicalLine("https://x.com/me/", "sr-Latn-ME", "https://x.com/", "fr")
+	if got != "https://x.com/me/ (written in sr-Latn-ME) names as its canonical https://x.com/ (written in fr)" {
+		t.Errorf("got %q", got)
+	}
+}
