@@ -436,7 +436,7 @@
 			<p class="lfr-kicker">{{ trans "AUDIT_SPEED_LAB" }}</p>
 			<p class="lfr-small">{{ trans "AUDIT_SPEED_LAB_HELP" }}</p>
 			<div class="lfr-metrics">
-				{{ if .Score }}<div class="lfr-metric lfr-{{ .ScoreClass }}"><b>{{ .Score }}<small>/100</small></b><span>{{ trans "AUDIT_SPEED_SCORE" }}</span></div>{{ end }}
+				{{ if .Score }}<div class="lfr-metric lfr-{{ .ScoreClass }}"><b>{{ .Score }}<small>/100</small></b><span>{{ trans "AUDIT_SPEED_SCORE" }}</span><span class="lfr-chip lfr-{{ .ScoreClass }}">{{ template "lfr_icon" .ScoreClass }}{{ trans (print "AUDIT_SPEED_RATING_" .ScoreClass) }}</span></div>{{ end }}
 				{{ range .Metrics }}{{ template "lfr_metric" . }}{{ end }}
 			</div>
 			{{ if .Opportunities }}
