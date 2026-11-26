@@ -3,6 +3,19 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.10.1 - 2026-11-26
+
+Relecture du rapport régénéré de bigneurons.com (audit 22).
+
+- **Conseils de vitesse en français courant** : les titres que renvoie
+  PageSpeed (« Requêtes de blocage du rendu ») sont remplacés, pour les
+  conseils les plus fréquents, par un libellé clair (« Fichiers de style et
+  scripts qui retardent l'affichage de la page »).
+- **Une page peu reliée** : le texte passe au singulier quand une seule page
+  est concernée.
+- **IA** : un problème technique déjà classé en priorité n'est plus
+  réexpliqué dans les analyses de rédaction et de contenu.
+
 ## 1.10.0 - 2026-11-26
 
 Le français du rapport (Francis : « je dois faire quoi pour que tu arretes le

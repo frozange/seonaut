@@ -12,9 +12,9 @@ func popResult() *audit.PopularityReport {
 	return &audit.PopularityReport{
 		Release: "cc-main-2026-aug-sep-oct", ReleaseEnd: time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC),
 		Previous: "cc-main-2026-may-jun-jul", PreviousEnd: time.Date(2026, 7, 1, 0, 0, 0, 0, time.UTC),
-		Domains: 134979706,
-		Site:    audit.DomainPop{Domain: "ex.com", Found: true, Referring: 1234, Rank: 2345678, PrevFound: true, PrevReferring: 1200},
-		Top:     []audit.RefDomain{{Domain: "wikipedia.org", Rank: 12}, {Domain: "petit-blog.fr"}},
+		Domains:  134979706,
+		Site:     audit.DomainPop{Domain: "ex.com", Found: true, Referring: 1234, Rank: 2345678, PrevFound: true, PrevReferring: 1200},
+		Top:      []audit.RefDomain{{Domain: "wikipedia.org", Rank: 12}, {Domain: "petit-blog.fr"}},
 		Compared: true, GainedCount: 40, LostCount: 6,
 		Gained: []audit.RefDomain{{Domain: "nouveau.fr", Rank: 99000}},
 		Lost:   []audit.RefDomain{{Domain: "parti.fr"}},

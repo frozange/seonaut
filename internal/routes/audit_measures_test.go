@@ -36,7 +36,7 @@ func lotAResult() *audit.Result {
 		Speed: &audit.SpeedReport{URL: "https://ex.com/",
 			Mobile: &audit.SpeedRun{FieldScope: "site",
 				Field: &audit.FieldData{LCP: &audit.FieldMetric{P75: 1823, Rating: "good"}, INP: &audit.FieldMetric{P75: 134, Rating: "good"}, CLS: &audit.FieldMetric{P75: 0.31, Rating: "poor"}},
-				Lab:   &audit.LabData{Score: &score, LCPms: &lcp, CLS: &cls, TBTms: &tbt, Opportunities: []audit.Opportunity{{Title: "Réduisez le JavaScript [inutilisé](https://x)", SavingMs: 900}}}},
+				Lab:   &audit.LabData{Score: &score, LCPms: &lcp, CLS: &cls, TBTms: &tbt, Opportunities: []audit.Opportunity{{Title: "Réduisez le JavaScript [inutilisé](https://x)", SavingMs: 900}, {ID: "render-blocking-insight", Title: "Requêtes de blocage du rendu", SavingMs: 800}}}},
 			Desktop: &audit.SpeedRun{Error: "HTTP 500"}},
 		Structured: &audit.StructuredReport{PagesRead: 38, PagesWith: 20, Unreadable: 1, UnreadableExamples: []string{"https://ex.com/x"}, OtherTypes: []string{"WebSite"},
 			Families: []audit.SDFamily{
@@ -83,7 +83,7 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 		last = i
 	}
 	for _, s := range []string{
-		"1,8\u00a0s", "134\u00a0ms", "0,31", "objectif : moins de 2,5\u00a0s", "Note de la simulation", "46", "Réduisez le JavaScript inutilisé", "jusqu&#39;à 0,9\u00a0s à gagner",
+		"1,8\u00a0s", "134\u00a0ms", "0,31", "objectif : moins de 2,5\u00a0s", "Note de la simulation", "46", "Réduisez le JavaScript inutilisé", "jusqu&#39;à 0,9\u00a0s à gagner", "Fichiers de style et scripts qui retardent l&#39;affichage de la page",
 		"Offre : il manque le prix", "(conseillé par Google)", "Fil d&#39;Ariane : une seule étape", "Commerce ou entreprise locale : format incorrect pour le prix, la note ou un avis",
 		"Recherches écartées (1)", "zzz inconnu", "Google propose plutôt : « zzz connu »", "4,0\u00a0s", "Proposée par Google", "« électrolyseur piscine »", "« pompe piscine prix »",
 		"Pages peu reliées : 9", "/p9 (fiche produit)", "Google n&#39;en publie aucune", "texte commun à 93 %", "Groupes de pages en double : 1",

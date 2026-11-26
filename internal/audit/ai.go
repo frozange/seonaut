@@ -137,6 +137,8 @@ const styleRules = `Writing rules for every text you produce:
 - Say what is observed, why it matters for the business, and what to do.
 - One finding, one place. A fact stated in the summary, a priority or a criterion is not stated again elsewhere in other
   words: the other sections refer to it or say nothing. Never write the same sentence twice in the report.
+  Technical problems belong to the technical priorities: the copywriting and content criteria never explain them again
+  (no canonical, sitemap or duplicate description inside a criterion), and a criterion verdict speaks of its own question only.
 - The advice of a finding lives in its "what to do" only. A criterion analysis does not end with the same advice again,
   and two pieces of advice about the same thing never disagree.
 - Do not hedge with the reading method ("in the pages read", "in the extracts read"): state what was found once, plainly

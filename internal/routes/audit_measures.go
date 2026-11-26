@@ -45,7 +45,26 @@ type labView struct {
 
 type opportunityView struct {
 	Title  string
+	Key    string // plain wording of a known Lighthouse advice, when there is one
 	Saving string
+}
+
+// psiAdvice gives the plain wording of the Lighthouse advice a business owner
+// meets most. Google's own titles ("Requêtes de blocage du rendu") are kept
+// only for the others.
+var psiAdvice = map[string]string{
+	"render-blocking-resources": "AUDIT_PSI_RENDER_BLOCKING",
+	"render-blocking-insight":   "AUDIT_PSI_RENDER_BLOCKING",
+	"unused-javascript":         "AUDIT_PSI_UNUSED_JS",
+	"unused-css-rules":          "AUDIT_PSI_UNUSED_CSS",
+	"modern-image-formats":      "AUDIT_PSI_IMAGES",
+	"uses-optimized-images":     "AUDIT_PSI_IMAGES",
+	"uses-responsive-images":    "AUDIT_PSI_IMAGES",
+	"image-delivery-insight":    "AUDIT_PSI_IMAGES",
+	"offscreen-images":          "AUDIT_PSI_OFFSCREEN",
+	"server-response-time":      "AUDIT_PSI_SERVER",
+	"document-latency-insight":  "AUDIT_PSI_SERVER",
+	"uses-text-compression":     "AUDIT_PSI_COMPRESSION",
 }
 
 func ratingClass(r string) string {
@@ -129,7 +148,7 @@ func newSpeedRunView(r *audit.SpeedRun, lang string) *speedRunView {
 			lv.Metrics = append(lv.Metrics, metricView{Key: "AUDIT_SPEED_CLS", Value: decimal(*l.CLS, 2, lang), Threshold: decimal(0.1, 2, lang), Class: ratingClass(audit.RateMetric("CLS", *l.CLS))})
 		}
 		for _, o := range l.Opportunities {
-			lv.Opportunities = append(lv.Opportunities, opportunityView{Title: stripMarkdownLinks(o.Title), Saving: seconds(float64(o.SavingMs), lang)})
+			lv.Opportunities = append(lv.Opportunities, opportunityView{Title: stripMarkdownLinks(o.Title), Key: psiAdvice[o.ID], Saving: seconds(float64(o.SavingMs), lang)})
 		}
 		v.Lab = lv
 	}
