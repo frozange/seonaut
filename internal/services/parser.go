@@ -192,7 +192,28 @@ func (p *Parser) htmlH1() string {
 		return ""
 	}
 
-	return strings.TrimSpace(p.sanitizer.Sanitize(htmlquery.InnerText(h1)))
+	return strings.TrimSpace(p.sanitizer.Sanitize(headingText(h1)))
+}
+
+// headingText reads a heading as a visitor sees it: a <br> separates two words.
+// InnerText glued them ("Stratégies humaines,<br>brand content" became
+// "humaines,brand"), and the report quoted the site with a typo it does not have.
+func headingText(n *html.Node) string {
+	var b strings.Builder
+	var walk func(*html.Node)
+	walk = func(n *html.Node) {
+		switch {
+		case n.Type == html.TextNode:
+			b.WriteString(n.Data)
+		case n.Type == html.ElementNode && n.Data == "br":
+			b.WriteByte(' ')
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			walk(c)
+		}
+	}
+	walk(n)
+	return strings.Join(strings.Fields(b.String()), " ")
 }
 
 // H2 heading title
@@ -203,7 +224,7 @@ func (p *Parser) htmlH2() string {
 		return ""
 	}
 
-	return strings.TrimSpace(p.sanitizer.Sanitize(htmlquery.InnerText(h2)))
+	return strings.TrimSpace(p.sanitizer.Sanitize(headingText(h2)))
 }
 
 // Canonical link defines the main version for duplicate and similar pages

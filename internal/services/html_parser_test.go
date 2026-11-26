@@ -601,3 +601,20 @@ func TestBaseRelativeURL(t *testing.T) {
 		t.Errorf("Link with base URL does not match, got %s", pageReport.ExternalLinks[0].URL)
 	}
 }
+
+// A <br> inside a heading separates two words, as the visitor sees it.
+func TestHeadingLineBreakIsASpace(t *testing.T) {
+	u, _ := url.Parse(testURL)
+	headers := http.Header{"Content-Type": []string{"text/html"}}
+	body := []byte(`<html><body><h1>Stratégies humaines,<br>brand content augmenté.</h1><h2>Un<br/>deux</h2></body></html>`)
+	pageReport, _, err := services.NewHTMLParser(u, 200, &headers, body, int64(len(body)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pageReport.H1 != "Stratégies humaines, brand content augmenté." {
+		t.Errorf("H1 = %q", pageReport.H1)
+	}
+	if pageReport.H2 != "Un deux" {
+		t.Errorf("H2 = %q", pageReport.H2)
+	}
+}
