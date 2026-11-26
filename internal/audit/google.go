@@ -27,10 +27,21 @@ var outsideGoogleRanking = map[string]bool{
 	"ERROR_CONTENT_TYPE_OPTIONS":      true,
 }
 
+// notADefect lists checks whose own description says there is nothing to fix,
+// or that misfire on resources the site does not control: they are left out of
+// the report entirely (cold review of the bigneurons.com report, 2026-11-26).
+var notADefect = map[string]bool{
+	"ERROR_EXTERNAL_WITHOUT_NOFOLLOW": true, // an ordinary link needs no rel
+	"ERROR_INCORRECT_MEDIA_TYPE":      true, // fonts and video playlists of third parties
+}
+
 // SplitByGoogle separates the issues that matter to Google Search from the
 // hygiene ones, keeping the order of each.
 func SplitByGoogle(issues []IssueSummary) (search, hygiene []IssueSummary) {
 	for _, is := range issues {
+		if notADefect[is.Type] {
+			continue
+		}
 		if outsideGoogleRanking[is.Type] {
 			hygiene = append(hygiene, is)
 		} else {

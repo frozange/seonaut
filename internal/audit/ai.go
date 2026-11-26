@@ -135,6 +135,14 @@ const styleRules = `Writing rules for every text you produce:
   that let a visitor call you or ask for a quote", "the links between your pages".
 - Never use an em dash or an en dash. No rhetorical questions, no lists of three adjectives, no flattery, no alarmism.
 - Say what is observed, why it matters for the business, and what to do.
+- One finding, one place. A fact stated in the summary, a priority or a criterion is not stated again elsewhere in other
+  words: the other sections refer to it or say nothing. Never write the same sentence twice in the report.
+- The advice of a finding lives in its "what to do" only. A criterion analysis does not end with the same advice again,
+  and two pieces of advice about the same thing never disagree.
+- Do not hedge with the reading method ("in the pages read", "in the extracts read"): state what was found once, plainly
+  ("we found no phone number"), or say nothing.
+- Every sentence must be one a person would say aloud to the owner across a table, in natural %[1]s, never a translation
+  from English. A sentence that repeats the previous one, or tells the owner what he already knows, is removed.
 - Density, not occurrence: each of these turns at most once in the whole report: two fragments joined by a comma without a verb,
   "X, not Y" oppositions, short slogan sentences, a colon that reveals the end of the sentence, "not only... but also".
   Successive sentences do not start the same way and do not all have the same length.

@@ -3,6 +3,32 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.10.0 - 2026-11-26
+
+Le français du rapport (Francis : « je dois faire quoi pour que tu arretes le
+mauvais français et les répétitions ? », « tout ça c'est du charabia »).
+Deux relectures à froid du rapport de bigneurons.com, appliquées.
+
+- **Backlinks** : plus de rang sur 135 millions de sites, plus de colonne
+  « Rang » ni de « centralité harmonique ». Restent le nombre de sites qui ont
+  un lien vers le vôtre, les principaux, les nouveaux et les absents du relevé.
+- **Textes fixes réécrits en français courant** : titres des contrôles sans
+  « balise title », « meta description », « 30x » ni « TTFB » ; niveaux
+  « À corriger d'abord / Ensuite / Pour finir » et « Grave / Important /
+  Mineur » ; la vitesse, les liens internes, les pages en double, les questions
+  de rédaction, la méthode.
+- **Plus de répétitions** : l'avertissement « Google ne s'en sert pas pour
+  classer » n'est plus redit sous chaque contrôle de la rubrique « Sans effet
+  connu sur votre position dans Google » ; la phrase d'ouverture, les compteurs
+  « contrôles sans défaut » et « types de problèmes », et la liste des pages
+  « les plus faciles à atteindre » sont retirés.
+- **Retirés du rapport** : « liens externes follow » (sa propre description dit
+  qu'il n'y a rien à corriger) et « type de média incorrect » (faux positifs sur
+  des polices et des vidéos de tiers).
+- **IA** : un constat a une seule place dans le rapport, le conseil vit dans
+  « Que faire », plus de « dans les pages lues », chaque phrase doit pouvoir se
+  dire à voix haute.
+
 ## 1.9.9 - 2026-11-26
 
 - **Auto-référence hreflang** : une page dont la canonique pointe ailleurs

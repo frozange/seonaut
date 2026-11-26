@@ -12,13 +12,14 @@ func TestSplitByGoogle(t *testing.T) {
 		{Type: "ERROR_40x", Priority: 1, Pages: 2},
 		{Type: "ERROR_NOT_VALID_HEADINGS", Priority: 2, Pages: 3},
 		{Type: "ERROR_DUPLICATED_TITLE", Priority: 2, Pages: 4},
+		{Type: "ERROR_LONG_TITLE", Priority: 3, Pages: 9},
 		{Type: "ERROR_EXTERNAL_WITHOUT_NOFOLLOW", Priority: 3, Pages: 9},
 	}
 	search, hygiene := SplitByGoogle(in)
 	if len(search) != 2 || search[0].Type != "ERROR_40x" || search[1].Type != "ERROR_DUPLICATED_TITLE" {
 		t.Errorf("search = %+v", search)
 	}
-	if len(hygiene) != 2 || hygiene[0].Type != "ERROR_NOT_VALID_HEADINGS" || hygiene[1].Type != "ERROR_EXTERNAL_WITHOUT_NOFOLLOW" {
+	if len(hygiene) != 2 || hygiene[0].Type != "ERROR_NOT_VALID_HEADINGS" || hygiene[1].Type != "ERROR_LONG_TITLE" {
 		t.Errorf("hygiene = %+v", hygiene)
 	}
 	if got := TechnicalScore(search, 10); got != 8.9 { // 10 - 1.2*0.6 - 0.6*0.7
@@ -31,6 +32,11 @@ func TestHygieneTypesExist(t *testing.T) {
 	known := map[string]bool{}
 	for _, k := range knownIssueTypes(t) {
 		known[k] = true
+	}
+	for k := range notADefect {
+		if !known[k] {
+			t.Errorf("%s is not an issue type", k)
+		}
 	}
 	for k := range outsideGoogleRanking {
 		if !known[k] {

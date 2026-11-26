@@ -73,7 +73,7 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 	if i := strings.Index(out, "AUDIT_"); i >= 0 {
 		t.Fatalf("untranslated key: %s", out[i:i+60])
 	}
-	order := []string{"La recherche que chaque page", "Ce que Google peut afficher", "La vitesse vécue", "Les liens entre vos pages", "Les pages copiées", "La façon dont la page d&#39;accueil"}
+	order := []string{"La recherche que chaque page", "Ce que Google peut afficher", "La vitesse de votre site", "Les liens entre vos pages", "Les pages en double", "La façon dont la page d&#39;accueil"}
 	last := -1
 	for _, s := range order {
 		i := strings.Index(out, s)
@@ -83,10 +83,10 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 		last = i
 	}
 	for _, s := range []string{
-		"1,8\u00a0s", "134\u00a0ms", "0,31", "bon jusqu&#39;à 2,5\u00a0s", "Note de la simulation", "46", "Réduisez le JavaScript inutilisé", "gain possible : 0,9\u00a0s",
+		"1,8\u00a0s", "134\u00a0ms", "0,31", "objectif : moins de 2,5\u00a0s", "Note de la simulation", "46", "Réduisez le JavaScript inutilisé", "jusqu&#39;à 0,9\u00a0s à gagner",
 		"Offre : il manque le prix", "(conseillé par Google)", "Fil d&#39;Ariane : une seule étape", "Commerce ou entreprise locale : format incorrect pour le prix, la note ou un avis",
 		"Recherches écartées (1)", "zzz inconnu", "Google propose plutôt : « zzz connu »", "4,0\u00a0s", "Proposée par Google", "« électrolyseur piscine »", "« pompe piscine prix »",
-		"Pages peu reliées : 9", "/p9 (fiche produit)", "Les pages les plus faciles à atteindre", "pas une note de Google", "texte commun à 93 %", "Groupes de copies : 1",
+		"Pages peu reliées : 9", "/p9 (fiche produit)", "Google n&#39;en publie aucune", "texte commun à 93 %", "Groupes de pages en double : 1",
 		"sur l&#39;ensemble du site", "Vitesse vécue par vos visiteurs sur téléphone",
 	} {
 		if !strings.Contains(out, s) {
@@ -113,7 +113,7 @@ func TestOldReportShowsNoLotASection(t *testing.T) {
 	res.AI.QueriesChecked, res.AI.DroppedQueries = false, nil
 	res.AI.TargetQueries = []audit.TargetQuery{{Page: "https://ex.com/", Query: "q", Alignment: "good"}}
 	out := renderFR(t, "audit_fragment", &fragmentView{Report: newReportView(&audit.Audit{URL: "https://ex.com/", Result: res}, "fr", true)})
-	for _, s := range []string{"Ce que Google peut afficher", "La vitesse vécue", "Les liens entre vos pages", "Les pages copiées", "Proposée par Google", "Recherches écartées"} {
+	for _, s := range []string{"Ce que Google peut afficher", "La vitesse de votre site", "Les liens entre vos pages", "Les pages en double", "Proposée par Google", "Recherches écartées"} {
 		if strings.Contains(out, s) {
 			t.Errorf("old report shows %q", s)
 		}
