@@ -216,7 +216,7 @@ func extractChrome(doc *html.Node) (footer string, actions, contacts []string) {
 			case "footer":
 				footers = append(footers, strings.Join(strings.Fields(nodeText(n)), " "))
 			case "a", "button":
-				text := strings.Join(strings.Fields(nodeText(n)), " ")
+				text := collapseRepeat(strings.Join(strings.Fields(nodeText(n)), " "))
 				href := attr(n, "href")
 				lower := strings.ToLower(href)
 				if (strings.HasPrefix(lower, "tel:") || strings.HasPrefix(lower, "mailto:")) && !seen[lower] && len(contacts) < 8 {
@@ -240,6 +240,22 @@ func extractChrome(doc *html.Node) (footer string, actions, contacts []string) {
 	}
 	walk(doc)
 	return firstWords(strings.Join(footers, " "), 250), actions, contacts
+}
+
+// collapseRepeat folds a label made of the same words twice ("Brief Brief")
+// into one copy. Responsive themes put a desktop and a mobile label in the same
+// button and hide one with CSS, which the extraction cannot see: the visitor
+// reads the label once.
+func collapseRepeat(text string) string {
+	words := strings.Fields(text)
+	half := len(words) / 2
+	if half == 0 || len(words)%2 != 0 {
+		return text
+	}
+	if strings.Join(words[:half], " ") != strings.Join(words[half:], " ") {
+		return text
+	}
+	return strings.Join(words[:half], " ")
 }
 
 // extractForms describes each form by its visible fields and its button.

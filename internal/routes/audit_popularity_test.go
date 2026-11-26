@@ -41,12 +41,12 @@ func renderPop(t *testing.T, p *audit.PopularityReport) string {
 func TestPopularityRendersInFrench(t *testing.T) {
 	out := renderPop(t, popResult())
 	for _, s := range []string{
-		"Popularité : les sites qui vous citent", "août à octobre 2026", "<b>1 234</b> sites vous citent",
+		"Backlinks : les sites qui font un lien vers le vôtre", "août à octobre 2026", "<b>1 234</b> sites font un lien vers le vôtre",
 		"rang 2 345 678 sur 134 979 706", "des 2 % de sites les mieux reliés de cet échantillon", "repère de LaFactory", "ne publie aucune note de liens",
 		"wikipedia.org</span><span class=\"lfr-small lfr-num\">12</span>", "<span>Site</span><span>Rang</span>", "petit-blog.fr", "Nouveaux depuis le trimestre précédent : 40", "nouveau.fr", "Liens non retrouvés ce trimestre : 6", "parti.fr",
 		"plus bas que dans les outils payants",
-		"Vous face aux concurrents", "<b>ex.com</b> (vous)", "1 site le cite", "absent.fr", "Pas encore dans l&#39;échantillon",
-		"Sites qui citent vos concurrents et pas vous : 3", "annuaire.fr", "cite rival.fr", "aucun lien de « toxique »",
+		"Vous face aux concurrents", "<b>ex.com</b> (vous)", "1 site fait un lien vers lui", "absent.fr", "Pas encore dans l&#39;échantillon",
+		"Sites qui font un lien vers vos concurrents et pas vers vous : 3", "annuaire.fr", "lien vers rival.fr", "aucun lien de « toxique »",
 	} {
 		if !strings.Contains(out, s) {
 			t.Errorf("missing %q", s)
@@ -61,7 +61,7 @@ func TestPopularityRendersInFrench(t *testing.T) {
 		}
 	}
 	// The section sits between speed and internal links.
-	if a, b, c := strings.Index(out, "La vitesse vécue"), strings.Index(out, "Popularité"), strings.Index(out, "Les liens entre vos pages"); !(a < b && b < c) {
+	if a, b, c := strings.Index(out, "La vitesse vécue"), strings.Index(out, "Backlinks :"), strings.Index(out, "Les liens entre vos pages"); !(a < b && b < c) {
 		t.Errorf("popularity out of place: %d %d %d", a, b, c)
 	}
 	for _, s := range []string{"Domain Authority", "toxiques", "Spam", "autorité de domaine"} {
@@ -75,7 +75,7 @@ func TestPopularityAbsentSiteShowsNoZero(t *testing.T) {
 	p := &audit.PopularityReport{Release: "cc-main-2026-aug-sep-oct", ReleaseEnd: time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC),
 		Domains: 134979706, Site: audit.DomainPop{Domain: "nouveau-site.fr"}}
 	out := renderPop(t, p)
-	i := strings.Index(out, "Popularité")
+	i := strings.Index(out, "Backlinks :")
 	sec := out[i : i+strings.Index(out[i:], "</section>")]
 	if !strings.Contains(sec, "Pas encore dans l&#39;échantillon") || !strings.Contains(sec, "nouveau-site.fr n&#39;apparaît pas encore") {
 		t.Fatalf("absent site: %s", sec)
@@ -97,20 +97,20 @@ func TestPopularityVariants(t *testing.T) {
 			t.Errorf("missing %q", s)
 		}
 	}
-	if strings.Contains(out, "Vous face aux concurrents") || strings.Contains(out, "sites vous citent") {
+	if strings.Contains(out, "Vous face aux concurrents") || strings.Contains(out, "sites font un lien vers le vôtre") {
 		t.Error("competitors or a zero count shown")
 	}
 	// New in the sample this quarter.
 	p.Previous, p.PreviousEnd, p.Site.Referring, p.Site.Rank = "cc-main-2025-aug-sep-oct", time.Date(2025, 10, 1, 0, 0, 0, 0, time.UTC), 1, 90
 	out = renderPop(t, p)
-	if !strings.Contains(out, "<b>1</b> site vous cite") || !strings.Contains(out, "n&#39;était pas dans l&#39;échantillon du trimestre précédent") {
+	if !strings.Contains(out, "<b>1</b> site fait un lien vers le vôtre") || !strings.Contains(out, "n&#39;était pas dans l&#39;échantillon du trimestre précédent") {
 		t.Error("new in the sample")
 	}
 	if strings.Contains(out, "les mieux reliés de cet échantillon") {
 		t.Error("a rank in the second half of the sample shows a share")
 	}
 	// No report part when there is no index.
-	if out := renderPop(t, nil); strings.Contains(out, "Popularité") {
+	if out := renderPop(t, nil); strings.Contains(out, "Backlinks :") {
 		t.Error("section without data")
 	}
 }

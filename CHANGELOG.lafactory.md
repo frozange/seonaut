@@ -3,6 +3,38 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.9.4 - 2026-11-26
+
+Défauts relevés sur le rapport de bigneurons.com (Francis : « Décalé », « on
+croirait à un gag, ce sont des backlinks », « plein d'autres erreurs »).
+
+- **Section « Backlinks »** : « Popularité : les sites qui vous citent »
+  devient « Backlinks : les sites qui font un lien vers le vôtre » ; le mot
+  « citer » disparaît des libellés, de la comparaison aux concurrents et de la
+  méthode (FR et EN).
+- **Rang décalé** : un nom de domaine long poussait le rang sur une seconde
+  ligne. Une ligne qui porte un rang ne passe plus à la ligne ; le nom se coupe.
+- **Nouveau contrôle, canonique dans une autre langue**
+  (`ERROR_CANONICAL_OTHER_LANGUAGE`, critique) : une page dont la canonique
+  pointe vers une page d'une autre langue (`lang` de base différent, `fr-FR` et
+  `fr` restent égaux). Google demande une canonique dans la même langue
+  ([versions localisées](https://developers.google.com/search/docs/specialty/international/localized-versions)).
+  Sur bigneurons.com, 58 pages anglaises et monténégrines désignaient l'accueil
+  français ; l'ancien rapport n'en voyait que 8, par le biais du plan du site.
+- **Redirections (30x) rétrogradées** de critique à avertissement : Google suit
+  les redirections sans pénalité ; la description ne parle plus de « budget de
+  crawl », qui ne concerne que les très grands sites
+  ([crawl budget](https://developers.google.com/search/docs/crawling-indexing/large-site-managing-crawl-budget)).
+- **Hors classement Google** : le TTFB mesuré par notre robot (Google classe sur
+  les vraies visites, [Core Web Vitals](https://developers.google.com/search/docs/appearance/core-web-vitals))
+  et le type de média des ressources (aucune règle Google ; faux positif sur
+  `fonts.googleapis.com/css2`, adresse sans extension prise pour du HTML). Les
+  descriptions des images volumineuses et sans dimensions ne disent plus
+  qu'elles nuisent au classement.
+- **Faux « Brief Brief »** : un bouton qui porte un libellé bureau et un
+  libellé mobile (l'un masqué en CSS) était lu deux fois par l'IA, qui en
+  tirait une réécriture. Un libellé fait du même texte répété est lu une fois.
+
 ## 1.9.3 - 2026-11-26
 
 Mise en page du rapport (Francis : « il faut deux colonnes, et le responsif en

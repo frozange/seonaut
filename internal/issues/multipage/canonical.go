@@ -85,3 +85,29 @@ func (sr *SqlReporter) CanonicalizedToError(c *models.Crawl) *models.MultipageIs
 		ErrorType: errors.ErrorCanonicalizedToError,
 	}
 }
+
+// Creates a MultipageIssueReporter object that contains the SQL query to check for pages
+// canonicalized to a page written in another language. Google asks for a canonical in the
+// same language: a translation pointing to the original gets dropped from the results.
+// https://developers.google.com/search/docs/specialty/international/localized-versions
+func (sr *SqlReporter) CanonicalizedToOtherLanguage(c *models.Crawl) *models.MultipageIssueReporter {
+	query := `
+		SELECT
+			a.id
+		FROM pagereports AS a
+		INNER JOIN pagereports AS b ON a.canonical = b.url
+		WHERE a.crawl_id = ?
+			AND b.crawl_id = ?
+			AND a.canonical != ""
+			AND a.canonical != a.url
+			AND a.crawled = 1
+			AND b.crawled = 1
+			AND a.lang != ""
+			AND b.lang != ""
+			AND LOWER(SUBSTRING_INDEX(REPLACE(a.lang, "_", "-"), "-", 1)) != LOWER(SUBSTRING_INDEX(REPLACE(b.lang, "_", "-"), "-", 1))`
+
+	return &models.MultipageIssueReporter{
+		Pstream:   sr.pageReportsQuery(query, c.Id, c.Id),
+		ErrorType: errors.ErrorCanonicalOtherLanguage,
+	}
+}

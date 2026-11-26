@@ -20,6 +20,8 @@ var outsideGoogleRanking = map[string]bool{
 	"ERROR_DOM_SIZE":                  true, // speed is measured on real visits
 	"ERROR_IMG_SIZE_ATTR":             true,
 	"ERROR_LARGE_IMAGE":               true,
+	"ERROR_SLOW_TTFB":                 true, // crawler timing, not a field measure
+	"ERROR_INCORRECT_MEDIA_TYPE":      true, // no Google rule on resource MIME types
 	"ERROR_MISSING_HSTS":              true, // security headers
 	"ERROR_MISSING_CSP":               true,
 	"ERROR_CONTENT_TYPE_OPTIONS":      true,

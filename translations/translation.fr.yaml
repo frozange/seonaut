@@ -392,7 +392,7 @@ ERROR_40x: URL renvoyant un code de statut 40x
 ERROR_40x_DESC: Ces pages sont introuvables et vos visiteurs comme les moteurs de recherche s'y perdent. Cela peut laisser penser que votre site est mal entretenu. À terme, trop de liens cassés nuisent à l'efficacité de l'exploration et diluent l'autorité de votre site.
 
 ERROR_30x: URL renvoyant un code de statut 30x
-ERROR_30x_DESC: Ces URL provoquent des redirections qui envoient les visiteurs et les moteurs de recherche vers une autre page. Les redirections ralentissent le chargement, déroutent les internautes et gaspillent le budget de crawl.
+ERROR_30x_DESC: "Ces adresses redirigent vers une autre page. Google suit les redirections sans pénalité ; un lien interne ou une entrée du plan du site qui mène directement à l'adresse finale évite seulement un détour aux visiteurs et au robot."
 
 ERROR_REDIRECT_CHAIN: URL provoquant une chaîne de redirections
 ERROR_REDIRECT_CHAIN_DESC: Une chaîne de redirections se forme quand une URL redirige vers une autre URL qui redirige elle-même ailleurs. Elle frustre les internautes et complique l'exploration et l'indexation efficaces de votre contenu par les moteurs de recherche.
@@ -542,7 +542,7 @@ ERROR_CONTENT_TYPE_OPTIONS: Options de type de contenu manquantes
 ERROR_CONTENT_TYPE_OPTIONS_DESC: Pages sans en-tête X-Content-Type-Options, ce qui expose le site à des risques de sécurité liés au type de contenu, avec d'éventuelles pénalités SEO et une expérience utilisateur peu sûre.
 
 ERROR_LARGE_IMAGE: Images volumineuses
-ERROR_LARGE_IMAGE_DESC: Les images volumineuses ralentissent le chargement d'une page et nuisent à l'expérience utilisateur comme au classement SEO. N'utilisez de grandes images que lorsque c'est indispensable et optimisez-les à une taille raisonnable.
+ERROR_LARGE_IMAGE_DESC: "Les images volumineuses ralentissent l'affichage, surtout sur téléphone. Google mesure la vitesse sur de vraies visites (Core Web Vitals), pas sur le poids d'un fichier : allégez ces images pour vos visiteurs."
 
 ERROR_LONG_ALT_TEXT: Images avec un texte alternatif trop long
 ERROR_LONG_ALT_TEXT_DESC: Pages contenant des images dont l'attribut alt est trop long. Un texte alternatif trop long rend le contenu et la fonction de l'image plus difficiles à comprendre. Gardez un texte alternatif court et précis.
@@ -575,7 +575,7 @@ ERROR_UNDERSCORE_URL: URL contenant des tirets bas
 ERROR_UNDERSCORE_URL_DESC: Il est déconseillé d'utiliser des tirets bas (underscores) dans les URL, car certains moteurs de recherche les ignorent et traitent le segment comme un seul mot. Utilisez plutôt un tiret comme séparateur de mots.
 
 ERROR_SLOW_TTFB: Temps de réponse initial (TTFB) lent
-ERROR_SLOW_TTFB_DESC: Un TTFB lent dégrade l'expérience utilisateur et nuit au SEO en allongeant les temps de chargement, certains moteurs de recherche prenant la vitesse des pages en compte dans leur classement.
+ERROR_SLOW_TTFB_DESC: "Notre robot a attendu longtemps la première réponse du serveur. Google ne classe pas sur cette mesure de robot, il s'appuie sur les vraies visites (Core Web Vitals) ; un serveur lent retarde pourtant l'affichage pour vos visiteurs."
 
 ERROR_HTTP_FORM: Formulaires sur des pages HTTP
 ERROR_HTTP_FORM_DESC: Pages HTTP contenant des formulaires. Un formulaire sur une URL HTTP compromet la sécurité, réduit la confiance des utilisateurs et pénalise le SEO. Assurez-vous que vos formulaires sont sur des pages HTTPS.
@@ -602,10 +602,10 @@ ERROR_NOSNIPPET: Pages avec la directive nosnippet
 ERROR_NOSNIPPET_DESC: Les directives nosnippet ou max-snippet:0 demandent aux moteurs de recherche de ne pas afficher d'extrait de texte ni d'aperçu vidéo dans les résultats. Passez ces pages en revue pour vérifier que c'est bien le comportement voulu.
 
 ERROR_IMG_SIZE_ATTR: Pages avec des images sans attributs de taille
-ERROR_IMG_SIZE_ATTR_DESC: Ne pas définir la taille des images provoque des décalages de mise en page pendant le chargement, ce qui nuit à l'expérience utilisateur comme au SEO. Vérifiez que vos images ont leurs attributs de taille.
+ERROR_IMG_SIZE_ATTR_DESC: "Sans largeur ni hauteur, une image peut décaler la page pendant le chargement, ce qui gêne la lecture. Google mesure cette stabilité sur de vraies visites, pas dans le code."
 
 ERROR_INCORRECT_MEDIA_TYPE: URL avec un type de média incorrect
-ERROR_INCORRECT_MEDIA_TYPE_DESC: Des URL avec un type MIME incorrect peuvent nuire au SEO, car les navigateurs risquent d'interpréter mal le contenu ou de ne pas l'afficher, ce qui affecte l'expérience utilisateur et l'indexation.
+ERROR_INCORRECT_MEDIA_TYPE_DESC: "Le type annoncé par le serveur ne correspond pas à l'extension de l'adresse. Google ne fixe aucune règle à ce sujet ; vérifiez seulement que ces fichiers s'affichent bien dans le navigateur."
 
 ERROR_DUPLICATED_ID: Pages contenant des éléments avec des ID dupliqués
 ERROR_DUPLICATED_ID_DESC: Des éléments avec des ID dupliqués perturbent les technologies d'assistance et JavaScript, entraînant des problèmes de navigation et des comportements imprévisibles. Cela peut nuire à l'expérience utilisateur et au SEO. Assurez-vous que chaque ID est unique.
@@ -914,12 +914,12 @@ AUDIT_METHOD_LINKS: "La facilité d'accès applique à vos seuls liens internes 
 AUDIT_METHOD_DUPS: "Deux pages sont jugées copiées quand au moins 85 % de leurs suites de cinq mots se retrouvent dans les deux textes, menus et pied de page exclus, traductions mises à part."
 AUDIT_METHOD_SUGGEST: "Les recherches visées viennent de notre lecture des pages, puis sont confrontées aux suggestions de Google (la liste qui s'affiche quand on tape dans la barre de recherche). Une recherche que Google ne propose pas, même sous une forme proche, est écartée. Les suggestions ne donnent aucun volume de recherche."
 AUDIT_LINKS_ORPHANS: "Pages qu'aucune autre page ne relie : %1%. Google ne peut les trouver que par le plan du site."
-AUDIT_POP: "Popularité : les sites qui vous citent"
-AUDIT_POP_HELP: "Un site qui fait un lien vers le vôtre vous cite. Common Crawl, une fondation qui explore une partie du web et publie ses données en libre accès, recense ces liens chaque trimestre. Les chiffres ci-dessous viennent de sa dernière publication, qui couvre %1% à %2%."
+AUDIT_POP: "Backlinks : les sites qui font un lien vers le vôtre"
+AUDIT_POP_HELP: "Un backlink est un lien qu'un autre site fait vers le vôtre. Common Crawl, une fondation qui explore une partie du web et publie ses données en libre accès, recense ces liens chaque trimestre. Les chiffres ci-dessous viennent de sa dernière publication, qui couvre %1% à %2%."
 AUDIT_POP_ABSENT_CHIP: "Pas encore dans l'échantillon"
-AUDIT_POP_ABSENT: "%1% n'apparaît pas encore parmi les %2% sites de l'échantillon de Common Crawl. Votre site peut très bien être cité ailleurs : l'échantillon ne couvre qu'une partie du web, et un site jeune ou peu relié y entre souvent plus tard."
-AUDIT_POP_SITES: "sites vous citent"
-AUDIT_POP_SITE_ONE: "site vous cite"
+AUDIT_POP_ABSENT: "%1% n'apparaît pas encore parmi les %2% sites de l'échantillon de Common Crawl. Votre site peut très bien avoir des backlinks ailleurs : l'échantillon ne couvre qu'une partie du web, et un site jeune ou peu relié y entre souvent plus tard."
+AUDIT_POP_SITES: "sites font un lien vers le vôtre"
+AUDIT_POP_SITE_ONE: "site fait un lien vers le vôtre"
 AUDIT_POP_NONE: "Votre site figure dans l'échantillon, mais aucun des sites explorés ce trimestre ne lui fait encore de lien."
 AUDIT_POP_RANK: "Votre site occupe le rang %1% sur %2%."
 AUDIT_POP_TOP_PCT: "Il fait partie des %1% % de sites les mieux reliés de cet échantillon."
@@ -928,7 +928,7 @@ AUDIT_NUM: "%1%"
 AUDIT_POP_COL_SITE: "Site"
 AUDIT_POP_COL_RANK: "Rang"
 AUDIT_POP_RANK_SHORT: "rang %1%"
-AUDIT_POP_TOP: "Les sites les mieux reliés qui vous citent"
+AUDIT_POP_TOP: "Les sites les mieux reliés qui font un lien vers le vôtre"
 AUDIT_POP_GAINED: "Nouveaux depuis le trimestre précédent : %1%"
 AUDIT_POP_LOST: "Liens non retrouvés ce trimestre : %1%"
 AUDIT_POP_LOST_HELP: "Un site sort de cette liste quand Common Crawl ne retrouve plus son lien. Bien souvent, il n'a simplement pas revisité la page qui le portait."
@@ -938,10 +938,12 @@ AUDIT_POP_SAMPLE: "Common Crawl n'explore qu'une partie du web. Vos chiffres son
 AUDIT_VS: "Vous face aux concurrents"
 AUDIT_VS_HELP: "Les mêmes mesures, dans le même échantillon, pour les sites concurrents que vous nous avez indiqués."
 AUDIT_VS_YOU: "vous"
-AUDIT_VS_SITES: "%1% sites le citent"
-AUDIT_VS_SITES_ONE: "1 site le cite"
-AUDIT_VS_GAP: "Sites qui citent vos concurrents et pas vous : %1%"
+AUDIT_VS_SITES: "%1% sites font un lien vers lui"
+AUDIT_VS_SITES_ONE: "1 site fait un lien vers lui"
+AUDIT_VS_GAP: "Sites qui font un lien vers vos concurrents et pas vers vous : %1%"
 AUDIT_VS_GAP_HELP_2: "Chacun fait un lien vers au moins deux de vos concurrents. Ces sites parlent déjà de votre métier, ce sont les premiers à qui présenter le vôtre."
 AUDIT_VS_GAP_HELP_1: "Chacun fait un lien vers votre concurrent et aucun vers vous. Ces sites parlent déjà de votre métier, ce sont les premiers à qui présenter le vôtre."
-AUDIT_VS_CITES: "cite"
-AUDIT_METHOD_POP: "La popularité vient du graphe des liens entre domaines que Common Crawl publie chaque trimestre. Il donne, pour chaque site, les autres sites qui lui font au moins un lien dans les pages explorées pendant trois mois, et un rang de centralité harmonique calculé par Common Crawl. Google indique qu'il se sert des liens entre les pages, parmi beaucoup d'autres signaux, pour comprendre de quoi elles parlent et lesquelles peuvent être utiles. Il ne publie aucune note de liens, et nous ne qualifions aucun lien de « toxique » : Google ignore de lui-même ceux qu'il juge artificiels."
+AUDIT_VS_CITES: "lien vers"
+AUDIT_METHOD_POP: "Les backlinks viennent du graphe des liens entre domaines que Common Crawl publie chaque trimestre. Il donne, pour chaque site, les autres sites qui lui font au moins un lien dans les pages explorées pendant trois mois, et un rang de centralité harmonique calculé par Common Crawl. Google indique qu'il se sert des liens entre les pages, parmi beaucoup d'autres signaux, pour comprendre de quoi elles parlent et lesquelles peuvent être utiles. Il ne publie aucune note de liens, et nous ne qualifions aucun lien de « toxique » : Google ignore de lui-même ceux qu'il juge artificiels."
+ERROR_CANONICAL_OTHER_LANGUAGE: "Pages dont la version principale (canonique) est dans une autre langue"
+ERROR_CANONICAL_OTHER_LANGUAGE_DESC: "Ces pages désignent comme version principale une page écrite dans une autre langue, souvent l'accueil du site. Google demande une canonique dans la même langue : sinon il peut ne garder que la page désignée et retirer ces traductions de ses résultats."

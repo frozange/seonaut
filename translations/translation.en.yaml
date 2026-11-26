@@ -392,7 +392,7 @@ ERROR_40x: URLs returning status code 40x
 ERROR_40x_DESC: This pages are missing and both your users and search engines are getting lost. It may signal to search engines that your site isn't well maintained. Over time, too many broken links can impact crawl efficiency and dilute your site's authority.
 
 ERROR_30x: URLs returning status code 30x
-ERROR_30x_DESC: URLs causing redirects are sending users and search engines to a different page. Redirects can slow down page loading, confuse users and waste the search engine's crawl budget.
+ERROR_30x_DESC: "These URLs redirect to another page. Google follows redirects without penalty; an internal link or a sitemap entry that points straight to the final URL only saves visitors and the crawler a detour."
 
 ERROR_REDIRECT_CHAIN: URLs causing a redirect chain
 ERROR_REDIRECT_CHAIN_DESC: Redirect chains are URLs that redirect to other URLs that also redirect somewhere else, creating a chain of redirects. Redirect chains frustrate users, and make it harder for search engines to crawl and index your content efficiently.
@@ -542,7 +542,7 @@ ERROR_CONTENT_TYPE_OPTIONS: Missing content type options
 ERROR_CONTENT_TYPE_OPTIONS_DESC: Pages missing X-Content-Type-Options header exposing the website to content type security risks, leading to potential SEO penalties and unsafe user experiences.
 
 ERROR_LARGE_IMAGE: Large images
-ERROR_LARGE_IMAGE_DESC: Large images can slow down a web page's loading speed, negatively affecting the user experience and SEO rankings due to increased load times. Consider using large images only when essential and optimize them to a reasonable size.
+ERROR_LARGE_IMAGE_DESC: "Large images slow the display down, mostly on phones. Google measures speed on real visits (Core Web Vitals), not on file weight: make these images lighter for your visitors."
 
 ERROR_LONG_ALT_TEXT: Images with long Alt text
 ERROR_LONG_ALT_TEXT_DESC: Pages that have images with long text in the alt attribute. Having a long text in the alt attribute of an image can make it harder to understand the image's content and purpose. Try to keep the alt text short and to the point.
@@ -575,7 +575,7 @@ ERROR_UNDERSCORE_URL: URLs with underscore characters
 ERROR_UNDERSCORE_URL_DESC: It is usually not recommended to use underscore characters in URLs, as some search engines will ignore them and treat that part as a single word. Use a dash instead as a word separator character.
 
 ERROR_SLOW_TTFB: Slow Time to First Byte
-ERROR_SLOW_TTFB_DESC: A slow time to first byte can negatively impact the user experience and hurt SEO by causing longer page load times, as some search engines take page speed into consideration as a ranking factor.
+ERROR_SLOW_TTFB_DESC: "Our crawler waited a long time for the server's first response. Google does not rank on this crawler measure, it relies on real visits (Core Web Vitals); a slow server still delays the display for your visitors."
 
 ERROR_HTTP_FORM: Forms on HTTP pages
 ERROR_HTTP_FORM_DESC: HTTP pages with forms. Having a form on an HTTP URL compromises security, reducing user trust and SEO rankings. Make sure your forms are on HTTPS pages.
@@ -602,10 +602,10 @@ ERROR_NOSNIPPET: Pages with the nosnippet directive
 ERROR_NOSNIPPET_DESC: The nosnippet or max-snippet:0 directives tell search engines not to display a text snippet or video preview in the search results. Review these pages to make sure this is the wanted behavior.
 
 ERROR_IMG_SIZE_ATTR: Pages containing images missing size attributes
-ERROR_IMG_SIZE_ATTR_DESC: Not setting the size attributes for images can cause layout shifts as the page loads, which can negatively impact user experience as well as SEO. Make sure your images have the corresponding size attributes in place.
+ERROR_IMG_SIZE_ATTR_DESC: "Without width and height, an image can shift the page while it loads, which disturbs reading. Google measures this stability on real visits, not in the code."
 
 ERROR_INCORRECT_MEDIA_TYPE: URLs with incorrect media type
-ERROR_INCORRECT_MEDIA_TYPE_DESC: Having URLs with incorrect MIME types can hurt SEO by causing browsers to misinterpret or fail to render content, which can impact user experience and search engine indexing.
+ERROR_INCORRECT_MEDIA_TYPE_DESC: "The type the server announces does not match the URL extension. Google sets no rule about it; just check that these files display correctly in the browser."
 
 ERROR_DUPLICATED_ID: Pages containing elements with duplicated IDs
 ERROR_DUPLICATED_ID_DESC: Having elements with duplicate IDs confuses assistive technologies and JavaScript, leading to navigation issues and unpredictable behavior. This could impact user experience and SEO. Make sure IDs are unique.
@@ -914,12 +914,12 @@ AUDIT_METHOD_LINKS: "Ease of access applies the classic link calculation (PageRa
 AUDIT_METHOD_DUPS: "Two pages are copies when at least 85% of their five-word sequences appear in both texts, menus and footer aside, translations set apart."
 AUDIT_METHOD_SUGGEST: "Target searches come from our reading of the pages, then are checked against Google's suggestions (the list shown while typing in the search box). A search Google does not propose, even in a close form, is left out. Suggestions give no search volume."
 AUDIT_LINKS_ORPHANS: "Pages no other page links to: %1%. Google can find them only through the sitemap."
-AUDIT_POP: "Popularity: the sites that cite you"
-AUDIT_POP_HELP: "A site that links to yours cites you. Common Crawl, a foundation that crawls part of the web and publishes its data openly, records these links every quarter. The figures below come from its latest release, covering %1% to %2%."
+AUDIT_POP: "Backlinks: the sites that link to yours"
+AUDIT_POP_HELP: "A backlink is a link another site makes to yours. Common Crawl, a foundation that crawls part of the web and publishes its data openly, records these links every quarter. The figures below come from its latest release, covering %1% to %2%."
 AUDIT_POP_ABSENT_CHIP: "Not in the sample yet"
-AUDIT_POP_ABSENT: "%1% does not appear yet among the %2% sites of the Common Crawl sample. Your site may well be cited elsewhere: the sample covers only part of the web, and a young or little linked site often enters it later."
-AUDIT_POP_SITES: "sites cite you"
-AUDIT_POP_SITE_ONE: "site cites you"
+AUDIT_POP_ABSENT: "%1% does not appear yet among the %2% sites of the Common Crawl sample. Your site may well have backlinks elsewhere: the sample covers only part of the web, and a young or little linked site often enters it later."
+AUDIT_POP_SITES: "sites link to yours"
+AUDIT_POP_SITE_ONE: "site links to yours"
 AUDIT_POP_NONE: "Your site is in the sample, but none of the sites crawled this quarter links to it yet."
 AUDIT_POP_RANK: "Your site ranks %1% out of %2%."
 AUDIT_POP_TOP_PCT: "It is among the %1%% best linked sites of this sample."
@@ -928,7 +928,7 @@ AUDIT_NUM: "%1%"
 AUDIT_POP_COL_SITE: "Site"
 AUDIT_POP_COL_RANK: "Rank"
 AUDIT_POP_RANK_SHORT: "rank %1%"
-AUDIT_POP_TOP: "The best linked sites that cite you"
+AUDIT_POP_TOP: "The best linked sites that link to yours"
 AUDIT_POP_GAINED: "New since the previous quarter: %1%"
 AUDIT_POP_LOST: "Links not found again this quarter: %1%"
 AUDIT_POP_LOST_HELP: "A site leaves this list when Common Crawl no longer finds its link. Quite often it simply did not crawl the page carrying it again."
@@ -938,10 +938,12 @@ AUDIT_POP_SAMPLE: "Common Crawl crawls only part of the web, so your figures are
 AUDIT_VS: "You and your competitors"
 AUDIT_VS_HELP: "The same measures, in the same sample, for the competitor sites you gave us."
 AUDIT_VS_YOU: "you"
-AUDIT_VS_SITES: "%1% sites cite it"
-AUDIT_VS_SITES_ONE: "1 site cites it"
-AUDIT_VS_GAP: "Sites that cite your competitors and not you: %1%"
+AUDIT_VS_SITES: "%1% sites link to it"
+AUDIT_VS_SITES_ONE: "1 site links to it"
+AUDIT_VS_GAP: "Sites that link to your competitors and not to you: %1%"
 AUDIT_VS_GAP_HELP_2: "Each links to at least two of your competitors. These sites already talk about your trade: they are the first ones to show yours to."
 AUDIT_VS_GAP_HELP_1: "Each links to your competitor and none to you. These sites already talk about your trade: they are the first ones to show yours to."
-AUDIT_VS_CITES: "cites"
-AUDIT_METHOD_POP: "Popularity comes from the graph of links between domains Common Crawl publishes every quarter. It gives, for each site, the other sites linking to it at least once in the pages crawled over three months, and a harmonic centrality rank computed by Common Crawl. Google says it uses links between pages, among many other signals, to understand what they are about and which may be helpful. It publishes no link score, and we call no link \"toxic\": Google ignores by itself the links it judges unnatural."
+AUDIT_VS_CITES: "links to"
+AUDIT_METHOD_POP: "Backlinks come from the domain to domain link graph Common Crawl publishes every quarter. It gives, for each site, the other sites that make at least one link to it in the pages crawled over three months, and a harmonic centrality rank computed by Common Crawl. Google says it uses links between pages, among many other signals, to understand what they are about and which may be useful. It publishes no link score, and we call no link \"toxic\": Google ignores on its own those it deems artificial."
+ERROR_CANONICAL_OTHER_LANGUAGE: "Pages whose main (canonical) version is in another language"
+ERROR_CANONICAL_OTHER_LANGUAGE_DESC: "These pages name as their main version a page written in another language, often the home page. Google asks for a canonical in the same language: otherwise it may keep only the named page and drop these translations from its results."

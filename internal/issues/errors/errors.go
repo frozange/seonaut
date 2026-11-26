@@ -88,4 +88,5 @@ const (
 	ErrorDOMSize                                 // HTML documents with excessive DOM size
 	ErrorPaginationLink                          // Pages with next and prev attributes missing the actual link
 	ErrorLocalhostLinks                          // Pages with links to localhost or 127.0.0.1
+	ErrorCanonicalOtherLanguage                  // Pages canonicalized to a page in another language
 )

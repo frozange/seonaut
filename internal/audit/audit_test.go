@@ -356,3 +356,17 @@ func TestExtractFormsAndLanguages(t *testing.T) {
 		t.Errorf("alternates = %q", alts)
 	}
 }
+
+func TestActionLabelShownOnce(t *testing.T) {
+	doc, _ := html.Parse(strings.NewReader(`<html><body><header>
+		<a href="/brief/" class="brief-btn"><span class="label-desktop">Brief</span><span class="label-mobile">Brief</span></a>
+		<a href="/call/" class="cta"><span>Book a call</span><span>Book a call</span></a>
+		<a href="/go/" class="btn">Go go go</a>
+		<a href="/x/" class="btn">Yes Yes Yes Yes</a>
+		</header></body></html>`))
+	_, actions, _ := extractChrome(doc)
+	want := "Brief -> /brief/|Book a call -> /call/|Go go go -> /go/|Yes Yes -> /x/"
+	if got := strings.Join(actions, "|"); got != want {
+		t.Errorf("actions = %q, want %q", got, want)
+	}
+}
