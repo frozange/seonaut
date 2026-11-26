@@ -3,6 +3,17 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.9.5 - 2026-11-26
+
+- **Plafond de pages atteint, enfin dit** : l'audit de bigneurons.com s'est
+  arrêté au plafond de 150 pages, mais une page que l'analyseur HTML n'a pas pu
+  lire (plus de 512 éléments imbriqués) n'est jamais enregistrée : 149 pages,
+  donc « plafond non atteint », et le rapport présentait l'échantillon comme le
+  site entier (7 canoniques fautives vues sur 58). Le plafond compte comme
+  atteint à 1 % près (une page au moins), et la phrase d'ouverture du rapport
+  le dit : « à partir des 149 premières pages explorées : le site en compte
+  davantage ».
+
 ## 1.9.4 - 2026-11-26
 
 Défauts relevés sur le rapport de bigneurons.com (Francis : « Décalé », « on

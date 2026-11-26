@@ -370,3 +370,14 @@ func TestActionLabelShownOnce(t *testing.T) {
 		t.Errorf("actions = %q, want %q", got, want)
 	}
 }
+
+func TestLimitReached(t *testing.T) {
+	for _, c := range []struct {
+		pages, limit int
+		want         bool
+	}{{149, 150, true}, {150, 150, true}, {148, 150, false}, {4950, 5000, true}, {4949, 5000, false}, {10, 0, false}} {
+		if got := limitReached(c.pages, c.limit); got != c.want {
+			t.Errorf("limitReached(%d, %d) = %v", c.pages, c.limit, got)
+		}
+	}
+}

@@ -250,7 +250,7 @@ func (s *Service) analyse(ctx context.Context, a *Audit, crawlID int64, signals 
 		return nil, err
 	}
 	facts.URL, facts.Host, facts.CrawlLimit = a.URL, u.Host, s.Cfg.CrawlLimit
-	facts.LimitReached = s.Cfg.CrawlLimit > 0 && facts.PagesCrawled >= s.Cfg.CrawlLimit
+	facts.LimitReached = limitReached(facts.PagesCrawled, s.Cfg.CrawlLimit)
 	if ex, err := LoadExclusion(s.Cfg.ExcludeDir, a.URL); err == nil {
 		facts.Excluded = ex.Len()
 	}
@@ -488,4 +488,20 @@ func (s *Service) notify(a *Audit, note string) {
 	if err := s.Mailer.Send(s.Cfg.NotifyEmail, "[SEO audit] "+a.URL+" "+string(a.Status), body); err != nil {
 		log.Printf("audit %d: notify: %v", a.ID, err)
 	}
+}
+
+// limitReached tells whether the crawl stopped on its page cap. The crawler
+// stops after the cap's number of responses, but a response it could not
+// parse (more than 512 nested elements, for one) is never saved: bigneurons.com
+// stopped at 150 and showed 149 pages, so the report claimed the whole site.
+// One percent of the cap, at least one page, is allowed for those losses.
+func limitReached(pages, limit int) bool {
+	if limit <= 0 {
+		return false
+	}
+	slack := limit / 100
+	if slack < 1 {
+		slack = 1
+	}
+	return pages >= limit-slack
 }

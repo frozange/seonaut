@@ -263,7 +263,7 @@
 	<header class="lfr-hero">
 		<p class="lfr-kicker">{{ trans "AUDIT_REPORT_KICKER" }} · {{ .Date }}</p>
 		{{ if not .Embed }}<h1>{{ .Host }}</h1>{{ end }}
-		<p class="lfr-lead">{{ trans "AUDIT_REPORT_LEAD" .Result.Site.PagesCrawled }}</p>
+		<p class="lfr-lead">{{ if .SampleNote }}{{ trans "AUDIT_REPORT_LEAD_SAMPLE" .Result.Site.PagesCrawled }}{{ else }}{{ trans "AUDIT_REPORT_LEAD" .Result.Site.PagesCrawled }}{{ end }}</p>
 		<div class="lfr-gauges">
 			{{ range .Scores }}
 			<figure class="lfr-gauge lfr-{{ .Class }}" style="margin: 0">
