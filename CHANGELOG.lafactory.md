@@ -3,6 +3,25 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.9.3 - 2026-11-26
+
+Mise en page du rapport (Francis : « il faut deux colonnes, et le responsif en
+général est mauvais »).
+
+- **Priorités sur deux colonnes** dès que le rapport dispose de 680 px (tablette
+  et ordinateur) ; le numéro passe dans le coin de la carte au lieu d'occuper
+  une gouttière de 56 px, et l'encadré « Que faire » s'aligne en bas des deux
+  cartes d'une même ligne.
+- **Colonnes calculées sur la largeur réelle du rapport** (requêtes de
+  conteneur) et non plus sur celle de la fenêtre : une colonne sur téléphone,
+  deux sur tablette, trois sur grand écran quand il y a au moins trois cartes.
+  Une carte seule en fin de grille à deux colonnes prend toute la largeur. Sur
+  tablette (768 px), tout passait sur une seule colonne.
+- **Largeur** : la page du rapport ne garde plus 80 % de la fenêtre (réglage du
+  conteneur Divi) ; elle prend la largeur moins une gouttière de 16 à 48 px,
+  1080 px au plus. 707 px utiles à 768 au lieu de 614.
+- Détail technique : le « + » d'un problème ne passe plus seul à la ligne.
+
 ## 1.9.2 - 2026-11-25
 
 Défauts relevés par une relecture du rapport de lafactory.com.

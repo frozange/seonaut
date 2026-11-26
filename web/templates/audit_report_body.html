@@ -11,7 +11,9 @@
 		--lfr-line: #262633; --lfr-panel: #12121a; --lfr-panel-2: #181822;
 		--lfr-text: var(--lf-c-text, #cccccc); --lfr-strong: var(--lf-c-strong, #ffffff); --lfr-muted: var(--lf-c-muted, #b0b4bf);
 		--lfr-figure: var(--lf-c-accent, #ffff00);
-		color: var(--lfr-text); font-size: var(--lf-fs-text, 18px); line-height: 1.6; }
+		color: var(--lfr-text); font-size: var(--lf-fs-text, 18px); line-height: 1.6;
+		/* Columns follow the width the report really gets, not the window: the framing theme decides the margins. */
+		container: lfr / inline-size; }
 	.lfr *, .lfr *::before, .lfr *::after { box-sizing: border-box; }
 	:where(.lfr) p { margin: 0 0 .8em; padding: 0; }
 	:where(.lfr) p:last-child { margin-bottom: 0; }
@@ -30,7 +32,11 @@
 	.lfr-lead { font-size: var(--lf-fs-lead, 20px); color: var(--lfr-text); max-width: 68ch; }
 	.lfr-small { font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); }
 	.lfr-card { background: var(--lfr-panel); border: 1px solid var(--lfr-line); border-radius: 18px; padding: clamp(20px, 3vw, 32px); }
-	.lfr-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+	/* One column on phones, two on tablets, three on wide screens when there are three cards or more. */
+	.lfr-grid { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+	@container lfr (min-width: 560px) { .lfr-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+	@container lfr (min-width: 560px) and (max-width: 899.98px) { .lfr-grid > :last-child:nth-child(odd):not(:first-child) { grid-column: 1 / -1; } }
+	@container lfr (min-width: 900px) { .lfr-grid:has(> :nth-child(3)) { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 	/* Chips: a state always carries an icon and its word, never color alone. */
 	.lfr-chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 3px 12px 3px 8px; font-size: var(--lf-fs-label, 15px);
@@ -73,16 +79,21 @@
 	.lfr-mix { flex: 1 1 280px; max-width: 420px; }
 
 	/* Priorities */
-	.lfr-prio { display: grid; gap: 16px; counter-reset: lfrprio; }
-	.lfr-prio > li { counter-increment: lfrprio; display: grid; grid-template-columns: 56px 1fr; gap: 0 20px; }
-	.lfr-prio > li::before { content: counter(lfrprio, decimal-leading-zero); font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif);
-		font-size: var(--lf-fs-h3, 26px); color: var(--lfr-muted); line-height: 1; padding-top: 4px; }
+	/* Two columns as soon as a card keeps a readable measure; the rank sits in the card's corner, no gutter. */
+	.lfr-prio { display: grid; gap: 20px; counter-reset: lfrprio; grid-template-columns: minmax(0, 1fr); }
+	@container lfr (min-width: 680px) { .lfr-prio { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+	.lfr-prio > li { counter-increment: lfrprio; position: relative; display: flex; }
+	.lfr-prio > li > .lfr-card { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
+	.lfr-prio > li::before { content: counter(lfrprio, decimal-leading-zero); position: absolute; top: clamp(20px, 3vw, 32px); right: clamp(20px, 3vw, 32px);
+		font-family: var(--lf-font-title, 'Playfair Display', Georgia, serif); font-size: var(--lf-fs-h3, 26px); color: var(--lfr-muted); line-height: 1; }
+	.lfr-prio .lfr-card > .lfr-chip { margin-right: 56px; }
+	.lfr-prio .lfr-card > .lfr-todo { align-self: stretch; margin-top: auto; }
+	.lfr-prio .lfr-card > p:has(+ .lfr-todo) { margin-bottom: 16px; }
 	.lfr-prio h4 { margin: 12px 0 6px; }
 	.lfr-prio .lfr-meta { font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); margin-bottom: 12px; }
 	.lfr-todo { margin-top: 16px; padding: 14px 18px; border-radius: 12px; background: var(--lfr-panel-2); display: flex; gap: 12px; align-items: flex-start; }
 	.lfr-todo svg { width: 20px; height: 20px; flex: none; margin-top: 4px; color: var(--lfr-figure); }
 	.lfr-todo p { color: var(--lfr-strong); }
-	@media (max-width: 600px) { .lfr-prio > li { grid-template-columns: 1fr; } .lfr-prio > li::before { margin-bottom: 8px; } }
 
 	/* Strengths */
 	.lfr-strengths li { display: flex; gap: 14px; align-items: flex-start; }
@@ -117,8 +128,8 @@
 	.lfr-issue summary { cursor: pointer; list-style: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 34%) auto; gap: 8px 20px; align-items: center; padding: 16px 0; }
 	.lfr-issue summary::-webkit-details-marker { display: none; }
 	.lfr-issue .name { color: var(--lfr-strong); }
-	.lfr-issue .name::after { content: " +"; color: var(--lfr-muted); }
-	.lfr-issue[open] .name::after { content: " −"; }
+	.lfr-issue .name::after { content: "\00a0+"; color: var(--lfr-muted); }
+	.lfr-issue[open] .name::after { content: "\00a0−"; }
 	.lfr-bar { height: 8px; border-radius: 4px; background: var(--lfr-line); overflow: hidden; }
 	.lfr-bar i { display: block; height: 100%; border-radius: 4px; background: var(--lfr-c); }
 	.lfr-issue .count { font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); white-space: nowrap; text-align: right; }
@@ -182,8 +193,9 @@
 	@keyframes lfr-spin { to { transform: rotate(360deg); } }
 	@media (prefers-reduced-motion: reduce) { .lfr-spinner { animation: none; } }
 	@media (max-width: 700px) { .lfr-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+	/* Divi's .container keeps 80 % of the window: a fifth of a tablet or a phone lost. The report page takes the width less a gutter. */
+	#main-content .container:has(.lf-audit-report) { width: min(1080px, calc(100% - 2 * clamp(16px, 4vw, 48px))); max-width: none; }
 	@media (max-width: 600px) {
-		#main-content .container:has(.lf-audit-report) { width: auto; max-width: none; margin-inline: 16px; }
 		.lfr-card { padding: 20px 16px; }
 		.lfr-more summary, .lfr-fold > summary, .lfr-issue summary { min-height: 44px; }
 	}
