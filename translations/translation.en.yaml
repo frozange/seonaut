@@ -395,7 +395,7 @@ ERROR_30x: URLs returning status code 30x
 ERROR_30x_DESC: "These URLs redirect to another page. Google follows redirects without penalty; an internal link or a sitemap entry that points straight to the final URL only saves visitors and the crawler a detour."
 
 ERROR_REDIRECT_CHAIN: URLs causing a redirect chain
-ERROR_REDIRECT_CHAIN_DESC: Redirect chains are URLs that redirect to other URLs that also redirect somewhere else, creating a chain of redirects. Redirect chains frustrate users, and make it harder for search engines to crawl and index your content efficiently.
+ERROR_REDIRECT_CHAIN_DESC: "These URLs redirect to a URL that redirects again. Google follows the steps but advises against long chains, which slow crawling down; point the first URL and your links straight at the final one."
 
 ERROR_REDIRECT_LOOP: URLs causing a redirect loop
 ERROR_REDIRECT_LOOP_DESC: Redirect loops are a couple of URLs that redirect to each other creating a never ending loop of redirects. Redirect loops prevents users and search engines from ever reaching the destination. It leads to poor user experience, broken navigation, and blocks search engines from properly crawling and indexing your site.

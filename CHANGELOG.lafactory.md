@@ -3,6 +3,17 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.9.8 - 2026-11-26
+
+Relecture de l'audit 18 de bigneurons.com.
+
+- **Chaîne de redirections** rétrogradée de critique à alerte : Google suit les
+  étapes et déconseille seulement les longues chaînes, qui ralentissent
+  l'exploration ([crawl budget](https://developers.google.com/search/docs/crawling-indexing/large-site-managing-crawl-budget)).
+  Une chaîne de deux redirections n'est pas « à corriger d'abord ».
+- **Tirets bas** : seul le chemin de l'adresse compte, pas le nom d'un
+  paramètre (`?bn_lang=fr` relevé trois fois).
+
 ## 1.9.7 - 2026-11-26
 
 - **L'outil ne bloque plus son propriétaire** (Francis : « tu trouves ça

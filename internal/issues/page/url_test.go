@@ -171,3 +171,12 @@ func TestUnderscoreURLFontNoIssues(t *testing.T) {
 		t.Errorf("a font URL must not be reported")
 	}
 }
+
+// An underscore in a query parameter name is not a word separator of the URL.
+func TestUnderscoreURLQueryNoIssues(t *testing.T) {
+	u, _ := url.Parse("https://example.com/big-flux/?bn_lang=fr")
+	pageReport := &models.PageReport{URL: u.String(), ParsedURL: u, MediaType: "text/html"}
+	if page.NewUnderscoreURLReporter().Callback(pageReport, &html.Node{}, &http.Header{}) {
+		t.Errorf("a query parameter must not be reported")
+	}
+}

@@ -395,7 +395,7 @@ ERROR_30x: URL renvoyant un code de statut 30x
 ERROR_30x_DESC: "Ces adresses redirigent vers une autre page. Google suit les redirections sans pénalité ; un lien interne ou une entrée du plan du site qui mène directement à l'adresse finale évite seulement un détour aux visiteurs et au robot."
 
 ERROR_REDIRECT_CHAIN: URL provoquant une chaîne de redirections
-ERROR_REDIRECT_CHAIN_DESC: Une chaîne de redirections se forme quand une URL redirige vers une autre URL qui redirige elle-même ailleurs. Elle frustre les internautes et complique l'exploration et l'indexation efficaces de votre contenu par les moteurs de recherche.
+ERROR_REDIRECT_CHAIN_DESC: "Ces adresses redirigent vers une adresse qui redirige à son tour. Google suit ces étapes, mais déconseille les longues chaînes, qui ralentissent l'exploration ; faites pointer la première adresse et vos liens directement vers l'adresse finale."
 
 ERROR_REDIRECT_LOOP: URL provoquant une boucle de redirections
 ERROR_REDIRECT_LOOP_DESC: Une boucle de redirections se produit quand deux URL (ou plus) se redirigent mutuellement, sans fin. Les visiteurs et les moteurs de recherche n'atteignent jamais la destination. Résultat, mauvaise expérience utilisateur, navigation cassée, et exploration et indexation de votre site impossibles.

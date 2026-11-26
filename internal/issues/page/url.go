@@ -19,7 +19,12 @@ func NewUnderscoreURLReporter() *models.PageIssueReporter {
 		if pageReport.MediaType != "" && pageReport.MediaType != "text/html" {
 			return false
 		}
-		return strings.Contains(pageReport.URL, "_")
+		// The advice is about the words of the path, not a query parameter name
+		// (bigneurons.com: ?bn_lang=fr).
+		if pageReport.ParsedURL != nil {
+			return strings.Contains(pageReport.ParsedURL.Path, "_")
+		}
+		return strings.Contains(strings.SplitN(pageReport.URL, "?", 2)[0], "_")
 	}
 
 	return &models.PageIssueReporter{
