@@ -186,6 +186,18 @@
 	/* The two speed cards stack at full width: side by side, the real-visitor card (often one sentence)
 	   stood beside four tiles at a third of their height. The tiles fill their rows like the cards. */
 	.lfr-speed-cards { display: grid; gap: 20px; }
+	@container lfr (min-width: 680px) {
+		.lfr-speed-cards:has(> .lfr-card + .lfr-card) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		.lfr-speed-cards:has(> .lfr-card + .lfr-card) .lfr-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		.lfr-speed-cards:has(> .lfr-card + .lfr-card) .lfr-metrics > * { grid-column: auto; }
+		.lfr-speed-cards:has(> .lfr-card + .lfr-card) .lfr-metrics > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+	}
+	.lfr-pair { display: grid; column-gap: 40px; }
+	@container lfr (min-width: 680px) {
+		.lfr-pair:has(> section + section) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		.lfr-pair:has(> section + section) .lfr-grid { grid-template-columns: minmax(0, 1fr); }
+		.lfr-pair:has(> section + section) .lfr-grid > * { grid-column: auto; }
+	}
 	.lfr-speed > .lfr-kicker { color: var(--lfr-strong); margin-bottom: 6px; }
 	.lfr-speed > .lfr-small { max-width: 75ch; }
 	.lfr-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
@@ -248,7 +260,7 @@
 
 {{ define "lfr_icon" }}{{ if eq . "good" }}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ else if or (eq . "partial") (eq . "mid") }}<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 2a6 6 0 010 12z" fill="currentColor"/></svg>{{ else if eq . "none" }}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>{{ else if eq . "info" }}<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 7v4M8 4.6v.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>{{ else }}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>{{ end }}{{ end }}
 
-{{ define "lfr_metric" }}<div class="lfr-metric lfr-{{ .Class }}"><b>{{ .Value }}</b><span>{{ trans .Key }}</span><span class="lfr-chip lfr-{{ .Class }}">{{ template "lfr_icon" .Class }}{{ trans (print "AUDIT_SPEED_RATING_" .Class) }}</span><small>{{ trans "AUDIT_SPEED_THRESHOLD" .Threshold }}</small></div>{{ end }}
+{{ define "lfr_metric" }}<div class="lfr-metric lfr-{{ .Class }}"><b>{{ .Value }}</b><span>{{ trans .Key }}</span><span class="lfr-chip lfr-{{ .Class }}">{{ template "lfr_icon" .Class }}{{ trans (print "AUDIT_SPEED_RATING_" .Class) }}</span></div>{{ end }}
 
 {{ define "lfr_rating_class" }}{{ if eq . "good" }}lfr-good{{ else if eq . "partial" }}lfr-mid{{ else }}lfr-low{{ end }}{{ end }}
 
@@ -447,16 +459,12 @@
 		{{ if not .Site.Found }}
 		<div class="lfr-card lfr-info"><span class="lfr-chip lfr-info">{{ template "lfr_icon" "info" }}{{ trans "AUDIT_POP_ABSENT_CHIP" }}</span><p class="lfr-card-text">{{ trans "AUDIT_POP_ABSENT" .Site.Domain .Domains }}</p></div>
 		{{ else }}
-		<div class="lfr-card lfr-pop-head">
-			<div>
+		<div class="lfr-grid lfr-pop-lists">
+			<article class="lfr-card">
 				{{ if .Site.ReferringN }}<p class="lfr-pop-figure"><b>{{ .Site.Referring }}</b> {{ if eq .Site.ReferringN 1 }}{{ trans "AUDIT_POP_SITE_ONE" }}{{ else }}{{ trans "AUDIT_POP_SITES" }}{{ end }}</p>{{ else }}<p class="lfr-card-text">{{ trans "AUDIT_POP_NONE" }}</p>{{ end }}
-			</div>
-		</div>
-		{{ if or .Top .Compared }}<div class="lfr-grid lfr-pop-lists">
-			{{ if .Top }}<article class="lfr-card">
-				<h5 class="lfr-card-title">{{ trans "AUDIT_POP_TOP" }}</h5>
-				{{ template "lfr_pop_rows" .Top }}
-			</article>{{ end }}
+				{{ if .Top }}<h5 class="lfr-card-title">{{ trans "AUDIT_POP_TOP" }}</h5>
+				{{ template "lfr_pop_rows" .Top }}{{ end }}
+			</article>
 			{{ if .Compared }}<article class="lfr-card lfr-good">
 				<h5 class="lfr-card-title">{{ trans "AUDIT_POP_GAINED" .GainedCount }}</h5>
 				{{ if .Gained }}{{ template "lfr_pop_rows" .Gained }}{{ end }}
@@ -466,7 +474,7 @@
 				{{ if .Lost }}{{ template "lfr_pop_rows" .Lost }}{{ end }}
 				{{ if .LostN }}<p class="lfr-small lfr-card-text">{{ trans "AUDIT_POP_LOST_HELP" }}</p>{{ end }}
 			</article>{{ end }}
-		</div>{{ end }}
+		</div>
 		{{ if .Compared }}{{ else if .NewInSample }}<p class="lfr-small lfr-note">{{ trans "AUDIT_POP_NEW" }}</p>
 		{{ else if not .HasPrevious }}<p class="lfr-small lfr-note">{{ trans "AUDIT_POP_NO_PREVIOUS" }}</p>{{ end }}
 		{{ end }}
@@ -489,6 +497,7 @@
 	{{ end }}
 	{{ end }}
 
+	{{ if or .Linking .Dups }}<div class="lfr-pair">
 	{{ with .Linking }}
 	<section class="lfr-sec">
 		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_LINKS" }}</h2><p class="lfr-help">{{ trans "AUDIT_LINKS_HELP" .Pages }}</p></div></div>
@@ -518,6 +527,7 @@
 		{{ end }}
 	</section>
 	{{ end }}
+	</div>{{ end }}
 
 	{{ if .Copywriting }}
 	<section class="lfr-sec">

@@ -83,11 +83,11 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 		last = i
 	}
 	for _, s := range []string{
-		"1,8\u00a0s", "134\u00a0ms", "0,31", "objectif : moins de 2,5\u00a0s", "Note de la simulation", "46", "Réduisez le JavaScript inutilisé", "jusqu&#39;à 0,9\u00a0s à gagner", "Fichiers de style et scripts qui retardent l&#39;affichage de la page",
+		"1,8\u00a0s", "134\u00a0ms", "0,31", "Indice PageSpeed", "46", "Réduisez le JavaScript inutilisé", "jusqu&#39;à 0,9\u00a0s à gagner", "Fichiers de style et scripts qui retardent l&#39;affichage de la page",
 		"Offre : il manque le prix", "(conseillé par Google)", "Fil d&#39;Ariane : une seule étape", "Commerce ou entreprise locale : format incorrect pour le prix, la note ou un avis",
 		"Recherches écartées (1)", "zzz inconnu", "Google propose plutôt : « zzz connu »", "4,0\u00a0s", "Proposée par Google", "« électrolyseur piscine »", "« pompe piscine prix »",
 		"Pages peu reliées : 9", "/p9 (fiche produit)", "Google n&#39;en publie aucune", "texte commun à 93 %", "Groupes de pages en double : 1",
-		"sur l&#39;ensemble du site", "Vitesse vécue par vos visiteurs sur téléphone",
+		"sur l&#39;ensemble du site", "Core Web Vitals sur mobile",
 	} {
 		if !strings.Contains(out, s) {
 			t.Errorf("missing %q", s)

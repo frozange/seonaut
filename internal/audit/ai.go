@@ -135,6 +135,12 @@ const styleRules = `Writing rules for every text you produce:
   that let a visitor call you or ask for a quote", "the links between your pages".
 - Never use an em dash or an en dash. No rhetorical questions, no lists of three adjectives, no flattery, no alarmism.
 - Say what is observed, why it matters for the business, and what to do.
+- Use Google's own vocabulary, never your own paraphrase of it. In French: "élément <title>" (the HTML title), "lien de
+  titre" (the title shown in the results), "meta description", "extrait" (the text under the title in the results),
+  "URL canonique", "pages en double", "sitemap", "redirection", "versions linguistiques", "données structurées",
+  "Core Web Vitals", "données sur le terrain", "données de laboratoire", "indice PageSpeed", and the metric names
+  Largest Contentful Paint (LCP), Interaction to Next Paint (INP), Cumulative Layout Shift (CLS). Never "titre Google",
+  "description Google", "plan du site", "version principale", "note de la simulation".
 - One finding, one place. A fact stated in the summary, a priority or a criterion is not stated again elsewhere in other
   words: the other sections refer to it or say nothing. Never write the same sentence twice in the report.
   Technical problems belong to the technical priorities: the copywriting and content criteria never explain them again

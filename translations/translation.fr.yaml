@@ -391,38 +391,38 @@ ERROR_50x_DESC: Ces erreurs sont généralement dues à un bug ou à une mauvais
 ERROR_40x: URL renvoyant un code de statut 40x
 ERROR_40x_DESC: Ces pages sont introuvables et vos visiteurs comme les moteurs de recherche s'y perdent. Cela peut laisser penser que votre site est mal entretenu. À terme, trop de liens cassés nuisent à l'efficacité de l'exploration et diluent l'autorité de votre site.
 
-ERROR_30x: "Adresses qui redirigent vers une autre"
-ERROR_30x_DESC: "Google suit les redirections sans pénalité. Un lien ou une entrée du plan du site qui mène directement à la page finale évite seulement un détour."
+ERROR_30x: "Redirections"
+ERROR_30x_DESC: "Google suit les redirections sans pénalité. Un lien ou une entrée du sitemap qui mène directement à l'URL finale évite seulement un détour."
 
-ERROR_REDIRECT_CHAIN: "Adresses qui redirigent plusieurs fois de suite"
+ERROR_REDIRECT_CHAIN: "Chaînes de redirections"
 ERROR_REDIRECT_CHAIN_DESC: "Chacune de ces adresses redirige vers une adresse qui redirige à son tour. Google suit les étapes mais déconseille les longues chaînes, qui ralentissent son exploration de votre site : faites pointer la redirection et vos liens directement vers la page finale."
 
 ERROR_REDIRECT_LOOP: URL provoquant une boucle de redirections
 ERROR_REDIRECT_LOOP_DESC: Une boucle de redirections se produit quand deux URL (ou plus) se redirigent mutuellement, sans fin. Les visiteurs et les moteurs de recherche n'atteignent jamais la destination. Résultat, mauvaise expérience utilisateur, navigation cassée, et exploration et indexation de votre site impossibles.
 
-ERROR_DUPLICATED_TITLE: "Même titre Google sur plusieurs pages"
+ERROR_DUPLICATED_TITLE: "Éléments <title> en double"
 ERROR_DUPLICATED_TITLE_DESC: "Google recommande un titre propre à chaque page. Avec un même titre, l'internaute ne voit pas dans les résultats ce qui distingue ces pages."
 
-ERROR_LONG_TITLE: "Titres Google coupés dans les résultats"
-ERROR_LONG_TITLE_DESC: "Google coupe un titre long à la largeur de l'écran : l'internaute n'en lit que le début."
+ERROR_LONG_TITLE: "Éléments <title> longs"
+ERROR_LONG_TITLE_DESC: "Google tronque un lien de titre long à la largeur de l'écran : l'internaute n'en lit que le début."
 
-ERROR_SHORT_TITLE: "Titres Google très courts"
+ERROR_SHORT_TITLE: "Éléments <title> très courts"
 ERROR_SHORT_TITLE_DESC: "Google demande un titre qui décrit la page : un mot seul, comme « Accueil » ou « Blog », ne la distingue pas des autres."
 
 ERROR_EMPTY_TITLE: Pages sans balise title
 ERROR_EMPTY_TITLE_DESC: La balise title aide les moteurs de recherche à comprendre le sujet d'une page et s'affiche souvent dans les résultats. Sans title, votre page peut être moins bien classée, passer inaperçue et paraître peu professionnelle ou inachevée.
 
-ERROR_EMPTY_DESCRIPTION: "Pages sans description Google"
-ERROR_EMPTY_DESCRIPTION_DESC: "Sans description, Google compose lui-même le texte affiché sous votre titre."
+ERROR_EMPTY_DESCRIPTION: "Pages sans meta description"
+ERROR_EMPTY_DESCRIPTION_DESC: "Sans meta description, Google compose lui-même l'extrait affiché sous votre lien de titre."
 
-ERROR_SHORT_DESCRIPTION: "Descriptions Google très courtes"
-ERROR_SHORT_DESCRIPTION_DESC: "Une description très courte en dit peu à l'internaute qui la lit sous votre titre."
+ERROR_SHORT_DESCRIPTION: "Meta descriptions très courtes"
+ERROR_SHORT_DESCRIPTION_DESC: "Une meta description très courte en dit peu à l'internaute qui lit l'extrait sous votre lien de titre."
 
-ERROR_LONG_DESCRIPTION: "Descriptions Google coupées dans les résultats"
-ERROR_LONG_DESCRIPTION_DESC: "Google coupe une description trop longue et l'internaute n'en lit que le début : mettez l'essentiel dans la première phrase."
+ERROR_LONG_DESCRIPTION: "Meta descriptions longues"
+ERROR_LONG_DESCRIPTION_DESC: "Google tronque un extrait trop long et l'internaute n'en lit que le début : mettez l'essentiel dans la première phrase."
 
-ERROR_DUPLICATED_DESCRIPTION: "Même description Google sur plusieurs pages"
-ERROR_DUPLICATED_DESCRIPTION_DESC: "C'est souvent la description que Google affiche sous le titre : identique d'une page à l'autre, elle ne dit pas à l'internaute ce que contient chacune."
+ERROR_DUPLICATED_DESCRIPTION: "Meta descriptions en double"
+ERROR_DUPLICATED_DESCRIPTION_DESC: "Google se sert souvent de la meta description pour l'extrait : identique d'une page à l'autre, elle ne dit pas à l'internaute ce que contient chacune."
 
 ERROR_LITTLE_CONTENT: "Pages au texte court"
 ERROR_LITTLE_CONTENT_DESC: "Relisez-les pour vérifier qu'elles répondent à la question du visiteur."
@@ -481,8 +481,8 @@ NO_INDEX_IN_SITEMAP_DESC: Les pages non indexables ne doivent pas figurer dans u
 BLOCKED_IN_SITEMAP: Pages bloquées présentes dans le sitemap
 BLOCKED_IN_SITEMAP_DESC: Les pages bloquées par le fichier robots.txt ne doivent pas figurer dans le sitemap, car cela envoie un signal contradictoire aux moteurs de recherche. Elles peuvent aussi ralentir l'exploration et fausser l'indexation.
 
-NON_CANONICAL_IN_SITEMAP: "Pages du plan du site qui renvoient Google vers une autre page"
-NON_CANONICAL_IN_SITEMAP_DESC: "Le plan du site ne devrait lister que les pages que vous voulez voir dans Google. Celles-ci désignent une autre page comme version principale : le plan du site et la page donnent à Google deux consignes contraires."
+NON_CANONICAL_IN_SITEMAP: "Pages non canoniques dans le sitemap"
+NON_CANONICAL_IN_SITEMAP_DESC: "Le sitemap ne devrait lister que les URL canoniques, celles que vous voulez voir dans Google. Ces pages désignent une autre URL canonique : le sitemap et la page donnent à Google deux consignes contraires."
 
 INCOMING_FOLLOW_NOFOLLOW: Pages avec des liens entrants follow et nofollow
 INCOMING_FOLLOW_NOFOLLOW_DESC: Une page qui reçoit à la fois des liens internes follow et nofollow peut diluer les signaux d'autorité et de pertinence, ce qui brouille les moteurs de recherche et réduit ses chances de bien se positionner.
@@ -550,8 +550,8 @@ ERROR_LONG_ALT_TEXT_DESC: "Le texte alternatif décrit l'image à ceux qui ne la
 ERROR_MULTIPLE_TITLES: Balises title multiples
 ERROR_MULTIPLE_TITLES_DESC: Pages contenant plus d'une balise title dans l'en-tête. Plusieurs balises title dans l'en-tête HTML peuvent nuire au SEO en perturbant les moteurs de recherche, qui comprennent alors plus difficilement le contenu de la page.
 
-ERROR_MULTIPLE_DESCRIPTIONS: "Plusieurs descriptions Google sur une même page"
-ERROR_MULTIPLE_DESCRIPTIONS_DESC: "Le code de ces pages contient plusieurs descriptions. Google n'en affiche qu'une, et vous ne choisissez plus laquelle."
+ERROR_MULTIPLE_DESCRIPTIONS: "Pages avec plusieurs meta descriptions"
+ERROR_MULTIPLE_DESCRIPTIONS_DESC: "Le code de ces pages contient plusieurs meta descriptions : vous ne maîtrisez plus laquelle Google peut utiliser pour l'extrait."
 
 ERROR_PAGE_DEPTH: Profondeur élevée
 ERROR_PAGE_DEPTH_DESC: Les pages trop profondes peuvent nuire au SEO et à l'expérience utilisateur. Difficiles d'accès pour les moteurs de recherche comme pour les internautes, elles risquent de perdre en visibilité dans les résultats et de rendre la navigation moins intuitive.
@@ -723,7 +723,7 @@ AUDIT_WARNINGS: "Mineur"
 AUDIT_HYGIENE: "Sans effet connu sur votre position dans Google"
 AUDIT_HYGIENE_HELP: "Ces points ne comptent pas dans la note : Google dit ne pas s'en servir pour classer les pages, ou ne fixe aucune règle. Ils peuvent compter pour vos visiteurs."
 AUDIT_METHOD: Méthode
-AUDIT_METHOD_CRAWL: "Notre robot est parti de la page d'accueil et du plan du site, puis a suivi les liens comme le fait celui de Google, en respectant les pages que le site interdit aux robots. Il a lu %1% pages."
+AUDIT_METHOD_CRAWL: "Notre robot est parti de la page d'accueil et du sitemap, puis a suivi les liens comme le fait celui de Google, en respectant le fichier robots.txt. Il a lu %1% pages."
 AUDIT_METHOD_SAMPLE: "Le site compte plus de pages que les %1% lues pour cet audit gratuit. Les chiffres techniques portent sur les pages lues, pas sur tout le site."
 AUDIT_METHOD_EXCLUDED: "À la demande du propriétaire du site, %1% adresses ont été laissées de côté (par exemple le blog). Elles n'ont pas été lues, et les chiffres n'en tiennent pas compte."
 AUDIT_METHOD_SCALE: "La note technique part de 10 points et retire 1,2 par type de problème critique, 0,6 par alerte et 0,2 par avertissement : la moitié dès qu'une page est concernée, la totalité quand toutes le sont. Les notes de rédaction et de contenu font la moyenne des critères (satisfaisant 10, partiel 5, insuffisant 0)."
@@ -861,28 +861,28 @@ AUDIT_EXAMPLES: "Voir les pages"
 AUDIT_SPEED: "La vitesse de votre site"
 AUDIT_SPEED_HELP: "Mesures de Google (PageSpeed Insights) sur la page d'accueil."
 AUDIT_SPEED_FAILED: "La mesure de vitesse n'a pas abouti : le service de Google n'a pas répondu ce jour-là. Aucun chiffre n'est donc donné."
-AUDIT_SPEED_FIELD: "Vos vrais visiteurs, sur téléphone"
+AUDIT_SPEED_FIELD: "Données sur le terrain, mobile"
 AUDIT_SPEED_FIELD_PAGE: "Visites réelles enregistrées par Chrome sur 28 jours. Chaque chiffre est atteint ou battu par trois visites sur quatre."
 AUDIT_SPEED_FIELD_SITE: "Visites réelles enregistrées par Chrome sur 28 jours, sur l'ensemble du site : la page d'accueil seule n'en compte pas assez. Chaque chiffre est atteint ou battu par trois visites sur quatre."
-AUDIT_SPEED_NO_FIELD: "Google ne publie pas de mesures prises chez vos visiteurs : il lui faut assez de visites sous Chrome sur 28 jours, ce qui manque souvent à un site peu fréquenté. Seule la simulation est disponible, et Google ne s'en sert pas pour classer les pages."
-AUDIT_SPEED_LAB: "Simulation, sur téléphone"
-AUDIT_SPEED_LAB_HELP: "Une visite simulée par Google, sur un téléphone de milieu de gamme et une connexion lente."
-AUDIT_SPEED_SCORE: "Note de la simulation"
-AUDIT_SPEED_LCP: "Affichage du contenu principal"
-AUDIT_SPEED_INP: "Réaction après un clic ou un appui"
-AUDIT_SPEED_CLS: "Stabilité de l'affichage"
-AUDIT_SPEED_TBT: "Temps pendant lequel la page ne réagit pas"
+AUDIT_SPEED_NO_FIELD: "Google ne publie pas de données sur le terrain pour ce site : il lui faut assez de visites sous Chrome sur 28 jours, ce qui manque souvent à un site peu fréquenté. Seules les données de laboratoire sont disponibles, et Google ne s'en sert pas pour classer les pages."
+AUDIT_SPEED_LAB: "Données de laboratoire, mobile"
+AUDIT_SPEED_LAB_HELP: "Visite simulée par Lighthouse, sur un mobile de milieu de gamme et une connexion lente."
+AUDIT_SPEED_SCORE: "Indice PageSpeed"
+AUDIT_SPEED_LCP: "Largest Contentful Paint (LCP)"
+AUDIT_SPEED_INP: "Interaction to Next Paint (INP)"
+AUDIT_SPEED_CLS: "Cumulative Layout Shift (CLS)"
+AUDIT_SPEED_TBT: "Total Blocking Time (temps de blocage total)"
 AUDIT_SPEED_RATING_good: "Bon"
-AUDIT_SPEED_RATING_mid: "Moyen"
-AUDIT_SPEED_RATING_low: "Mauvais"
+AUDIT_SPEED_RATING_mid: "Amélioration nécessaire"
+AUDIT_SPEED_RATING_low: "Médiocre"
 AUDIT_SPEED_THRESHOLD: "objectif : moins de %1%"
 AUDIT_SPEED_ADVICE: "Ce qui ralentit la page"
 AUDIT_SPEED_SAVING: "jusqu'à %1% à gagner"
 AUDIT_SPEED_DESKTOP: "Sur ordinateur,"
-AUDIT_SPEED_OVERALL_good: "les visites réelles sont rapides ;"
-AUDIT_SPEED_OVERALL_mid: "les visites réelles sont moyennes ;"
-AUDIT_SPEED_OVERALL_low: "les visites réelles sont lentes ;"
-AUDIT_SPEED_DESKTOP_LAB: "la simulation donne %1% sur 100."
+AUDIT_SPEED_OVERALL_good: "les données sur le terrain sont bonnes ;"
+AUDIT_SPEED_OVERALL_mid: "les données sur le terrain nécessitent une amélioration ;"
+AUDIT_SPEED_OVERALL_low: "les données sur le terrain sont médiocres ;"
+AUDIT_SPEED_DESKTOP_LAB: "l'indice PageSpeed est de %1% sur 100."
 AUDIT_LINKS: "Les liens entre vos pages"
 AUDIT_LINKS_HELP: "Vos visiteurs, comme le robot de Google, passent d'une page à l'autre par vos liens. Nous avons noté de 0 à 100 la facilité à atteindre chacune des %1% pages que Google peut afficher. Cette note est la nôtre : Google n'en publie aucune."
 AUDIT_LINKS_TOP: "Les pages les plus faciles à atteindre"
@@ -900,20 +900,20 @@ AUDIT_DUPS_NONE: "Aucune page en double parmi les %1% pages que Google peut affi
 AUDIT_DUPS_GROUPS: "Groupes de pages en double : %1%"
 AUDIT_DUPS_TEXT_HELP: "Gardez une seule de ces pages et redirigez les autres vers elle, ou donnez à chacune un texte qui lui est propre."
 AUDIT_DUPS_SIMILAR: "texte commun à %1% %"
-AUDIT_PRIO_SPEED: "Vitesse vécue par vos visiteurs sur téléphone"
-AUDIT_PRIO_SPEED_DESC: "Les mesures de vrais visiteurs relevées par Google montrent une page lente ou instable sur téléphone."
+AUDIT_PRIO_SPEED: "Core Web Vitals sur mobile"
+AUDIT_PRIO_SPEED_DESC: "Les données sur le terrain de Google montrent une page lente ou instable sur mobile."
 AUDIT_PRIO_STRUCTURED: "Fiches produits mal décrites pour Google"
 AUDIT_PRIO_STRUCTURED_DESC: "Une erreur dans les données structurées empêche Google d'afficher le prix, la disponibilité ou les avis dans ses résultats."
 AUDIT_PRIO_DUPLICATES: "Pages en double"
 AUDIT_PRIO_DUPLICATES_DESC: "Plusieurs pages ont presque le même texte : Google n'en garde en général qu'une dans ses résultats."
 AUDIT_PRIO_LINKING: "Pages qu'aucune autre page ne relie"
-AUDIT_PRIO_LINKING_DESC: "Aucune de vos pages ne fait de lien vers elles : les visiteurs ne peuvent pas y arriver, et Google ne les trouve que par le plan du site, s'il les contient."
+AUDIT_PRIO_LINKING_DESC: "Aucun lien de votre site ne mène à ces pages : les visiteurs ne peuvent pas les atteindre depuis le site, et Google ne les trouve que par le sitemap, si elles y figurent."
 AUDIT_METHOD_SPEED: "La vitesse est mesurée par PageSpeed Insights, l'outil de Google. Une mesure qui échoue n'affiche aucun chiffre."
 AUDIT_METHOD_SD: "Les données structurées de chaque page sont comparées à ce que Google exige et conseille dans sa documentation."
 AUDIT_METHOD_LINKS: "La note de facilité d'accès reprend le calcul du PageRank, la formule d'origine de Google, appliquée aux seuls liens entre vos pages, puis ramenée de 0 à 100."
 AUDIT_METHOD_DUPS: "Deux pages sont jugées en double quand au moins 85 % de leurs suites de cinq mots se retrouvent dans les deux textes."
 AUDIT_METHOD_SUGGEST: "Les recherches visées viennent de notre lecture des pages, puis sont confrontées aux suggestions de Google (la liste qui s'affiche quand on tape dans la barre de recherche). Une recherche que Google ne propose pas, même sous une forme proche, est écartée. Les suggestions ne donnent aucun volume de recherche."
-AUDIT_LINKS_ORPHANS: "Pages qu'aucune autre page ne relie : %1%. Google ne peut les trouver que par le plan du site."
+AUDIT_LINKS_ORPHANS: "Pages vers lesquelles aucune autre page du site ne fait de lien : %1%. Depuis votre site, Google ne peut les trouver que par le sitemap."
 AUDIT_POP: "Backlinks"
 AUDIT_POP_HELP: "Les sites qui ont un lien vers le vôtre. Google s'en sert, parmi bien d'autres signaux, pour juger l'intérêt de vos pages. Relevé de Common Crawl, une archive publique du web, entre %1% et %2%."
 AUDIT_POP_ABSENT_CHIP: "Pas encore dans l'échantillon"
@@ -945,8 +945,8 @@ AUDIT_VS_GAP_HELP_2: "Chacun fait un lien vers au moins deux de vos concurrents.
 AUDIT_VS_GAP_HELP_1: "Chacun fait un lien vers votre concurrent et aucun vers vous. Ces sites parlent déjà de votre métier, ce sont les premiers à qui présenter le vôtre."
 AUDIT_VS_CITES: "lien vers"
 AUDIT_METHOD_POP: "Common Crawl, une archive publique du web, publie chaque trimestre quels sites mènent à quels autres. Les principaux sont ceux qu'il place le plus haut dans ce réseau de liens. Google ne publie aucune note de liens et ignore de lui-même les liens artificiels : ce rapport n'en qualifie donc aucun de « toxique »."
-ERROR_CANONICAL_OTHER_LANGUAGE: "Pages dont la version principale (canonique) est dans une autre langue"
-ERROR_CANONICAL_OTHER_LANGUAGE_DESC: "Ces pages désignent comme version principale une page dans une autre langue. Google demande que la version principale soit dans la langue de la page ; sinon il peut ne garder que la page désignée et écarter les traductions."
+ERROR_CANONICAL_OTHER_LANGUAGE: "URL canonique dans une autre langue"
+ERROR_CANONICAL_OTHER_LANGUAGE_DESC: "Ces pages désignent comme URL canonique une page dans une autre langue. Google demande une URL canonique dans la langue de la page ; sinon il peut ne garder que la page désignée et écarter les versions linguistiques."
 AUDIT_REPORT_LEAD_SAMPLE: "Rapport établi à partir des %1% premières pages explorées : le site en compte davantage, la limite de cet audit est atteinte."
 AUDIT_SD_PAGES_ONE: "Présent sur 1 page."
 AUDIT_PSI_RENDER_BLOCKING: "Fichiers de style et scripts qui retardent l'affichage de la page"
@@ -972,6 +972,6 @@ AUDIT_LANG_hr: "croate"
 AUDIT_LANG_bs: "bosnien"
 AUDIT_LANG_other: "langue étrangère"
 AUDIT_IN: "en"
-AUDIT_PRIO_CANONICAL_CLAUSE: "vos pages %1% désignent une page %2% comme version principale"
+AUDIT_PRIO_CANONICAL_CLAUSE: "vos pages %1% désignent comme URL canonique une page %2%"
 AUDIT_CLAUSE_SEP: " ; "
 AUDIT_PRIO_CANONICAL_CLAUSE_NEXT: "celles %1%, une page %2%"
