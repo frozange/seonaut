@@ -1,8 +1,10 @@
 // Command auditctl queues a free audit from the server itself, through the same
-// validation and limits as the /audit form, without the browser and its human
-// check. It is the owner's route for tests and requests made on someone's
+// validation as the /audit form, without the browser, its human check or its
+// quotas. It is the owner's route for tests and requests made on someone's
 // behalf: it needs the instance config (database credentials), so only the
-// account that runs SEOnaut can use it.
+// account that runs SEOnaut can use it. Francis, 2026-11-26: « tu trouves ça
+// normal que ma propre app me bloque ? ». Its audits do not count against the
+// form's quotas either (Store.CountSince skips OwnerIP).
 //
 //	auditctl -c config [-fresh] request <site URL> <e-mail>
 //	auditctl -c config status <token or slug>
@@ -79,8 +81,6 @@ func main() {
 			BaseURL:     cfg.HTTPServer.URL,
 			ReportURL:   cfg.Audit.ReportURL,
 			DefaultLang: cfg.Audit.Language,
-			DailyCap:    cfg.Audit.DailyCap,
-			PerEmailDay: cfg.Audit.PerEmailPerDay,
 			ReuseFor:    time.Duration(cfg.Audit.ReuseHours) * time.Hour,
 		},
 	}
@@ -96,7 +96,7 @@ func main() {
 		if len(args) != 3 {
 			usage()
 		}
-		a, err := svc.Request(args[1], args[2], "cli")
+		a, err := svc.Request(args[1], args[2], audit.OwnerIP)
 		if err != nil {
 			log.Fatalf("request refused: %v", err)
 		}

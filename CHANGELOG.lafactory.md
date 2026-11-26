@@ -3,6 +3,14 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.9.7 - 2026-11-26
+
+- **L'outil ne bloque plus son propriétaire** (Francis : « tu trouves ça
+  normal que ma propre app me bloque ? ») : `auditctl`, qui ne tourne que sur
+  le serveur avec la config de l'instance, n'applique plus les quotas du
+  formulaire public (3 audits par adresse sur 24 h, plafond quotidien). Ses
+  audits (`ip = 'cli'`) ne comptent plus non plus dans ces quotas.
+
 ## 1.9.6 - 2026-11-26
 
 Trois faux constats de l'audit complet de bigneurons.com (491 pages).

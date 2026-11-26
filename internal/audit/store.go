@@ -193,10 +193,15 @@ func (s *Store) RequeueInterrupted() error {
 	return err
 }
 
-// CountSince counts audits created since t, optionally for one email or host.
+// OwnerIP marks the audits the owner queues from the server with auditctl.
+const OwnerIP = "cli"
+
+// CountSince counts the public audits created since t, optionally for one
+// email or host. The owner's audits (auditctl, OwnerIP) never use up the
+// quotas of the form.
 func (s *Store) CountSince(t time.Time, email, urlPrefix string) (int, error) {
-	q := `SELECT COUNT(*) FROM audits WHERE created >= ?`
-	args := []any{t.UTC()}
+	q := `SELECT COUNT(*) FROM audits WHERE created >= ? AND ip <> ?`
+	args := []any{t.UTC(), OwnerIP}
 	if email != "" {
 		q += ` AND email = ?`
 		args = append(args, email)
