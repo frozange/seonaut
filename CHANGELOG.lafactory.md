@@ -3,6 +3,15 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.9.9 - 2026-11-26
+
+- **Auto-référence hreflang** : une page dont la canonique pointe ailleurs
+  (filtres de la boutique de lafactory.com, `?lfscat=`, `?lfsprice=`) reprend
+  à juste titre les versions de langue de sa page canonique, et Google ne lit
+  le hreflang que sur les pages canoniques. Elle n'est plus relevée (5 faux
+  constats sur l'audit 19 de lafactory.com, seule priorité technique du
+  rapport).
+
 ## 1.9.8 - 2026-11-26
 
 Relecture de l'audit 18 de bigneurons.com.

@@ -59,6 +59,13 @@ func NewHreflangMissingSelfReference() *models.PageIssueReporter {
 			return false
 		}
 
+		// A page canonicalized elsewhere (a filtered listing, ?lfscat=...) rightly
+		// repeats its canonical's language versions: Google reads hreflang on
+		// canonical pages only.
+		if pageReport.Canonical != "" && pageReport.Canonical != pageReport.URL {
+			return false
+		}
+
 		for _, hl := range pageReport.Hreflangs {
 			if hl.URL == pageReport.URL {
 				return false

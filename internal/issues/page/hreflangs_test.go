@@ -305,3 +305,17 @@ func TestHreflangMismatchingLangRegions(t *testing.T) {
 		}
 	}
 }
+
+// A filtered page canonicalized to its listing repeats the listing's versions: no issue.
+func TestHreflangSelfReferenceCanonicalizedNoIssues(t *testing.T) {
+	pageReport := &models.PageReport{
+		Crawled:   true,
+		MediaType: "text/html",
+		URL:       "https://example.com/store/?cat=a",
+		Canonical: "https://example.com/store/",
+		Hreflangs: []models.Hreflang{{URL: "https://example.com/store/", Lang: "en"}, {URL: "https://example.com/fr/boutique/", Lang: "fr"}},
+	}
+	if page.NewHreflangMissingSelfReference().Callback(pageReport, &html.Node{}, &http.Header{}) {
+		t.Errorf("a canonicalized page must not be reported")
+	}
+}
