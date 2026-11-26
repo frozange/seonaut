@@ -3,6 +3,13 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.10.6 - 2026-11-26
+
+- **Le rapport prend la largeur du site** : 1280 px au plus, comme le menu de
+  lafactory.com, au lieu de 1080 (Francis : « 1080 n'a aucun sens puisque le
+  template est bien plus large »). Sur un écran de 1920 px, le rapport n'était
+  plus qu'une colonne étroite sous un bandeau plus large que lui.
+
 ## 1.10.5 - 2026-11-26
 
 - **Canonique dans une autre langue, sans faux constat** : Google ne lit pas
