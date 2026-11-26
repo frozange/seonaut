@@ -71,7 +71,7 @@ func NewNonCanonicalInSitemapReporter() *models.PageIssueReporter {
 			return false
 		}
 
-		if pageReport.MediaType != "text/html" {
+		if !pageReport.InSitemap || pageReport.MediaType != "text/html" {
 			return false
 		}
 

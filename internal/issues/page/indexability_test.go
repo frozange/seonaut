@@ -302,3 +302,16 @@ func TestNosnippetIssues(t *testing.T) {
 		t.Errorf("TestNosnippetIssues max-snippet: reportsIssue should be true")
 	}
 }
+
+// A non canonical page that is not listed in the sitemap is not reported.
+func TestNonCanonicalNotInSitemapNoIssues(t *testing.T) {
+	pageReport := &models.PageReport{
+		Crawled:   true,
+		MediaType: "text/html",
+		URL:       "https://example.com/en/page",
+		Canonical: "https://example.com/",
+	}
+	if page.NewNonCanonicalInSitemapReporter().Callback(pageReport, &html.Node{}, &http.Header{}) {
+		t.Errorf("a page outside the sitemap must not be reported")
+	}
+}

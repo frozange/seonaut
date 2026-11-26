@@ -21,6 +21,12 @@ func NewHTTPSchemeReporter() *models.PageIssueReporter {
 			return false
 		}
 
+		// Pages only: an image or a font fetched over http is a resource, not a
+		// page Google shows (bigneurons.com: a staging image reported as a page).
+		if pageReport.MediaType != "" && pageReport.MediaType != "text/html" {
+			return false
+		}
+
 		return pageReport.ParsedURL.Scheme == "http"
 	}
 

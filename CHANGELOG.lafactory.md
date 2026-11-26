@@ -3,6 +3,22 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.9.6 - 2026-11-26
+
+Trois faux constats de l'audit complet de bigneurons.com (491 pages).
+
+- **« Pages non canoniques présentes dans le sitemap »** (défaut d'origine de
+  SEOnaut) : le contrôle ne regardait jamais si la page figurait au plan du
+  site et relevait toute page non canonique. 59 relevées sur bigneurons.com,
+  15 réellement au sitemap. Il exige maintenant `InSitemap`.
+- **« Pages en HTTP »** : une image d'un serveur de préproduction, chargée en
+  http, passait pour une page du site en priorité critique. Le contrôle ne
+  porte plus que sur les pages HTML.
+- **« URL contenant des tirets bas »** : 87 relevés, presque tous des fichiers
+  de fonts.gstatic.com et des images. Le conseil de Google porte sur l'adresse
+  des pages ([URL structure](https://developers.google.com/search/docs/crawling-indexing/url-structure)) :
+  le contrôle ne porte plus que sur les pages HTML.
+
 ## 1.9.5 - 2026-11-26
 
 - **Plafond de pages atteint, enfin dit** : l'audit de bigneurons.com s'est

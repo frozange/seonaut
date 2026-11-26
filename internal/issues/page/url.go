@@ -14,6 +14,11 @@ import (
 // if URL has undescore characters.
 func NewUnderscoreURLReporter() *models.PageIssueReporter {
 	c := func(pageReport *models.PageReport, htmlNode *html.Node, header *http.Header) bool {
+		// Google's URL advice is about page URLs: font and upload file names
+		// (87 on bigneurons.com, mostly fonts.gstatic.com) are not pages.
+		if pageReport.MediaType != "" && pageReport.MediaType != "text/html" {
+			return false
+		}
 		return strings.Contains(pageReport.URL, "_")
 	}
 

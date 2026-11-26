@@ -77,3 +77,12 @@ func TestHTTPSchemeIssues(t *testing.T) {
 		t.Errorf("TestHTTPSchemeIssues: reportsIssue should be true")
 	}
 }
+
+// An image served over http is a resource, not a page: it is not reported.
+func TestHTTPSchemeImageNoIssues(t *testing.T) {
+	parsedURL, _ := url.Parse("http://staging.example.com/splash.png")
+	pageReport := &models.PageReport{Crawled: true, URL: parsedURL.String(), ParsedURL: parsedURL, StatusCode: 200, MediaType: "image/png"}
+	if page.NewHTTPSchemeReporter().Callback(pageReport, &html.Node{}, &http.Header{}) {
+		t.Errorf("an http image must not be reported as an http page")
+	}
+}

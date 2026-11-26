@@ -163,3 +163,11 @@ func TestMultiplSlashes(t *testing.T) {
 		t.Errorf("TestMultiplSlashes: reportsIssue should be true")
 	}
 }
+
+// A font file name with underscores is not a page URL: it is not reported.
+func TestUnderscoreURLFontNoIssues(t *testing.T) {
+	pageReport := &models.PageReport{URL: "https://fonts.gstatic.com/s/inter/v20/Uc_x.ttf", MediaType: "font/ttf"}
+	if page.NewUnderscoreURLReporter().Callback(pageReport, &html.Node{}, &http.Header{}) {
+		t.Errorf("a font URL must not be reported")
+	}
+}
