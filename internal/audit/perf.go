@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -91,13 +92,32 @@ type LabData struct {
 	TTFBms        *float64      `json:"ttfb_ms,omitempty"`
 	Bytes         *float64      `json:"bytes,omitempty"`
 	Opportunities []Opportunity `json:"opportunities,omitempty"`
+	// LCP is the element Lighthouse saw paint last, with where its time went
+	// (sel-tech.fr, 2026-11-27: the Crillon card image, never named before).
+	LCP *LCPElement `json:"lcp_element,omitempty"`
+}
+
+// LCPElement names the largest element and splits its time.
+type LCPElement struct {
+	Label           string     `json:"label,omitempty"`  // alt text or text Lighthouse shows
+	Source          string     `json:"source,omitempty"` // image address when the element is an image
+	Phases          []LCPPhase `json:"phases,omitempty"`
+	NoFetchPriority bool       `json:"no_fetchpriority,omitempty"`
+	LazyLoaded      bool       `json:"lazy_loaded,omitempty"`
+}
+
+// LCPPhase is one part of the LCP time.
+type LCPPhase struct {
+	ID string  `json:"id"` // timeToFirstByte, resourceLoadDelay, resourceLoadDuration, elementRenderDelay
+	Ms float64 `json:"ms"`
 }
 
 // Opportunity is a Lighthouse advice that would save at least 150 ms.
 type Opportunity struct {
-	ID       string `json:"id"`
-	Title    string `json:"title"`
-	SavingMs int    `json:"saving_ms"`
+	ID       string   `json:"id"`
+	Title    string   `json:"title"`
+	SavingMs int      `json:"saving_ms"`
+	Files    []string `json:"files,omitempty"` // addresses Lighthouse lists for this advice
 }
 
 // RateMetric applies the thresholds.
@@ -220,7 +240,8 @@ type psiAudit struct {
 	Score        *float64 `json:"score"`
 	NumericValue *float64 `json:"numericValue"`
 	Details      struct {
-		OverallSavingsMs *float64 `json:"overallSavingsMs"`
+		OverallSavingsMs *float64          `json:"overallSavingsMs"`
+		Items            []json.RawMessage `json:"items"`
 	} `json:"details"`
 	MetricSavings struct {
 		LCP *float64 `json:"LCP"`
@@ -265,7 +286,7 @@ func ParsePSI(body []byte) (*SpeedRun, error) {
 				saving = a.MetricSavings.LCP
 			}
 			if a.Score != nil && *a.Score < 0.9 && saving != nil && *saving >= 150 {
-				lab.Opportunities = append(lab.Opportunities, Opportunity{ID: id, Title: a.Title, SavingMs: int(*saving)})
+				lab.Opportunities = append(lab.Opportunities, Opportunity{ID: id, Title: a.Title, SavingMs: int(*saving), Files: itemURLs(a.Details.Items, 5)})
 			}
 		}
 		sort.Slice(lab.Opportunities, func(i, k int) bool {
@@ -274,9 +295,7 @@ func ParsePSI(body []byte) (*SpeedRun, error) {
 			}
 			return lab.Opportunities[i].ID < lab.Opportunities[k].ID
 		})
-		if len(lab.Opportunities) > 5 {
-			lab.Opportunities = lab.Opportunities[:5]
-		}
+		lab.LCP = lcpElement(lh.Audits)
 		if lab.Score != nil || lab.LCPms != nil {
 			run.Lab = lab
 		}
@@ -348,4 +367,84 @@ func ReadEnvKey(path, name string) (string, error) {
 		return "", err
 	}
 	return "", fmt.Errorf("%s not found in %s", name, path)
+}
+
+// itemURLs returns the first n distinct "url" fields of an audit's table rows.
+func itemURLs(items []json.RawMessage, n int) []string {
+	var out []string
+	seen := map[string]bool{}
+	for _, raw := range items {
+		var it struct {
+			URL string `json:"url"`
+		}
+		if json.Unmarshal(raw, &it) != nil || it.URL == "" || seen[it.URL] {
+			continue
+		}
+		seen[it.URL] = true
+		out = append(out, it.URL)
+		if len(out) == n {
+			break
+		}
+	}
+	return out
+}
+
+var imgSrcRe = regexp.MustCompile(`\bsrc="([^"]+)"`)
+
+// lcpElement reads the LCP insights of Lighthouse 12: the element node, the
+// time split of lcp-breakdown-insight and the checklist of lcp-discovery-insight.
+func lcpElement(audits map[string]psiAudit) *LCPElement {
+	el := &LCPElement{}
+	found := false
+	for _, id := range []string{"lcp-breakdown-insight", "lcp-discovery-insight", "largest-contentful-paint-element"} {
+		for _, raw := range audits[id].Details.Items {
+			var it struct {
+				Type      string          `json:"type"`
+				NodeLabel string          `json:"nodeLabel"`
+				Snippet   string          `json:"snippet"`
+				Items     json.RawMessage `json:"items"`
+			}
+			if json.Unmarshal(raw, &it) != nil {
+				continue
+			}
+			switch it.Type {
+			case "node":
+				if !found {
+					el.Label = it.NodeLabel
+					if m := imgSrcRe.FindStringSubmatch(it.Snippet); m != nil {
+						el.Source = m[1]
+					}
+					found = true
+				}
+			case "table":
+				var rows []struct {
+					Subpart  string   `json:"subpart"`
+					Duration *float64 `json:"duration"`
+				}
+				if json.Unmarshal(it.Items, &rows) == nil && len(el.Phases) == 0 {
+					for _, r := range rows {
+						if r.Subpart != "" && r.Duration != nil {
+							el.Phases = append(el.Phases, LCPPhase{ID: r.Subpart, Ms: *r.Duration})
+						}
+					}
+				}
+			case "checklist":
+				var c map[string]struct {
+					Value bool `json:"value"`
+				}
+				if json.Unmarshal(it.Items, &c) == nil {
+					if v, ok := c["priorityHinted"]; ok && !v.Value {
+						el.NoFetchPriority = true
+					}
+					if v, ok := c["eagerlyLoaded"]; ok && !v.Value {
+						el.LazyLoaded = true
+					}
+				}
+			}
+		}
+	}
+	if !found && len(el.Phases) == 0 {
+		return nil
+	}
+	return el
 }

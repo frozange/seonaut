@@ -3,6 +3,24 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.12.0 - 2026-11-27
+
+- **Vitesse mobile, vitesse bureau** (Francis : « vitesse mobile / bureau point
+  final, les gens ne sont pas si stupides ») : une carte par appareil, avec ses
+  chiffres, sans les paragraphes « données sur le terrain », « données de
+  laboratoire », Lighthouse ou 28 jours. Les mesures de visites réelles, quand
+  Google en a, sont dans la même carte (« visites réelles »). Mesure ratée : une
+  ligne.
+- **Le rapport montre les solutions que PageSpeed donne** (Francis : « tu as les
+  solutions sous les yeux et elles ne sont pas affichées ») : l'élément le plus
+  lent à s'afficher (sur sel-tech.fr, l'image de la carte Crillon), le partage
+  de son temps (réponse du serveur, attente, téléchargement, attente avant
+  l'affichage), et ce qu'il faut y changer (`fetchpriority="high"` absent,
+  `loading="lazy"` en trop). Sous chaque piste, les fichiers concernés. Les
+  pistes ne sont plus coupées à cinq et la liste est ouverte.
+- Tests : `TestParsePSIKeepsTheSolutions` (vraie réponse de PageSpeed pour
+  sel-tech.fr), `TestSpeedCardShowsTheSolutions`, tests de la vitesse mis à jour.
+
 ## 1.11.6 - 2026-11-27
 
 - **Plus de phrase répétée dans la vitesse** : sans données sur le terrain, la

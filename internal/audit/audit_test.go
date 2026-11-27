@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -458,5 +459,33 @@ func TestMailReportWithoutTranslationsDoesNotPanic(t *testing.T) {
 	s.mailReport(&Audit{ID: 1, URL: "https://example.com/"}, "a@example.com")
 	if m.sent != 1 {
 		t.Error("mail not sent with translations")
+	}
+}
+
+// The PageSpeed answer of sel-tech.fr (2026-11-27): the report must name the
+// LCP element (the Crillon card image), split its time, flag the missing
+// fetchpriority and list the files behind each advice.
+func TestParsePSIKeepsTheSolutions(t *testing.T) {
+	body, err := os.ReadFile("testdata/psi_seltech_mobile.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	run, err := ParsePSI(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	l := run.Lab.LCP
+	if l == nil || l.Label != "Piscine du Crillon" || !strings.Contains(l.Source, "crillon-carte") {
+		t.Fatalf("LCP element not named: %+v", l)
+	}
+	if !l.NoFetchPriority || len(l.Phases) != 4 {
+		t.Errorf("fetchpriority %v, phases %d", l.NoFetchPriority, len(l.Phases))
+	}
+	files := 0
+	for _, o := range run.Lab.Opportunities {
+		files += len(o.Files)
+	}
+	if files == 0 {
+		t.Error("no file listed under the advice")
 	}
 }

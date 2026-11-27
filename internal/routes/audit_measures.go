@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"math"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -45,12 +46,14 @@ type labView struct {
 	ScoreClass    string
 	Metrics       []metricView
 	Opportunities []opportunityView
+	LCP           *lcpView
 }
 
 type opportunityView struct {
 	Title  string
 	Key    string // plain wording of a known Lighthouse advice, when there is one
 	Saving string
+	Files  []string // file names Lighthouse lists for this advice
 }
 
 // psiAdvice gives the plain wording of the Lighthouse advice a business owner
@@ -118,10 +121,10 @@ func newSpeedRunView(r *audit.SpeedRun, lang string) *speedRunView {
 	if f := r.Field; f != nil {
 		v.HasField, v.FieldScope, v.Overall = true, r.FieldScope, ratingClass(f.Overall())
 		if f.LCP != nil {
-			v.Field = append(v.Field, metricView{Key: "AUDIT_SPEED_LCP", Value: seconds(f.LCP.P75, lang), Threshold: seconds(2500, lang), Class: ratingClass(f.LCP.Rating)})
+			v.Field = append(v.Field, metricView{Key: "AUDIT_SPEED_LCP_FIELD", Value: seconds(f.LCP.P75, lang), Threshold: seconds(2500, lang), Class: ratingClass(f.LCP.Rating)})
 		}
 		if f.INP != nil {
-			v.Field = append(v.Field, metricView{Key: "AUDIT_SPEED_INP", Value: millis(f.INP.P75), Threshold: millis(200), Class: ratingClass(f.INP.Rating)})
+			v.Field = append(v.Field, metricView{Key: "AUDIT_SPEED_INP_FIELD", Value: millis(f.INP.P75), Threshold: millis(200), Class: ratingClass(f.INP.Rating)})
 		}
 	}
 	if l := r.Lab; l != nil {
@@ -141,7 +144,14 @@ func newSpeedRunView(r *audit.SpeedRun, lang string) *speedRunView {
 			lv.Metrics = append(lv.Metrics, metricView{Key: "AUDIT_SPEED_LCP", Value: seconds(*l.LCPms, lang), Threshold: seconds(2500, lang), Class: ratingClass(audit.RateMetric("LCP", *l.LCPms))})
 		}
 		for _, o := range l.Opportunities {
-			lv.Opportunities = append(lv.Opportunities, opportunityView{Title: stripMarkdownLinks(o.Title), Key: psiAdvice[o.ID], Saving: seconds(float64(o.SavingMs), lang)})
+			lv.Opportunities = append(lv.Opportunities, opportunityView{Title: stripMarkdownLinks(o.Title), Key: psiAdvice[o.ID], Saving: seconds(float64(o.SavingMs), lang), Files: fileNames(o.Files)})
+		}
+		if e := l.LCP; e != nil {
+			ev := &lcpView{Label: e.Label, File: fileName(e.Source), NoFetchPriority: e.NoFetchPriority, LazyLoaded: e.LazyLoaded}
+			for _, ph := range e.Phases {
+				ev.Phases = append(ev.Phases, lcpPhaseView{Key: "AUDIT_SPEED_LCP_PHASE_" + ph.ID, Value: seconds(ph.Ms, lang)})
+			}
+			lv.LCP = ev
 		}
 		v.Lab = lv
 	}
@@ -440,4 +450,47 @@ func newPopView(p *audit.PopularityReport, lang string) *popView {
 		}
 	}
 	return v
+}
+
+// lcpView names the element that paints last and what to change on it
+// (sel-tech.fr, 2026-11-27: "tu as les solutions sous les yeux et elles ne
+// sont pas affichées").
+type lcpView struct {
+	Label           string
+	File            string
+	Phases          []lcpPhaseView
+	NoFetchPriority bool
+	LazyLoaded      bool
+}
+
+type lcpPhaseView struct {
+	Key   string
+	Value string
+}
+
+// fileName returns the last path segment of an address, decoded.
+func fileName(raw string) string {
+	if raw == "" {
+		return ""
+	}
+	u, err := url.Parse(raw)
+	if err != nil {
+		return raw
+	}
+	p := strings.TrimSuffix(u.Path, "/")
+	if i := strings.LastIndex(p, "/"); i >= 0 {
+		p = p[i+1:]
+	}
+	if p == "" {
+		return u.Host
+	}
+	return p
+}
+
+func fileNames(list []string) []string {
+	out := make([]string, 0, len(list))
+	for _, f := range list {
+		out = append(out, fileName(f))
+	}
+	return out
 }

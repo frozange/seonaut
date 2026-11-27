@@ -186,7 +186,10 @@
 	/* The two speed cards stack at full width: side by side, the real-visitor card (often one sentence)
 	   stood beside four tiles at a third of their height. The tiles fill their rows like the cards. */
 	.lfr-speed-cards { display: grid; gap: 20px; }
-	.lfr-speed-run + .lfr-speed-run { margin-top: 20px; }
+	.lfr-lcp { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--lfr-line, rgba(255,255,255,.08)); }
+	.lfr-lcp .lfr-small { overflow-wrap: anywhere; }
+	.lfr-do { margin-top: 10px; color: var(--lfr-strong); }
+	.lfr-files { display: block; margin-top: 4px; opacity: .75; overflow-wrap: anywhere; }
 	/* Side by side only when both cards hold tiles: a card with one sentence beside four tiles left half a column empty. */
 	@container lfr (min-width: 680px) {
 		.lfr-speed-cards:has(> .lfr-speed:first-child .lfr-metrics):has(> .lfr-speed + .lfr-speed .lfr-metrics) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -264,32 +267,29 @@
 {{ define "lfr_icon" }}{{ if eq . "good" }}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ else if or (eq . "partial") (eq . "mid") }}<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 2a6 6 0 010 12z" fill="currentColor"/></svg>{{ else if eq . "none" }}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>{{ else if eq . "info" }}<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 7v4M8 4.6v.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>{{ else }}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>{{ end }}{{ end }}
 
 {{ define "lfr_speed_run" }}
-		{{ if .Failed }}<div class="lfr-card lfr-speed-run"><p>{{ trans (print "AUDIT_SPEED_FAILED" .Device) }}</p></div>{{ else }}
-		<div class="lfr-speed-cards lfr-speed-run">
 		<div class="lfr-card lfr-speed">
-			<p class="lfr-kicker">{{ trans (print "AUDIT_SPEED_FIELD" .Device) }}</p>
-			{{ if .HasField }}
-			<p class="lfr-small">{{ if eq .FieldScope "site" }}{{ trans "AUDIT_SPEED_FIELD_SITE" }}{{ else }}{{ trans "AUDIT_SPEED_FIELD_PAGE" }}{{ end }}</p>
-			<div class="lfr-metrics">{{ range .Field }}{{ template "lfr_metric" . }}{{ end }}</div>
-			{{ else }}<p>{{ trans (print "AUDIT_SPEED_NO_FIELD" .Device) }}</p>{{ end }}
-		</div>
-		{{ with .Lab }}
-		<div class="lfr-card lfr-speed">
-			<p class="lfr-kicker">{{ trans (print "AUDIT_SPEED_LAB" $.Device) }}</p>
-			<p class="lfr-small">{{ trans (print "AUDIT_SPEED_LAB_HELP" $.Device) }}</p>
+			<p class="lfr-kicker">{{ trans (print "AUDIT_SPEED_DEVICE" .Device) }}</p>
+			{{ if .Failed }}<p>{{ trans "AUDIT_SPEED_FAILED" }}</p>{{ else }}
 			<div class="lfr-metrics">
-				{{ if .Score }}<div class="lfr-metric lfr-{{ .ScoreClass }}"><b>{{ .Score }}<small>/100</small></b><span>{{ trans "AUDIT_SPEED_SCORE" }}</span><span class="lfr-chip lfr-{{ .ScoreClass }}">{{ template "lfr_icon" .ScoreClass }}{{ trans (print "AUDIT_SPEED_RATING_" .ScoreClass) }}</span></div>{{ end }}
-				{{ range .Metrics }}{{ template "lfr_metric" . }}{{ end }}
+				{{ with .Lab }}{{ if .Score }}<div class="lfr-metric lfr-{{ .ScoreClass }}"><b>{{ .Score }}<small>/100</small></b><span>{{ trans "AUDIT_SPEED_SCORE" }}</span><span class="lfr-chip lfr-{{ .ScoreClass }}">{{ template "lfr_icon" .ScoreClass }}{{ trans (print "AUDIT_SPEED_RATING_" .ScoreClass) }}</span></div>{{ end }}
+				{{ range .Metrics }}{{ template "lfr_metric" . }}{{ end }}{{ end }}
+				{{ range .Field }}{{ template "lfr_metric" . }}{{ end }}
 			</div>
-			{{ if .Opportunities }}
-			<details class="lfr-more"><summary>{{ trans "AUDIT_SPEED_ADVICE" }} ({{ len .Opportunities }})</summary>
-				<ul class="lfr-rows">{{ range .Opportunities }}<li><span>{{ if .Key }}{{ trans .Key }}{{ else }}{{ .Title }}{{ end }}</span><span class="lfr-small">{{ trans "AUDIT_SPEED_SAVING" .Saving }}</span></li>{{ end }}</ul>
+			{{ with .Lab }}{{ with .LCP }}
+			<div class="lfr-lcp">
+				<p class="lfr-card-title">{{ trans "AUDIT_SPEED_LCP_EL" .Label }}</p>
+				{{ if .File }}<p class="lfr-small">{{ .File }}</p>{{ end }}
+				{{ if .Phases }}<ul class="lfr-rows">{{ range .Phases }}<li><span>{{ trans .Key }}</span><span class="lfr-small">{{ .Value }}</span></li>{{ end }}</ul>{{ end }}
+				{{ if .NoFetchPriority }}<p class="lfr-do">{{ trans "AUDIT_SPEED_LCP_FETCHPRIORITY" }}</p>{{ end }}
+				{{ if .LazyLoaded }}<p class="lfr-do">{{ trans "AUDIT_SPEED_LCP_LAZY" }}</p>{{ end }}
+			</div>
+			{{ end }}{{ if .Opportunities }}
+			<details class="lfr-more" open><summary>{{ trans "AUDIT_SPEED_ADVICE" }} ({{ len .Opportunities }})</summary>
+				<ul class="lfr-rows">{{ range .Opportunities }}<li><span>{{ if .Key }}{{ trans .Key }}{{ else }}{{ .Title }}{{ end }}{{ if .Files }}<small class="lfr-files">{{ range $i, $f := .Files }}{{ if $i }}, {{ end }}{{ $f }}{{ end }}</small>{{ end }}</span><span class="lfr-small">{{ trans "AUDIT_SPEED_SAVING" .Saving }}</span></li>{{ end }}</ul>
 			</details>
+			{{ end }}{{ end }}
 			{{ end }}
 		</div>
-		{{ end }}
-		</div>
-		{{ end }}
 {{ end }}
 {{ define "lfr_metric" }}<div class="lfr-metric lfr-{{ .Class }}"><b>{{ .Value }}</b><span>{{ trans .Key }}</span><span class="lfr-chip lfr-{{ .Class }}">{{ template "lfr_icon" .Class }}{{ trans (print "AUDIT_SPEED_RATING_" .Class) }}</span></div>{{ end }}
 
@@ -452,8 +452,10 @@
 	{{ with .Speed }}
 	<section class="lfr-sec">
 		<div class="lfr-sec-head"><div><h2>{{ trans "AUDIT_SPEED" }}</h2><p class="lfr-help">{{ trans "AUDIT_SPEED_HELP" }}</p></div></div>
+		<div class="lfr-speed-cards">
 		{{ with .Mobile }}{{ template "lfr_speed_run" . }}{{ end }}
 		{{ with .Desktop }}{{ template "lfr_speed_run" . }}{{ end }}
+		</div>
 	</section>
 	{{ end }}
 

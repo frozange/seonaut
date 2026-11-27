@@ -87,14 +87,21 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 		"Offre : il manque le prix", "(conseillé par Google)", "Fil d&#39;Ariane : une seule étape", "Commerce ou entreprise locale : format incorrect pour le prix, la note ou un avis",
 		"Recherches écartées (1)", "zzz inconnu", "Google propose plutôt : « zzz connu »", "4,0\u00a0s", "Proposée par Google", "« électrolyseur piscine »", "« pompe piscine prix »",
 		"Pages peu reliées : 9", "/p9 (fiche produit)", "Google n&#39;en publie aucune", "texte commun à 93 %", "Groupes de pages en double : 1",
-		"sur l&#39;ensemble du site", "Core Web Vitals sur mobile",
+		"Core Web Vitals sur mobile", "Vitesse mobile", "Vitesse bureau", "Largest Contentful Paint (LCP), visites réelles",
 	} {
 		if !strings.Contains(out, s) {
 			t.Errorf("missing %q", s)
 		}
 	}
-	if !strings.Contains(out, "La mesure de vitesse sur ordinateur n&#39;a pas abouti") {
+	if !strings.Contains(out, "Mesure indisponible ce jour-là.") {
 		t.Error("the failed desktop measurement must say so")
+	}
+	// Two cards, "Vitesse mobile" and "Vitesse bureau", without explanations
+	// (Francis, 2026-11-27: "vitesse mobile / bureau point final").
+	for _, s := range []string{"Données de laboratoire", "Données sur le terrain", "Lighthouse", "28 jours"} {
+		if strings.Contains(out, s) {
+			t.Errorf("explanation shown: %q", s)
+		}
 	}
 	// No CLS tile (Francis, 2026-11-27: "je ne veux pas le cls").
 	for _, s := range []string{"0,31", "Cumulative Layout Shift", "Total Blocking Time", "640\u00a0ms"} {
@@ -144,7 +151,7 @@ func TestDesktopSpeedShowsItsOwnTiles(t *testing.T) {
 	res.Speed.Desktop = &audit.SpeedRun{Lab: &audit.LabData{Score: &dScore, LCPms: &dLCP, CLS: &dCLS, TBTms: &dTBT}}
 	a := &audit.Audit{URL: "https://ex.com/", Status: audit.StatusDone, Result: res}
 	out := renderFR(t, "audit_fragment", &fragmentView{Report: newReportView(a, "fr", true)})
-	for _, s := range []string{"Données de laboratoire, ordinateur", "Données sur le terrain, ordinateur", "100<small>/100</small>", "0,8 s"} {
+	for _, s := range []string{"Vitesse mobile", "Vitesse bureau", "100<small>/100</small>", "0,8 s"} {
 		if !strings.Contains(out, s) {
 			t.Errorf("missing %q", s)
 		}
@@ -152,6 +159,22 @@ func TestDesktopSpeedShowsItsOwnTiles(t *testing.T) {
 	for _, s := range []string{"Cumulative Layout Shift", "Total Blocking Time"} {
 		if strings.Contains(out, s) {
 			t.Errorf("tile shown: %q", s)
+		}
+	}
+}
+
+// The speed card names the LCP element and what to change on it, and lists the
+// files behind each advice (sel-tech.fr, 2026-11-27: the Crillon card image).
+func TestSpeedCardShowsTheSolutions(t *testing.T) {
+	res := lotAResult()
+	res.Speed.Mobile.Lab.LCP = &audit.LCPElement{Label: "Piscine du Crillon", Source: "https://sel-tech.fr/wp-content/uploads/2026/11/crillon-carte.webp",
+		Phases: []audit.LCPPhase{{ID: "elementRenderDelay", Ms: 1076}}, NoFetchPriority: true}
+	res.Speed.Mobile.Lab.Opportunities[0].Files = []string{"https://sel-tech.fr/wp-content/uploads/2026/11/molitor-cadre-1215x476.webp"}
+	a := &audit.Audit{URL: "https://ex.com/", Status: audit.StatusDone, Result: res}
+	out := renderFR(t, "audit_fragment", &fragmentView{Report: newReportView(a, "fr", true)})
+	for _, s := range []string{"Piscine du Crillon", "crillon-carte.webp", "Attente avant l&#39;affichage", "fetchpriority=", "molitor-cadre-1215x476.webp"} {
+		if !strings.Contains(out, s) {
+			t.Errorf("missing %q", s)
 		}
 	}
 }
