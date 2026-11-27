@@ -3,6 +3,22 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.12.7 - 2026-11-27
+
+Cinquième relecture du rapport de sel-tech.fr (audit 35).
+
+- **Une redite dite autrement est aussi retirée** : une phrase qui reprend au
+  moins cinq mots principaux et plus du tiers des siens d'une phrase déjà dite
+  (le formulaire de devis « ville, type de projet, surface » ; les titles de la
+  priorité et des cartes de recherche).
+- **Une carte de critère dont le verdict est une redite n'est pas affichée** ; la
+  rubrique dit que ses autres points sont traités plus haut, dans les priorités
+  ou dans ce qui fonctionne déjà. Une carte sans verdict montre son analyse
+  dépliée.
+- **Détail technique** : une flèche (▸, ▾) au lieu de « + » et « − », lu comme un
+  tiret.
+- Test : `TestRepeatedCardIsNotShown`.
+
 ## 1.12.6 - 2026-11-27
 
 Quatrième relecture du rapport de sel-tech.fr (audit 35).

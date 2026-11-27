@@ -144,8 +144,8 @@
 	.lfr-issue summary { cursor: pointer; list-style: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 34%) auto; gap: 8px 20px; align-items: center; padding: 16px 0; }
 	.lfr-issue summary::-webkit-details-marker { display: none; }
 	.lfr-issue .name { color: var(--lfr-strong); }
-	.lfr-issue .name::after { content: "\00a0+"; color: var(--lfr-muted); }
-	.lfr-issue[open] .name::after { content: "\00a0−"; }
+	.lfr-issue .name::after { content: "\00a0▸"; color: var(--lfr-muted); }
+	.lfr-issue[open] .name::after { content: "\00a0▾"; }
 	.lfr-bar { height: 8px; border-radius: 4px; background: var(--lfr-line); overflow: hidden; }
 	.lfr-bar i { display: block; height: 100%; border-radius: 4px; background: var(--lfr-c); }
 	.lfr-issue .count { font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); white-space: nowrap; text-align: right; }
@@ -319,7 +319,7 @@
 		<span class="lfr-chip {{ template "lfr_rating_class" .Rating }}">{{ template "lfr_icon" .Rating }}{{ trans (print "AUDIT_RATING_" .Rating) }}</span>
 		<h5>{{ trans (print "AUDIT_CRITERION_" .Question) }}</h5>
 		{{ if .Verdict }}<p class="verdict">{{ .Verdict }}</p>{{ end }}
-		{{ if .Detail }}<details class="lfr-more"><summary>{{ trans "AUDIT_SHOW_DETAIL" }}</summary><p>{{ .Detail }}</p></details>{{ end }}
+		{{ if .Detail }}{{ if .Verdict }}<details class="lfr-more"><summary>{{ trans "AUDIT_SHOW_DETAIL" }}</summary><p>{{ .Detail }}</p></details>{{ else }}<p>{{ .Detail }}</p>{{ end }}{{ end }}
 	</article>
 	{{ end }}
 </div>
@@ -537,23 +537,25 @@
 	{{ end }}
 	</div>{{ end }}
 
-	{{ if .Copywriting }}
+	{{ if .CopyMix.Total }}
 	<section class="lfr-sec">
 		<div class="lfr-sec-head">
 			<div><h2>{{ trans "AUDIT_COPYWRITING" }}</h2><p class="lfr-help">{{ trans "AUDIT_COPYWRITING_HELP" }}</p></div>
 			{{ template "lfr_mix" .CopyMix }}
 		</div>
-		{{ template "lfr_criteria" .Copywriting }}
+		{{ if .Copywriting }}{{ template "lfr_criteria" .Copywriting }}{{ end }}
+		{{ if .CopyInPriorities }}<p class="lfr-small lfr-note">{{ if eq .CopyInPriorities 1 }}{{ trans "AUDIT_IN_PRIORITIES_ONE" }}{{ else }}{{ trans "AUDIT_IN_PRIORITIES" .CopyInPriorities }}{{ end }}</p>{{ end }}
 	</section>
 	{{ end }}
 
-	{{ if .Content }}
+	{{ if .ContentMix.Total }}
 	<section class="lfr-sec">
 		<div class="lfr-sec-head">
 			<div><h2>{{ trans "AUDIT_CONTENT" }}</h2><p class="lfr-help">{{ trans "AUDIT_CONTENT_HELP" }}</p></div>
 			{{ template "lfr_mix" .ContentMix }}
 		</div>
-		{{ template "lfr_criteria" .Content }}
+		{{ if .Content }}{{ template "lfr_criteria" .Content }}{{ end }}
+		{{ if .ContentInPriorities }}<p class="lfr-small lfr-note">{{ if eq .ContentInPriorities 1 }}{{ trans "AUDIT_IN_PRIORITIES_ONE" }}{{ else }}{{ trans "AUDIT_IN_PRIORITIES" .ContentInPriorities }}{{ end }}</p>{{ end }}
 	</section>
 	{{ end }}
 

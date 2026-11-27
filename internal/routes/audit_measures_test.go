@@ -245,3 +245,20 @@ func TestSpeedNamesAndOnceOnly(t *testing.T) {
 		t.Errorf("slowest element said %d times", n)
 	}
 }
+
+// A criterion card whose verdict was already said higher up is not shown, and
+// the section says where its other points are.
+func TestRepeatedCardIsNotShown(t *testing.T) {
+	res := lotAResult()
+	res.AI = &audit.AIReport{Summary: "La demande de devis et le téléphone sont visibles sur chaque page du site.",
+		Criteria: []audit.Criterion{{ID: "contact", Group: "copywriting", Question: "contact", Rating: "good",
+			Verdict: "La demande de devis et le téléphone sont visibles sur chaque page.", Detail: "L'adresse est aussi donnée."}}}
+	a := &audit.Audit{URL: "https://ex.com/", Status: audit.StatusDone, Result: res}
+	out := renderFR(t, "audit_fragment", &fragmentView{Report: newReportView(a, "fr", true)})
+	if strings.Contains(out, "L&#39;adresse est aussi donnée") {
+		t.Error("repeated card shown")
+	}
+	if !strings.Contains(out, "traité plus haut") {
+		t.Error("the section does not say where the point is")
+	}
+}

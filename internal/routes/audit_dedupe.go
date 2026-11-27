@@ -75,7 +75,10 @@ func (s *sayings) repeats(sentence string) bool {
 				n++
 			}
 		}
-		if float64(n)/float64(len(w)) >= dupShare {
+		share := float64(n) / float64(len(w))
+		// Same words, or the same handful of specific words told otherwise
+		// ("ville, type de projet, surface" of the quote form, sel-tech.fr).
+		if share >= dupShare || (n >= 5 && share >= 0.35) {
 			return true
 		}
 	}

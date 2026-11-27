@@ -178,6 +178,8 @@ type reportView struct {
 	Hygiene    []issueRow
 	IssueTypes int  // critical, alert and warning types found
 	OneLevel   bool // every priority has the same level
+	// Criteria of each section shown as priorities rather than as cards.
+	CopyInPriorities, ContentInPriorities int
 	// PriorityDetail holds the analysis of a criterion shown as a priority.
 	PriorityDetail map[string]string
 	HasAI          bool
@@ -410,9 +412,16 @@ func newReportView(a *audit.Audit, lang string, embed bool) *reportView {
 			} else {
 				allContent = append(allContent, c)
 			}
-			if inPriorities[c.ID] {
-				if c.Detail != "" {
-					v.PriorityDetail["e:"+c.ID] = c.Detail
+			if inPriorities[c.ID] && c.Detail != "" {
+				v.PriorityDetail["e:"+c.ID] = c.Detail
+			}
+			// Shown higher up: as a priority, or everything it says (its
+			// verdict first) was already said by the summary or the strengths.
+			if inPriorities[c.ID] || c.Verdict == "" {
+				if c.Group == "copywriting" {
+					v.CopyInPriorities++
+				} else {
+					v.ContentInPriorities++
 				}
 				continue
 			}
