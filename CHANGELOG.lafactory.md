@@ -3,6 +3,19 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.11.0 - 2026-11-27
+
+- **Audits lancés depuis lafactory.com par un membre connecté** : nouvelle route
+  `POST /audit/relay`, appelée par le plugin `lf-audit` côté serveur, jamais par
+  le navigateur. Le visiteur ne voit que lafactory.com : il se connecte ou crée
+  son compte WordPress, et le site transmet l'adresse à auditer avec son e-mail.
+  Le compte remplace Turnstile ; la limite par adresse IP (celle du membre), la
+  garde réseau et les quotas du formulaire s'appliquent comme avant. Un
+  administrateur du site lance ses audits sans quota, comme avec `auditctl`.
+- Route fermée tant que `[audit] relay_secret` (32 caractères au moins) n'est pas
+  posé ; le secret voyage dans l'en-tête `X-LF-Relay-Auth`, en plus de l'en-tête
+  d'origine.
+
 ## 1.10.9 - 2026-11-26
 
 Passe aux huit largeurs (390 à 2560 px, Chromium et WebKit) sur la 1.10.8.

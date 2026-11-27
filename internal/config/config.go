@@ -138,6 +138,12 @@ type AuditConfig struct {
 	// here, at /rapport/{token}.
 	ReportURL string `mapstructure:"report_url"`
 
+	// RelaySecret lets the main site queue audits for its signed-in members
+	// (POST /audit/relay with the X-LF-Relay-Auth header): the member's account
+	// stands in for Turnstile, every other check of the form still applies. At
+	// least 32 characters; empty disables the route.
+	RelaySecret string `mapstructure:"relay_secret"`
+
 	KeyPages            int  `mapstructure:"key_pages"`
 	MaxPages            int  `mapstructure:"max_pages"` // pages per audit crawl
 	DailyCap            int  `mapstructure:"daily_cap"`
