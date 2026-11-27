@@ -189,7 +189,8 @@
 	.lfr-lcp { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--lfr-line, rgba(255,255,255,.08)); }
 	.lfr-lcp .lfr-small { overflow-wrap: anywhere; }
 	.lfr-do { margin-top: 10px; color: var(--lfr-strong); }
-	.lfr-files { display: block; margin-top: 4px; opacity: .75; overflow-wrap: anywhere; }
+	.lfr-rows > li.lfr-opp { flex-wrap: wrap; }
+	.lfr-files { display: block; flex: 0 0 100%; margin-top: 4px; opacity: .75; overflow-wrap: anywhere; }
 	/* Side by side only when both cards hold tiles: a card with one sentence beside four tiles left half a column empty. */
 	@container lfr (min-width: 680px) {
 		.lfr-speed-cards:has(> .lfr-speed:first-child .lfr-metrics):has(> .lfr-speed + .lfr-speed .lfr-metrics) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -284,7 +285,7 @@
 			</div>
 			{{ end }}{{ if .Opportunities }}
 			<details class="lfr-more" open><summary>{{ trans "AUDIT_SPEED_ADVICE" }} ({{ len .Opportunities }})</summary>
-				<ul class="lfr-rows">{{ range .Opportunities }}<li><span>{{ if .Key }}{{ trans .Key }}{{ else }}{{ .Title }}{{ end }}{{ if .Files }}<small class="lfr-files">{{ range $i, $f := .Files }}{{ if $i }}, {{ end }}{{ $f }}{{ end }}</small>{{ end }}</span><span class="lfr-small">{{ trans "AUDIT_SPEED_SAVING" .Saving }}</span></li>{{ end }}</ul>
+				<ul class="lfr-rows">{{ range .Opportunities }}<li class="lfr-opp"><span>{{ if .Key }}{{ trans .Key }}{{ else }}{{ .Title }}{{ end }}</span><span class="lfr-small">{{ trans "AUDIT_SPEED_SAVING" .Saving }}</span>{{ if .Files }}<small class="lfr-files">{{ range $i, $f := .Files }}{{ if $i }}, {{ end }}{{ $f }}{{ end }}</small>{{ end }}</li>{{ end }}</ul>
 			</details>
 			{{ end }}{{ end }}
 			{{ end }}
@@ -317,7 +318,7 @@
 	<article class="lfr-card lfr-crit">
 		<span class="lfr-chip {{ template "lfr_rating_class" .Rating }}">{{ template "lfr_icon" .Rating }}{{ trans (print "AUDIT_RATING_" .Rating) }}</span>
 		<h5>{{ trans (print "AUDIT_CRITERION_" .Question) }}</h5>
-		<p class="verdict">{{ .Verdict }}</p>
+		{{ if .Verdict }}<p class="verdict">{{ .Verdict }}</p>{{ end }}
 		{{ if .Detail }}<details class="lfr-more"><summary>{{ trans "AUDIT_SHOW_DETAIL" }}</summary><p>{{ .Detail }}</p></details>{{ end }}
 	</article>
 	{{ end }}
@@ -371,15 +372,15 @@
 	<section class="lfr-sec">
 		<div class="lfr-sec-head">
 			<h2>{{ trans "AUDIT_PRIORITIES" }}</h2>
-			<div class="lfr-mix" role="img" aria-label="{{ range .Levels }}{{ trans (print "AUDIT_LEVEL_" .Level) }} {{ .Count }}. {{ end }}">
+			{{ if not $.OneLevel }}<div class="lfr-mix" role="img" aria-label="{{ range .Levels }}{{ trans (print "AUDIT_LEVEL_" .Level) }} {{ .Count }}. {{ end }}">
 				<div class="lfr-stack">{{ range .Levels }}<i class="{{ if eq .Level 1 }}lfr-low{{ else if eq .Level 2 }}lfr-mid{{ else }}lfr-info{{ end }}" style="flex: {{ .Count }}"></i>{{ end }}</div>
 				<div class="lfr-legend" aria-hidden="true">{{ range .Levels }}<span class="{{ if eq .Level 1 }}lfr-low{{ else if eq .Level 2 }}lfr-mid{{ else }}lfr-info{{ end }}">{{ trans (print "AUDIT_LEVEL_" .Level) }} <b>{{ .Count }}</b></span>{{ end }}</div>
-			</div>
+			</div>{{ end }}
 		</div>
 		<ol class="lfr-prio">
 			{{ range .Result.Priorities }}
 			<li><div class="lfr-card">
-				{{ template "lfr_level_chip" .Level }}
+				{{ if not $.OneLevel }}{{ template "lfr_level_chip" .Level }}{{ end }}
 				<h4>{{ if eq .Source "technical" }}{{ trans .Title }}{{ else }}{{ .Title }}{{ end }}</h4>
 				{{ if .Pages }}<p class="lfr-meta">{{ template "lfr_pages" .Pages }}</p>{{ end }}
 				{{ if .Impact }}<p>{{ .Impact }}</p>{{ else if eq .Source "technical" }}<p>{{ trans (print .Title "_DESC") }}</p>{{ end }}
@@ -601,7 +602,6 @@
 			{{ if .Speed }}<p>{{ trans "AUDIT_METHOD_SPEED" }}</p>{{ end }}
 			{{ if .Structured }}<p>{{ trans "AUDIT_METHOD_SD" }}</p>{{ end }}
 			{{ if .Pop }}<p>{{ trans "AUDIT_METHOD_POP" }}</p>{{ end }}
-			{{ if .Linking }}<p>{{ trans "AUDIT_METHOD_LINKS" }}</p>{{ end }}
 			{{ if .Dups }}<p>{{ trans "AUDIT_METHOD_DUPS" }}</p>{{ end }}
 			{{ if .Checked }}<p>{{ trans "AUDIT_METHOD_SUGGEST" }}</p>{{ end }}
 			{{ if .HasAI }}<p>{{ trans "AUDIT_METHOD_AI" }}</p>{{ end }}

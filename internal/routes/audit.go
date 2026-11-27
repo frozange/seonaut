@@ -176,7 +176,8 @@ type reportView struct {
 	Alerts      []issueRow
 	Warnings    []issueRow
 	Hygiene     []issueRow
-	IssueTypes  int // critical, alert and warning types found
+	IssueTypes  int  // critical, alert and warning types found
+	OneLevel    bool // every priority has the same level
 	HasAI       bool
 	ContactURL  string
 	SampleNote  bool
@@ -252,6 +253,15 @@ func formatScore(v *float64, lang string) scoreCard {
 func newIssueRows(list []audit.IssueSummary, read int) []issueRow {
 	rows := make([]issueRow, 0, len(list))
 	for _, is := range list {
+		// Addresses shown as people read them: "5000m²", not "5000m%c2%b2".
+		ex := make([]string, len(is.Examples))
+		for i, e := range is.Examples {
+			if dec, err := url.PathUnescape(e); err == nil {
+				e = dec
+			}
+			ex[i] = e
+		}
+		is.Examples = ex
 		pct := 100
 		if read > 0 {
 			pct = is.Pages * 100 / read
@@ -370,9 +380,24 @@ func newReportView(a *audit.Audit, lang string, embed bool) *reportView {
 			v.Levels = append(v.Levels, levelCount{Level: l, Count: counts[l]})
 		}
 	}
+	// A bar and a chip that all say the same level tell nothing
+	// (sel-tech.fr, 2026-11-27: "Pour finir" on all six priorities).
+	v.OneLevel = len(v.Levels) == 1
 
 	if res.AI != nil {
+		// A criterion that is also a priority ("e:<id>") already shows its
+		// verdict there: the card keeps its question, rating and analysis
+		// (sel-tech.fr, 2026-11-27: four priorities repeated word for word).
+		inPriorities := map[string]bool{}
+		for _, p := range res.Priorities {
+			if id, ok := strings.CutPrefix(p.ID, "e:"); ok {
+				inPriorities[id] = true
+			}
+		}
 		for _, c := range res.AI.Criteria {
+			if inPriorities[c.ID] {
+				c.Verdict = ""
+			}
 			if c.Group == "copywriting" {
 				v.Copywriting = append(v.Copywriting, c)
 			} else {

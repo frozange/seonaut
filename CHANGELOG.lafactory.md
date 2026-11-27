@@ -3,6 +3,22 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.12.3 - 2026-11-27
+
+Relecture indépendante du rapport de sel-tech.fr (audit 34).
+
+- **Plus de verdict répété** : un critère de rédaction qui est aussi une priorité
+  (`e:<id>`) ne redit pas sa phrase dans sa carte ; la carte garde la question,
+  la note et l'analyse. Quatre priorités sur six étaient répétées mot pour mot.
+- **Pas d'étiquette de niveau quand toutes les priorités ont le même** : ni barre
+  ni légende, ni « Pour finir » sur chaque carte.
+- **Liens entre vos pages** : le chapeau n'annonce plus une note de 0 à 100 qui
+  n'est pas affichée, et la méthode ne l'explique plus.
+- **Adresses lisibles** dans le détail technique (`5000m²`, pas `5000m%c2%b2`).
+- **Vitesse sur téléphone** : les fichiers d'une piste passent sur toute la
+  largeur, sous la piste et son gain.
+- Test : `TestReportHasNoRepeatsNorEmptyLabels`.
+
 ## 1.12.2 - 2026-11-27
 
 - **Nom complet du fichier le plus lent** : Lighthouse abrège l'adresse dans son

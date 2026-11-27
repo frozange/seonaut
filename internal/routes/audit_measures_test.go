@@ -86,7 +86,7 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 		"1,8\u00a0s", "134\u00a0ms", "Indice PageSpeed", "46", "Réduisez le JavaScript inutilisé", "jusqu&#39;à 0,9\u00a0s à gagner", "Fichiers de style et scripts qui retardent l&#39;affichage de la page",
 		"Offre : il manque le prix", "(conseillé par Google)", "Fil d&#39;Ariane : une seule étape", "Commerce ou entreprise locale : format incorrect pour le prix, la note ou un avis",
 		"Recherches écartées (1)", "zzz inconnu", "Google propose plutôt : « zzz connu »", "4,0\u00a0s", "Proposée par Google", "« électrolyseur piscine »", "« pompe piscine prix »",
-		"Pages peu reliées : 9", "/p9 (fiche produit)", "Google n&#39;en publie aucune", "texte commun à 93 %", "Groupes de pages en double : 1",
+		"Pages peu reliées : 9", "/p9 (fiche produit)", "texte commun à 93 %", "Groupes de pages en double : 1",
 		"Core Web Vitals sur mobile", "Vitesse mobile", "Vitesse bureau", "Largest Contentful Paint (LCP), visites réelles",
 	} {
 		if !strings.Contains(out, s) {
@@ -197,5 +197,30 @@ func TestBacklinksShowTheSiteRank(t *testing.T) {
 	}
 	if strings.Contains(out, "centralité") {
 		t.Error("jargon shown")
+	}
+}
+
+// Review of 2026-11-27 (sel-tech.fr, audit 34): no priority verdict repeated in
+// its criterion card, no level label when all priorities share one, no
+// announced 0-100 link score that is not shown, readable addresses.
+func TestReportHasNoRepeatsNorEmptyLabels(t *testing.T) {
+	res := lotAResult()
+	verdict := "La page piscine part des soucis du client."
+	res.AI = &audit.AIReport{Criteria: []audit.Criterion{{ID: "customer", Group: "copywriting", Question: "customer", Rating: "partial", Verdict: verdict, Detail: "Analyse."}}}
+	res.Priorities = []audit.Priority{{ID: "e:customer", Level: 3, Source: "editorial", Title: verdict}}
+	res.Issues = append(res.Issues, audit.IssueSummary{Type: "ERROR_EMPTY_DESCRIPTION", Priority: 2, Pages: 1, Examples: []string{"https://ex.com/parking-5000m%c2%b2/"}})
+	a := &audit.Audit{URL: "https://ex.com/", Status: audit.StatusDone, Result: res}
+	out := renderFR(t, "audit_fragment", &fragmentView{Report: newReportView(a, "fr", true)})
+	if n := strings.Count(out, verdict); n != 1 {
+		t.Errorf("verdict shown %d times, want once", n)
+	}
+	if strings.Contains(out, "Pour finir") {
+		t.Error("level label shown though every priority has the same level")
+	}
+	if strings.Contains(out, "de 0 à 100") {
+		t.Error("a link score is announced but not shown")
+	}
+	if !strings.Contains(out, "parking-5000m²") || strings.Contains(out, "%c2%b2") {
+		t.Error("example address not decoded")
 	}
 }
