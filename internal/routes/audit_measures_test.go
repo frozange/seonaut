@@ -97,7 +97,7 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 		t.Error("the failed desktop measurement must say so")
 	}
 	// No CLS tile (Francis, 2026-11-27: "je ne veux pas le cls").
-	for _, s := range []string{"0,31", "Cumulative Layout Shift"} {
+	for _, s := range []string{"0,31", "Cumulative Layout Shift", "Total Blocking Time", "640\u00a0ms"} {
 		if strings.Contains(out, s) {
 			t.Errorf("CLS shown: %q", s)
 		}
@@ -149,7 +149,9 @@ func TestDesktopSpeedShowsItsOwnTiles(t *testing.T) {
 			t.Errorf("missing %q", s)
 		}
 	}
-	if strings.Contains(out, "Cumulative Layout Shift") {
-		t.Error("CLS shown")
+	for _, s := range []string{"Cumulative Layout Shift", "Total Blocking Time"} {
+		if strings.Contains(out, s) {
+			t.Errorf("tile shown: %q", s)
+		}
 	}
 }

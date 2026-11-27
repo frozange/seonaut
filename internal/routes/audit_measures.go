@@ -20,7 +20,8 @@ type speedView struct {
 	Desktop *speedRunView
 }
 
-// The report shows no CLS tile (Francis, 2026-11-27: "je ne veux pas le cls");
+// The report shows no CLS and no Total Blocking Time tile (Francis, 2026-11-27:
+// "je ne veux pas le cls", "tu as laissé le cls à 0ms");
 // Google's overall field rating still includes it.
 type speedRunView struct {
 	Device     string // translation key suffix: "" for mobile, "_DESKTOP"
@@ -138,15 +139,6 @@ func newSpeedRunView(r *audit.SpeedRun, lang string) *speedRunView {
 		}
 		if l.LCPms != nil {
 			lv.Metrics = append(lv.Metrics, metricView{Key: "AUDIT_SPEED_LCP", Value: seconds(*l.LCPms, lang), Threshold: seconds(2500, lang), Class: ratingClass(audit.RateMetric("LCP", *l.LCPms))})
-		}
-		if l.TBTms != nil {
-			c := "good"
-			if *l.TBTms > 600 {
-				c = "low"
-			} else if *l.TBTms > 200 {
-				c = "mid"
-			}
-			lv.Metrics = append(lv.Metrics, metricView{Key: "AUDIT_SPEED_TBT", Value: millis(*l.TBTms), Threshold: millis(200), Class: c})
 		}
 		for _, o := range l.Opportunities {
 			lv.Opportunities = append(lv.Opportunities, opportunityView{Title: stripMarkdownLinks(o.Title), Key: psiAdvice[o.ID], Saving: seconds(float64(o.SavingMs), lang)})

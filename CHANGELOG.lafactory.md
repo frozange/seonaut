@@ -3,6 +3,13 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.11.5 - 2026-11-27
+
+- **Plus de tuile « 0 ms »** (Francis : « tu as laissé le cls à 0ms ») : la
+  tuile Total Blocking Time disparaît, en mobile comme en ordinateur, et l'IA
+  n'en parle plus. Restent l'indice PageSpeed et le LCP en laboratoire, le LCP
+  et l'INP sur le terrain.
+
 ## 1.11.4 - 2026-11-27
 
 - **La vitesse sur ordinateur a ses propres cartes et tuiles** (Francis :
