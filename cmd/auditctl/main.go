@@ -90,6 +90,13 @@ func main() {
 	if m, err := services.NewMailer(cfg.Mail); err == nil {
 		svc.Mailer = m
 	}
+	// The report mail is written from the translations: without them the
+	// reused-report path crashed (sel-tech.fr, 2026-11-27).
+	if t, err := services.NewTranslator("translations", cfg.UIConfig.Language); err == nil {
+		svc.Trans = t.Trans
+	} else {
+		log.Printf("translations: %v (no report mail)", err)
+	}
 
 	switch args[0] {
 	case "request":

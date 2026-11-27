@@ -440,3 +440,23 @@ func TestFixedFactsOverrideTheAI(t *testing.T) {
 		t.Errorf("impact = %q", res.Priorities[0].Impact)
 	}
 }
+
+type recordMailer struct{ sent int }
+
+func (m *recordMailer) Send(to, subject, body string) error { m.sent++; return nil }
+
+// auditctl built a Service without translations and the reused-report mail
+// panicked on a nil Trans (sel-tech.fr, 2026-11-27).
+func TestMailReportWithoutTranslationsDoesNotPanic(t *testing.T) {
+	m := &recordMailer{}
+	s := &Service{Mailer: m}
+	s.mailReport(&Audit{ID: 1, URL: "https://example.com/"}, "a@example.com")
+	if m.sent != 0 {
+		t.Error("mail sent without a text")
+	}
+	s.Trans = func(lang, key string, args ...interface{}) string { return key }
+	s.mailReport(&Audit{ID: 1, URL: "https://example.com/"}, "a@example.com")
+	if m.sent != 1 {
+		t.Error("mail not sent with translations")
+	}
+}

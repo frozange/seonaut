@@ -474,6 +474,10 @@ func (s *Service) mailReport(a *Audit, to string) {
 	if s.Mailer == nil {
 		return
 	}
+	if s.Trans == nil {
+		log.Printf("audit %d: report mail not sent: no translations loaded", a.ID)
+		return
+	}
 	u, _ := url.Parse(a.URL)
 	subject := s.Trans(a.Lang, "AUDIT_MAIL_SUBJECT", u.Host)
 	body := s.Trans(a.Lang, "AUDIT_MAIL_BODY", u.Host, s.ReportURL(a))

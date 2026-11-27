@@ -3,6 +3,14 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.11.3 - 2026-11-27
+
+- **`auditctl request` sur un rapport récent ne plante plus** : il renvoie le
+  lien du rapport existant par courriel, mais `auditctl` ne chargeait pas les
+  traductions qui écrivent ce courriel (panique sur un traducteur nul,
+  sel-tech.fr). Il les charge, et sans elles le service journalise au lieu de
+  planter. Test : `TestMailReportWithoutTranslationsDoesNotPanic`.
+
 ## 1.11.2 - 2026-11-27
 
 - **Un nombre arrondi en lettres est un chiffre comme un autre** : l'IA écrivait
