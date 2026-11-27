@@ -3,6 +3,20 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.11.4 - 2026-11-27
+
+- **La vitesse sur ordinateur a ses propres cartes et tuiles** (Francis :
+  « pourquoi tu as retiré les autres chiffres version desk ? ») : depuis la
+  1.7.0, l'ordinateur tenait en une phrase sous la section (« Sur ordinateur,
+  l'indice PageSpeed est de 100 sur 100 »). Il a maintenant, comme le mobile,
+  une carte « Données sur le terrain, ordinateur » et une carte « Données de
+  laboratoire, ordinateur » avec l'indice PageSpeed, le LCP, le TBT et les
+  pistes d'amélioration. Une mesure ratée le dit dans sa carte.
+- **Plus de CLS dans le rapport** (Francis : « je ne veux pas le cls ») : ni
+  tuile sur le terrain, ni tuile de laboratoire, et l'IA n'en parle plus. La
+  note d'ensemble des données sur le terrain reste celle de Google.
+- Tests : `TestDesktopSpeedShowsItsOwnTiles`, `TestLotASectionsRenderInFrench`.
+
 ## 1.11.3 - 2026-11-27
 
 - **`auditctl request` sur un rapport récent ne plante plus** : il renvoie le

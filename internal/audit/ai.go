@@ -139,7 +139,7 @@ const styleRules = `Writing rules for every text you produce:
   titre" (the title shown in the results), "meta description", "extrait" (the text under the title in the results),
   "URL canonique", "pages en double", "sitemap", "redirection", "versions linguistiques", "données structurées",
   "Core Web Vitals", "données sur le terrain", "données de laboratoire", "indice PageSpeed", and the metric names
-  Largest Contentful Paint (LCP), Interaction to Next Paint (INP), Cumulative Layout Shift (CLS). Never "titre Google",
+  Largest Contentful Paint (LCP), Interaction to Next Paint (INP). Never "titre Google",
   "description Google", "plan du site", "version principale", "note de la simulation".
 - One finding, one place. A fact stated in the summary, a priority or a criterion is not stated again elsewhere in other
   words: the other sections refer to it or say nothing. Never write the same sentence twice in the report.
@@ -147,6 +147,7 @@ const styleRules = `Writing rules for every text you produce:
   (no canonical, sitemap or duplicate description inside a criterion), and a criterion verdict speaks of its own question only.
 - The advice of a finding lives in its "what to do" only. A criterion analysis does not end with the same advice again,
   and two pieces of advice about the same thing never disagree.
+- Never mention the Cumulative Layout Shift (CLS) or layout stability measure: the report does not show it.
 - A count is written as the exact number found in the evidence, never rounded into a word ("une trentaine", "une
   dizaine", "des centaines"): 26 projects are "26 chantiers". Without an exact count, name the items and give no quantity.
 - Do not hedge with the reading method ("in the pages read", "in the extracts read"): state what was found once, plainly

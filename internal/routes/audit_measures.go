@@ -20,7 +20,10 @@ type speedView struct {
 	Desktop *speedRunView
 }
 
+// The report shows no CLS tile (Francis, 2026-11-27: "je ne veux pas le cls");
+// Google's overall field rating still includes it.
 type speedRunView struct {
+	Device     string // translation key suffix: "" for mobile, "_DESKTOP"
 	Failed     bool
 	HasField   bool
 	FieldScope string // page or site
@@ -96,7 +99,11 @@ func newSpeedView(s *audit.SpeedReport, lang string) *speedView {
 	if s == nil {
 		return nil
 	}
-	return &speedView{Mobile: newSpeedRunView(s.Mobile, lang), Desktop: newSpeedRunView(s.Desktop, lang)}
+	v := &speedView{Mobile: newSpeedRunView(s.Mobile, lang), Desktop: newSpeedRunView(s.Desktop, lang)}
+	if v.Desktop != nil {
+		v.Desktop.Device = "_DESKTOP"
+	}
+	return v
 }
 
 func newSpeedRunView(r *audit.SpeedRun, lang string) *speedRunView {
@@ -114,9 +121,6 @@ func newSpeedRunView(r *audit.SpeedRun, lang string) *speedRunView {
 		}
 		if f.INP != nil {
 			v.Field = append(v.Field, metricView{Key: "AUDIT_SPEED_INP", Value: millis(f.INP.P75), Threshold: millis(200), Class: ratingClass(f.INP.Rating)})
-		}
-		if f.CLS != nil {
-			v.Field = append(v.Field, metricView{Key: "AUDIT_SPEED_CLS", Value: decimal(f.CLS.P75, 2, lang), Threshold: decimal(0.1, 2, lang), Class: ratingClass(f.CLS.Rating)})
 		}
 	}
 	if l := r.Lab; l != nil {
@@ -143,9 +147,6 @@ func newSpeedRunView(r *audit.SpeedRun, lang string) *speedRunView {
 				c = "mid"
 			}
 			lv.Metrics = append(lv.Metrics, metricView{Key: "AUDIT_SPEED_TBT", Value: millis(*l.TBTms), Threshold: millis(200), Class: c})
-		}
-		if l.CLS != nil {
-			lv.Metrics = append(lv.Metrics, metricView{Key: "AUDIT_SPEED_CLS", Value: decimal(*l.CLS, 2, lang), Threshold: decimal(0.1, 2, lang), Class: ratingClass(audit.RateMetric("CLS", *l.CLS))})
 		}
 		for _, o := range l.Opportunities {
 			lv.Opportunities = append(lv.Opportunities, opportunityView{Title: stripMarkdownLinks(o.Title), Key: psiAdvice[o.ID], Saving: seconds(float64(o.SavingMs), lang)})

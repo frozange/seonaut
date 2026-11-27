@@ -83,7 +83,7 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 		last = i
 	}
 	for _, s := range []string{
-		"1,8\u00a0s", "134\u00a0ms", "0,31", "Indice PageSpeed", "46", "Réduisez le JavaScript inutilisé", "jusqu&#39;à 0,9\u00a0s à gagner", "Fichiers de style et scripts qui retardent l&#39;affichage de la page",
+		"1,8\u00a0s", "134\u00a0ms", "Indice PageSpeed", "46", "Réduisez le JavaScript inutilisé", "jusqu&#39;à 0,9\u00a0s à gagner", "Fichiers de style et scripts qui retardent l&#39;affichage de la page",
 		"Offre : il manque le prix", "(conseillé par Google)", "Fil d&#39;Ariane : une seule étape", "Commerce ou entreprise locale : format incorrect pour le prix, la note ou un avis",
 		"Recherches écartées (1)", "zzz inconnu", "Google propose plutôt : « zzz connu »", "4,0\u00a0s", "Proposée par Google", "« électrolyseur piscine »", "« pompe piscine prix »",
 		"Pages peu reliées : 9", "/p9 (fiche produit)", "Google n&#39;en publie aucune", "texte commun à 93 %", "Groupes de pages en double : 1",
@@ -93,8 +93,14 @@ func TestLotASectionsRenderInFrench(t *testing.T) {
 			t.Errorf("missing %q", s)
 		}
 	}
-	if strings.Contains(out, "Sur ordinateur") {
-		t.Error("the failed desktop measurement must show no line and no figure")
+	if !strings.Contains(out, "La mesure de vitesse sur ordinateur n&#39;a pas abouti") {
+		t.Error("the failed desktop measurement must say so")
+	}
+	// No CLS tile (Francis, 2026-11-27: "je ne veux pas le cls").
+	for _, s := range []string{"0,31", "Cumulative Layout Shift"} {
+		if strings.Contains(out, s) {
+			t.Errorf("CLS shown: %q", s)
+		}
 	}
 	for _, s := range []string{"concurrence", "même recherche visée", "4 clics"} {
 		if strings.Contains(out, s) {
@@ -127,5 +133,23 @@ func TestSpeedViewFailedHasNoFigure(t *testing.T) {
 	v := newSpeedRunView(&audit.SpeedRun{Error: "x"}, "fr")
 	if !v.Failed || v.Field != nil || v.Lab != nil {
 		t.Errorf("%+v", v)
+	}
+}
+
+// The desktop measurement gets the same cards and tiles as mobile, not a
+// one-line sentence (Francis, 2026-11-27, sel-tech.fr report).
+func TestDesktopSpeedShowsItsOwnTiles(t *testing.T) {
+	res := lotAResult()
+	dScore, dLCP, dCLS, dTBT := 100, 768.0, 0.004, 0.0
+	res.Speed.Desktop = &audit.SpeedRun{Lab: &audit.LabData{Score: &dScore, LCPms: &dLCP, CLS: &dCLS, TBTms: &dTBT}}
+	a := &audit.Audit{URL: "https://ex.com/", Status: audit.StatusDone, Result: res}
+	out := renderFR(t, "audit_fragment", &fragmentView{Report: newReportView(a, "fr", true)})
+	for _, s := range []string{"Données de laboratoire, ordinateur", "Données sur le terrain, ordinateur", "100<small>/100</small>", "0,8 s"} {
+		if !strings.Contains(out, s) {
+			t.Errorf("missing %q", s)
+		}
+	}
+	if strings.Contains(out, "Cumulative Layout Shift") {
+		t.Error("CLS shown")
 	}
 }
