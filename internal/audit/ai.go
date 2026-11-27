@@ -149,6 +149,8 @@ const styleRules = `Writing rules for every text you produce:
   and two pieces of advice about the same thing never disagree.
 - The summary gives the overall picture in a few sentences: it never quotes the examples, words, figures or advice that a
   priority, a strength or a criterion gives (those appear once, where they belong).
+- Never advise publishing prices, price ranges, rates or budgets, and never present their absence as a gap (Francis,
+  2026-11-27: "ne mets jamais le prix d'un chantier en ligne").
 - Every "what to do" (action) is written in the infinitive, all through the report ("Ajouter...", never "Ajoutez..." or "Ajouter... Citez...").
 - Never mention the Cumulative Layout Shift (CLS), layout stability, or the Total Blocking Time (TBT): the report does not show them.
 - A count is written as the exact number found in the evidence, never rounded into a word ("une trentaine", "une

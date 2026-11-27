@@ -3,6 +3,16 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.12.9 - 2026-11-27
+
+- **Jamais de conseil d'afficher un prix** (Francis : « ne mets jamais le prix
+  d'un chantier en ligne ») : l'audit de sel-tech.fr conseillait un bloc
+  « Budget et délais » avec une fourchette de prix. Consigne de l'IA, et filtre
+  à l'affichage : toute phrase de l'IA qui parle de prix, de tarif, de budget ou
+  de fourchette est retirée ; une priorité qui n'en parlait que disparaît. Les
+  données structurées (prix d'une fiche produit) ne sont pas concernées.
+- Test : `TestNoPriceAdvice`.
+
 ## 1.12.8 - 2026-11-27
 
 - **Pistes de vitesse en accordéons** (Francis : « accordéons ») : « Ce qui

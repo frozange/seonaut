@@ -85,11 +85,26 @@ func (s *sayings) repeats(sentence string) bool {
 	return false
 }
 
-// keepNew returns the sentences of text not said before, and records them.
+// priceWords mark a sentence about prices: the report never advises showing a
+// price (Francis, 2026-11-27: "ne mets jamais le prix d'un chantier en ligne").
+var priceWords = []string{"prix", "tarif", "budget", "fourchette", "price", "pricing"}
+
+func aboutPrice(sentence string) bool {
+	l := strings.ToLower(sentence)
+	for _, w := range priceWords {
+		if strings.Contains(l, w) {
+			return true
+		}
+	}
+	return false
+}
+
+// keepNew returns the sentences of text not said before and not about prices,
+// and records them.
 func (s *sayings) keepNew(text string) string {
 	var kept []string
 	for _, sent := range splitReportSentences(text) {
-		if !s.repeats(sent) {
+		if !s.repeats(sent) && !aboutPrice(sent) {
 			kept = append(kept, sent)
 		}
 	}
@@ -125,6 +140,7 @@ func dedupeAI(res *audit.Result) *audit.AIReport {
 	}
 	ai := *res.AI
 	var s sayings
+	ai.Summary = withoutPrices(ai.Summary)
 	s.add(ai.Summary)
 	for _, p := range res.Priorities {
 		if p.Source != "technical" {
@@ -162,4 +178,31 @@ func dedupeAI(res *audit.Result) *audit.AIReport {
 	ai.Rewrites = rewrites
 	ai.Conclusion = ""
 	return &ai
+}
+
+// withoutPrices drops the sentences of a text that speak of prices.
+func withoutPrices(text string) string {
+	var kept []string
+	for _, sent := range splitReportSentences(text) {
+		if !aboutPrice(sent) {
+			kept = append(kept, sent)
+		}
+	}
+	return strings.Join(kept, " ")
+}
+
+// pricelessPriorities removes price sentences from the written priorities; a
+// priority left without a title is dropped.
+func pricelessPriorities(list []audit.Priority) []audit.Priority {
+	out := make([]audit.Priority, 0, len(list))
+	for _, p := range list {
+		if p.Source != "technical" {
+			p.Title, p.Impact, p.Action = withoutPrices(p.Title), withoutPrices(p.Impact), withoutPrices(p.Action)
+			if p.Title == "" {
+				continue
+			}
+		}
+		out = append(out, p)
+	}
+	return out
 }

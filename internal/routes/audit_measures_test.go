@@ -266,3 +266,21 @@ func TestRepeatedCardIsNotShown(t *testing.T) {
 		t.Error("the section does not say where the point is")
 	}
 }
+
+// The report never advises showing a price (Francis, 2026-11-27).
+func TestNoPriceAdvice(t *testing.T) {
+	res := lotAResult()
+	res.AI = &audit.AIReport{Summary: "Le site est clair. Aucune page ne donne de prix.",
+		Criteria: []audit.Criterion{{ID: "depth", Group: "content", Question: "depth", Rating: "partial", Verdict: "La méthode est bien expliquée.", Detail: "Ajouter une fourchette de prix au m². Les étapes sont précises."}}}
+	res.Priorities = []audit.Priority{{ID: "e:depth", Level: 3, Source: "editorial", Title: "Le prix et la durée ne sont pas abordés.", Action: "Ajouter un bloc Budget et délais."}}
+	a := &audit.Audit{URL: "https://ex.com/", Status: audit.StatusDone, Result: res}
+	out := renderFR(t, "audit_fragment", &fragmentView{Report: newReportView(a, "fr", true)})
+	for _, w := range []string{"ne donne de prix", "fourchette de prix", "Budget et délais", "Le prix et la durée"} {
+		if strings.Contains(out, w) {
+			t.Errorf("price advice shown: %q", w)
+		}
+	}
+	if !strings.Contains(out, "Les étapes sont précises.") {
+		t.Error("non-price sentence lost")
+	}
+}

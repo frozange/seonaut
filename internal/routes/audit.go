@@ -337,7 +337,8 @@ func newReportView(a *audit.Audit, lang string, embed bool) *reportView {
 	res := a.Result
 	if res.AI != nil {
 		r := *res
-		r.AI = dedupeAI(res)
+		r.Priorities = pricelessPriorities(res.Priorities)
+		r.AI = dedupeAI(&r)
 		res = &r
 	}
 	v := &reportView{
