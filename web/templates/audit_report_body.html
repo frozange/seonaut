@@ -385,6 +385,7 @@
 				{{ if .Pages }}<p class="lfr-meta">{{ template "lfr_pages" .Pages }}</p>{{ end }}
 				{{ if .Impact }}<p>{{ .Impact }}</p>{{ else if eq .Source "technical" }}<p>{{ trans (print .Title "_DESC") }}</p>{{ end }}
 				{{ if .Action }}<div class="lfr-todo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h12M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><p><strong>{{ trans "AUDIT_ACTION" }}</strong> {{ .Action }}</p></div>{{ end }}
+				{{ with index $.PriorityDetail .ID }}<details class="lfr-more"><summary>{{ trans "AUDIT_SHOW_DETAIL" }}</summary><p>{{ . }}</p></details>{{ end }}
 			</div></li>
 			{{ end }}
 		</ol>
@@ -419,7 +420,7 @@
 		<details class="lfr-fold">
 			<summary>{{ trans "AUDIT_QUERIES_DROPPED" }} ({{ len .Dropped }})</summary>
 			<p class="lfr-small">{{ trans "AUDIT_QUERIES_DROPPED_HELP" }}</p>
-			<ul class="lfr-rows">{{ range .Dropped }}<li><span>« {{ .Query }} »{{ if .GoogleRelated }}<br><span class="lfr-small">{{ trans "AUDIT_GOOGLE_INSTEAD" }} {{ range $i, $r := .GoogleRelated }}{{ if $i }}, {{ end }}« {{ $r }} »{{ end }}</span>{{ end }}</span><span class="lfr-small">{{ .Path }}</span></li>{{ end }}</ul>
+			<ul class="lfr-rows">{{ range .Dropped }}<li><span>« {{ .Query }} »{{ if .GoogleRelated }}<br><span class="lfr-small">{{ trans "AUDIT_GOOGLE_INSTEAD" }} {{ range $i, $r := .GoogleRelated }}{{ if $i }}, {{ end }}« {{ $r }} »{{ end }}</span>{{ end }}</span><span class="lfr-small">{{ if eq .Path "/" }}{{ trans "AUDIT_HOME_PAGE" }}{{ else }}{{ .Path }}{{ end }}</span></li>{{ end }}</ul>
 		</details>
 		{{ end }}
 	</section>

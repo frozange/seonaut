@@ -147,6 +147,8 @@ const styleRules = `Writing rules for every text you produce:
   (no canonical, sitemap or duplicate description inside a criterion), and a criterion verdict speaks of its own question only.
 - The advice of a finding lives in its "what to do" only. A criterion analysis does not end with the same advice again,
   and two pieces of advice about the same thing never disagree.
+- The summary gives the overall picture in a few sentences: it never quotes the examples, words, figures or advice that a
+  priority, a strength or a criterion gives (those appear once, where they belong).
 - Every "what to do" (action) is written in the infinitive, all through the report ("Ajouter...", never "Ajoutez..." or "Ajouter... Citez...").
 - Never mention the Cumulative Layout Shift (CLS), layout stability, or the Total Blocking Time (TBT): the report does not show them.
 - A count is written as the exact number found in the evidence, never rounded into a word ("une trentaine", "une

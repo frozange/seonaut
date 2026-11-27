@@ -214,6 +214,9 @@ func TestReportHasNoRepeatsNorEmptyLabels(t *testing.T) {
 	if n := strings.Count(out, verdict); n != 1 {
 		t.Errorf("verdict shown %d times, want once", n)
 	}
+	if strings.Contains(out, "Le texte parle-t-il du client") || !strings.Contains(out, "Analyse.") {
+		t.Error("a criterion shown as a priority keeps its own card, or its analysis is lost")
+	}
 	if strings.Contains(out, "Pour finir") {
 		t.Error("level label shown though every priority has the same level")
 	}

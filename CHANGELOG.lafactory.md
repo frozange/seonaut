@@ -3,6 +3,21 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.12.5 - 2026-11-27
+
+Troisième relecture du rapport de sel-tech.fr : les mêmes constats redits avec
+d'autres mots.
+
+- **Un critère devenu priorité n'a plus sa carte** dans « Rédaction » ou
+  « Contenu et SEO » : la priorité porte le constat, l'effet, le « Que faire » et,
+  repliée, l'analyse du critère. Les sections gardent le décompte de toutes les
+  notes et montrent les autres critères.
+- **Consigne de l'IA** : « L'essentiel » donne la vue d'ensemble sans citer les
+  exemples, mots, chiffres ou conseils d'une priorité, d'un point fort ou d'un
+  critère.
+- « Recherches écartées » : la page d'accueil s'appelle « Accueil », plus « / » ;
+  l'aide ne suppose plus que « peu de gens les tapent » (aucun volume connu).
+
 ## 1.12.4 - 2026-11-27
 
 Seconde relecture indépendante du rapport de sel-tech.fr (audit 34).

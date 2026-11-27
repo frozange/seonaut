@@ -166,34 +166,36 @@ func hostOf(raw string) string {
 // reportView prepares the result for the template: formatted scores, the
 // figures the charts draw, and the issues split by priority.
 type reportView struct {
-	Host        string
-	URL         string
-	Date        string
-	Result      *audit.Result
-	Embed       bool // framed by a page of the main site: no title, no call to action
-	Scores      []scoreCard
-	Critical    []issueRow
-	Alerts      []issueRow
-	Warnings    []issueRow
-	Hygiene     []issueRow
-	IssueTypes  int  // critical, alert and warning types found
-	OneLevel    bool // every priority has the same level
-	HasAI       bool
-	ContactURL  string
-	SampleNote  bool
-	Copywriting []audit.Criterion
-	Content     []audit.Criterion
-	CopyMix     ratingMix
-	ContentMix  ratingMix
-	Levels      []levelCount
-	Queries     []queryRow
-	Dropped     []queryRow // target searches Google Suggest does not know
-	Checked     bool       // target searches were checked against Google Suggest
-	Speed       *speedView
-	Structured  *sdView
-	Linking     *linkingView
-	Dups        *dupView
-	Pop         *popView
+	Host       string
+	URL        string
+	Date       string
+	Result     *audit.Result
+	Embed      bool // framed by a page of the main site: no title, no call to action
+	Scores     []scoreCard
+	Critical   []issueRow
+	Alerts     []issueRow
+	Warnings   []issueRow
+	Hygiene    []issueRow
+	IssueTypes int  // critical, alert and warning types found
+	OneLevel   bool // every priority has the same level
+	// PriorityDetail holds the analysis of a criterion shown as a priority.
+	PriorityDetail map[string]string
+	HasAI          bool
+	ContactURL     string
+	SampleNote     bool
+	Copywriting    []audit.Criterion
+	Content        []audit.Criterion
+	CopyMix        ratingMix
+	ContentMix     ratingMix
+	Levels         []levelCount
+	Queries        []queryRow
+	Dropped        []queryRow // target searches Google Suggest does not know
+	Checked        bool       // target searches were checked against Google Suggest
+	Speed          *speedView
+	Structured     *sdView
+	Linking        *linkingView
+	Dups           *dupView
+	Pop            *popView
 }
 
 type scoreCard struct {
@@ -390,18 +392,29 @@ func newReportView(a *audit.Audit, lang string, embed bool) *reportView {
 	v.OneLevel = len(v.Levels) == 1
 
 	if res.AI != nil {
-		// A criterion that is also a priority ("e:<id>") already shows its
-		// verdict there: the card keeps its question, rating and analysis
-		// (sel-tech.fr, 2026-11-27: four priorities repeated word for word).
+		// A criterion that is also a priority ("e:<id>") is shown once, as the
+		// priority, with its analysis folded in it; its section keeps the
+		// rating count (sel-tech.fr, 2026-11-27: the same findings said in the
+		// priorities and again in the criterion cards).
 		inPriorities := map[string]bool{}
 		for _, p := range res.Priorities {
 			if id, ok := strings.CutPrefix(p.ID, "e:"); ok {
 				inPriorities[id] = true
 			}
 		}
+		var allCopy, allContent []audit.Criterion
+		v.PriorityDetail = map[string]string{}
 		for _, c := range res.AI.Criteria {
+			if c.Group == "copywriting" {
+				allCopy = append(allCopy, c)
+			} else {
+				allContent = append(allContent, c)
+			}
 			if inPriorities[c.ID] {
-				c.Verdict = ""
+				if c.Detail != "" {
+					v.PriorityDetail["e:"+c.ID] = c.Detail
+				}
+				continue
 			}
 			if c.Group == "copywriting" {
 				v.Copywriting = append(v.Copywriting, c)
@@ -409,8 +422,8 @@ func newReportView(a *audit.Audit, lang string, embed bool) *reportView {
 				v.Content = append(v.Content, c)
 			}
 		}
-		v.CopyMix = newRatingMix(v.Copywriting)
-		v.ContentMix = newRatingMix(v.Content)
+		v.CopyMix = newRatingMix(allCopy)
+		v.ContentMix = newRatingMix(allContent)
 		for _, q := range res.AI.TargetQueries {
 			v.Queries = append(v.Queries, newQueryRow(q))
 		}
