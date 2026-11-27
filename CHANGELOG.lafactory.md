@@ -39,6 +39,9 @@ Faux constats relevés sur l'audit de sel-tech.fr (audit 29).
 - Route fermée tant que `[audit] relay_secret` (32 caractères au moins) n'est pas
   posé ; le secret voyage dans l'en-tête `X-LF-Relay-Auth`, en plus de l'en-tête
   d'origine.
+- `deploy/install-lafactory.sh` pose ce secret une seule fois sous `[audit]` à
+  partir de `relay.secret`, rangé à côté de l'archive : le garde du compte
+  refuse toute autre écriture dans le dossier de l'application.
 
 ## 1.10.9 - 2026-11-26
 
