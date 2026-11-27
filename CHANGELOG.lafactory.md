@@ -3,6 +3,18 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.12.11 - 2026-11-27
+
+- **Un audit par jour pour un membre** (Francis : « Hors admin ou toi un seul
+  audit par jour ») : `per_email_per_day = 1` et `per_ip_per_day = 1` dans la
+  config de production. Les administrateurs de lafactory.com (`owner`) et
+  `auditctl` restent sans limite.
+- **Une adresse mal tapée ne consomme plus l'audit du jour** : la route de
+  relais vérifiait la limite par IP avant l'adresse du site. Elle vérifie
+  maintenant l'adresse d'abord. La limite par IP atteinte répond comme la
+  limite du jour (`AUDIT_ERROR_LIMIT`, « réessayez demain ») et non plus « trop
+  de tentatives ». Test : `TestRelayTypoKeepsTheIPAllowance`.
+
 ## 1.12.10 - 2026-11-27
 
 - **Accordéons de vitesse remis en ordre** : la pastille ronde de « Ce qui

@@ -74,10 +74,6 @@ func (h *auditHandler) relayHandler(w http.ResponseWriter, r *http.Request) {
 			fail(http.StatusBadRequest, "GENERIC_ERROR")
 			return
 		}
-		if !h.AuditIPLimiter.Allow(ip) {
-			fail(http.StatusTooManyRequests, "ERROR_TOO_MANY_ATTEMPTS")
-			return
-		}
 	}
 
 	u, err := audit.NormalizeURL(strings.TrimSpace(in.URL))
@@ -87,6 +83,12 @@ func (h *auditHandler) relayHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := h.NetGuard.CheckURL(r.Context(), u); err != nil {
 		fail(http.StatusUnprocessableEntity, "AUDIT_ERROR_URL")
+		return
+	}
+	// The address is checked before the IP allowance is used: with one audit a
+	// day (Francis, 2026-11-27), a typo must not spend it.
+	if !in.Owner && !h.AuditIPLimiter.Allow(ip) {
+		fail(http.StatusTooManyRequests, "AUDIT_ERROR_LIMIT")
 		return
 	}
 
