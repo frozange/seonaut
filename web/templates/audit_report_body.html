@@ -279,7 +279,6 @@
 			<div class="lfr-lcp">
 				<p class="lfr-card-title">{{ trans "AUDIT_SPEED_LCP_EL" .Label }}</p>
 				{{ if .File }}<p class="lfr-small">{{ .File }}</p>{{ end }}
-				{{ if .Phases }}<ul class="lfr-rows">{{ range .Phases }}<li><span>{{ trans .Key }}</span><span class="lfr-small">{{ .Value }}</span></li>{{ end }}</ul>{{ end }}
 				{{ if .NoFetchPriority }}<p class="lfr-do">{{ trans "AUDIT_SPEED_LCP_FETCHPRIORITY" }}</p>{{ end }}
 				{{ if .LazyLoaded }}<p class="lfr-do">{{ trans "AUDIT_SPEED_LCP_LAZY" }}</p>{{ end }}
 			</div>

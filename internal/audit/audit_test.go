@@ -488,7 +488,7 @@ func TestParsePSIKeepsTheSolutions(t *testing.T) {
 		t.Fatal(err)
 	}
 	l := run.Lab.LCP
-	if l == nil || l.Label != "Piscine du Crillon" || !strings.Contains(l.Source, "crillon-carte") {
+	if l == nil || l.Label != "Piscine du Crillon" || !strings.HasSuffix(l.Source, "/crillon-carte-recadree-cadre-534x504.webp") {
 		t.Fatalf("LCP element not named: %+v", l)
 	}
 	if !l.NoFetchPriority || len(l.Phases) != 4 {

@@ -446,6 +446,16 @@ func lcpElement(audits map[string]psiAudit) *LCPElement {
 	if !found && len(el.Phases) == 0 {
 		return nil
 	}
+	// Lighthouse cuts long addresses in the node snippet ("crillon-carte-…"):
+	// take the full one from the requests of the page.
+	if prefix, cut := strings.CutSuffix(el.Source, "…"); cut && prefix != "" {
+		for _, u := range itemURLs(listItems(audits["network-requests"].Details.Items), 1000) {
+			if strings.HasPrefix(u, prefix) {
+				el.Source = u
+				break
+			}
+		}
+	}
 	return el
 }
 

@@ -3,6 +3,15 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.12.2 - 2026-11-27
+
+- **Nom complet du fichier le plus lent** : Lighthouse abrège l'adresse dans son
+  extrait (« crillon-carte-recadree-cadr… ») ; l'adresse complète est reprise
+  des requêtes de la page (`crillon-carte-recadree-cadre-534x504.webp`).
+- **Partage du temps du LCP retiré** (ajouté en 1.12.0) : mesuré sur une visite
+  non ralentie, il additionnait 0,4 s sous une tuile LCP de 4,1 s. Le fichier en
+  cause et la correction à faire restent.
+
 ## 1.12.1 - 2026-11-27
 
 - **Corrigé : la vitesse était vide dans les audits de la 1.12.0** : une réponse

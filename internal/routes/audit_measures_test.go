@@ -172,10 +172,15 @@ func TestSpeedCardShowsTheSolutions(t *testing.T) {
 	res.Speed.Mobile.Lab.Opportunities[0].Files = []string{"https://sel-tech.fr/wp-content/uploads/2026/11/molitor-cadre-1215x476.webp"}
 	a := &audit.Audit{URL: "https://ex.com/", Status: audit.StatusDone, Result: res}
 	out := renderFR(t, "audit_fragment", &fragmentView{Report: newReportView(a, "fr", true)})
-	for _, s := range []string{"Piscine du Crillon", "crillon-carte.webp", "Attente avant l&#39;affichage", "fetchpriority=", "molitor-cadre-1215x476.webp"} {
+	for _, s := range []string{"Piscine du Crillon", "crillon-carte.webp", "fetchpriority=", "molitor-cadre-1215x476.webp"} {
 		if !strings.Contains(out, s) {
 			t.Errorf("missing %q", s)
 		}
+	}
+	// The time split is measured on an unthrottled visit and contradicts the
+	// simulated LCP tile (0,4 s of parts for 4,1 s): not shown.
+	if strings.Contains(out, "Attente avant l&#39;affichage") {
+		t.Error("LCP time split shown")
 	}
 }
 
