@@ -147,6 +147,8 @@ const styleRules = `Writing rules for every text you produce:
   (no canonical, sitemap or duplicate description inside a criterion), and a criterion verdict speaks of its own question only.
 - The advice of a finding lives in its "what to do" only. A criterion analysis does not end with the same advice again,
   and two pieces of advice about the same thing never disagree.
+- A count is written as the exact number found in the evidence, never rounded into a word ("une trentaine", "une
+  dizaine", "des centaines"): 26 projects are "26 chantiers". Without an exact count, name the items and give no quantity.
 - Do not hedge with the reading method ("in the pages read", "in the extracts read"): state what was found once, plainly
   ("we found no phone number"), or say nothing.
 - Every sentence must be one a person would say aloud to the owner across a table, in natural %[1]s, never a translation
@@ -498,10 +500,23 @@ func applyCorrection(rep *AIReport, prio []Priority, path, v string) bool {
 
 var numberRe = regexp.MustCompile(`\d+(?:[.,]\d+)?`)
 
+// approxRe finds a count written as a rounded word ("une trentaine", "des
+// centaines", "dozens"): sel-tech.fr, 2026-11-27, "une trentaine de chantiers"
+// for 26 counted on the page. Such a word is kept only when a page uses it.
+var approxRe = regexp.MustCompile(`(?i)\b(?:dizaines?|douzaines?|quinzaines?|vingtaines?|trentaines?|quarantaines?|cinquantaines?|soixantaines?|centaines?|milliers|dozens?|scores of|hundreds|thousands)\b`)
+
 func numbersKnown(text, corpus string) bool {
 	for _, n := range numberRe.FindAllString(text, -1) {
 		if !strings.Contains(corpus, n) && !strings.Contains(corpus, strings.ReplaceAll(n, ",", ".")) {
 			return false
+		}
+	}
+	if words := approxRe.FindAllString(text, -1); len(words) > 0 {
+		lower := strings.ToLower(corpus)
+		for _, w := range words {
+			if !strings.Contains(lower, strings.ToLower(w)) {
+				return false
+			}
 		}
 	}
 	return true

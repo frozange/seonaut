@@ -52,6 +52,20 @@ func TestStripUnknownNumbers(t *testing.T) {
 	}
 }
 
+// A rounded count in words is a figure too (sel-tech.fr, 2026-11-27: "une
+// trentaine de chantiers" for 26 on the page).
+func TestStripUnknownNumbersDropsRoundedCounts(t *testing.T) {
+	corpus := `{"text": "Nos réalisations : 26 chantiers. Une dizaine de piscines municipales."}`
+	in := "La page présente une trentaine de chantiers. Elle cite une dizaine de piscines municipales. Elle présente 26 chantiers."
+	got := stripUnknownNumbers(in, corpus)
+	if strings.Contains(got, "trentaine") {
+		t.Errorf("rounded count absent from the pages kept: %q", got)
+	}
+	if !strings.Contains(got, "dizaine") || !strings.Contains(got, "26 chantiers") {
+		t.Errorf("supported sentences dropped: %q", got)
+	}
+}
+
 func TestValidRewritesNeedTheOriginalText(t *testing.T) {
 	corpus := `{"title":"Agence web à Paris"}`
 	in := []Rewrite{

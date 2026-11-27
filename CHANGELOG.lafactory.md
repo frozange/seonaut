@@ -3,6 +3,17 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.11.2 - 2026-11-27
+
+- **Un nombre arrondi en lettres est un chiffre comme un autre** : l'IA écrivait
+  « une trentaine de chantiers » pour les 26 de la page des réalisations de
+  sel-tech.fr (audit 30). Le filtre qui retire une phrase dont un chiffre ne
+  figure dans aucune page ne voyait que les chiffres écrits en chiffres. Il
+  retire aussi « dizaine », « vingtaine », « trentaine », « centaines »,
+  « milliers » (et leurs équivalents anglais) quand aucune page ne les emploie,
+  et la consigne de l'IA demande le nombre exact. Test :
+  `TestStripUnknownNumbersDropsRoundedCounts`.
+
 ## 1.11.1 - 2026-11-27
 
 Faux constats relevés sur l'audit de sel-tech.fr (audit 29).
