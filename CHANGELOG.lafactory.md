@@ -3,6 +3,13 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.11.6 - 2026-11-27
+
+- **Plus de phrase répétée dans la vitesse** : sans données sur le terrain, la
+  carte ordinateur redisait mot pour mot l'explication de la carte mobile. Elle
+  dit maintenant « Google n'en publie pas non plus pour les visites sur
+  ordinateur. »
+
 ## 1.11.5 - 2026-11-27
 
 - **Plus de tuile « 0 ms »** (Francis : « tu as laissé le cls à 0ms ») : la

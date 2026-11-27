@@ -271,7 +271,7 @@
 			{{ if .HasField }}
 			<p class="lfr-small">{{ if eq .FieldScope "site" }}{{ trans "AUDIT_SPEED_FIELD_SITE" }}{{ else }}{{ trans "AUDIT_SPEED_FIELD_PAGE" }}{{ end }}</p>
 			<div class="lfr-metrics">{{ range .Field }}{{ template "lfr_metric" . }}{{ end }}</div>
-			{{ else }}<p>{{ trans "AUDIT_SPEED_NO_FIELD" }}</p>{{ end }}
+			{{ else }}<p>{{ trans (print "AUDIT_SPEED_NO_FIELD" .Device) }}</p>{{ end }}
 		</div>
 		{{ with .Lab }}
 		<div class="lfr-card lfr-speed">
