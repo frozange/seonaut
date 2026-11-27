@@ -106,6 +106,11 @@ func newSpeedView(s *audit.SpeedReport, lang string) *speedView {
 	v := &speedView{Mobile: newSpeedRunView(s.Mobile, lang), Desktop: newSpeedRunView(s.Desktop, lang)}
 	if v.Desktop != nil {
 		v.Desktop.Device = "_DESKTOP"
+		// The same slowest element and the same fix are said once, on mobile.
+		if m, d := v.Mobile, v.Desktop; m != nil && m.Lab != nil && d.Lab != nil && m.Lab.LCP != nil && d.Lab.LCP != nil &&
+			m.Lab.LCP.Label == d.Lab.LCP.Label && m.Lab.LCP.File == d.Lab.LCP.File {
+			d.Lab.LCP = nil
+		}
 	}
 	return v
 }
@@ -483,6 +488,11 @@ func fileName(raw string) string {
 	}
 	if p == "" {
 		return u.Host
+	}
+	// A name without an extension says nothing ("js" for Google's
+	// gtag/js?id=...): show where it comes from.
+	if !strings.Contains(p, ".") {
+		return u.Host + u.Path
 	}
 	return p
 }

@@ -227,3 +227,21 @@ func TestReportHasNoRepeatsNorEmptyLabels(t *testing.T) {
 		t.Error("example address not decoded")
 	}
 }
+
+// Fourth review of the sel-tech.fr report: a script named "js", and the same
+// slowest element and fix on both speed cards.
+func TestSpeedNamesAndOnceOnly(t *testing.T) {
+	if got := fileName("https://www.googletagmanager.com/gtag/js?id=GT-X"); got != "www.googletagmanager.com/gtag/js" {
+		t.Errorf("fileName = %q", got)
+	}
+	res := lotAResult()
+	el := &audit.LCPElement{Label: "Piscine du Crillon", Source: "https://ex.com/crillon.webp", NoFetchPriority: true}
+	dScore, dLCP := 100, 773.0
+	res.Speed.Mobile.Lab.LCP = el
+	res.Speed.Desktop = &audit.SpeedRun{Lab: &audit.LabData{Score: &dScore, LCPms: &dLCP, LCP: el}}
+	a := &audit.Audit{URL: "https://ex.com/", Status: audit.StatusDone, Result: res}
+	out := renderFR(t, "audit_fragment", &fragmentView{Report: newReportView(a, "fr", true)})
+	if n := strings.Count(out, "Piscine du Crillon"); n != 1 {
+		t.Errorf("slowest element said %d times", n)
+	}
+}

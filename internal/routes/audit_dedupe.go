@@ -114,7 +114,8 @@ func splitReportSentences(text string) []string {
 }
 
 // dedupeAI returns a copy of the report's AI text in which nothing is said
-// twice, in the page order: summary, priorities, strengths, criteria.
+// twice, in the page order: summary, priorities, strengths, searches,
+// criteria, rewrites.
 func dedupeAI(res *audit.Result) *audit.AIReport {
 	if res.AI == nil {
 		return nil
@@ -126,6 +127,7 @@ func dedupeAI(res *audit.Result) *audit.AIReport {
 		if p.Source != "technical" {
 			s.add(p.Title)
 			s.add(p.Impact)
+			s.add(p.Action)
 		}
 	}
 	var strengths []audit.Strength
@@ -136,6 +138,12 @@ func dedupeAI(res *audit.Result) *audit.AIReport {
 		}
 	}
 	ai.Strengths = strengths
+	queries := make([]audit.TargetQuery, len(ai.TargetQueries))
+	for i, q := range ai.TargetQueries {
+		q.Comment = s.keepNew(q.Comment)
+		queries[i] = q
+	}
+	ai.TargetQueries = queries
 	crit := make([]audit.Criterion, len(ai.Criteria))
 	for i, c := range ai.Criteria {
 		c.Verdict = s.keepNew(c.Verdict)
@@ -143,6 +151,12 @@ func dedupeAI(res *audit.Result) *audit.AIReport {
 		crit[i] = c
 	}
 	ai.Criteria = crit
+	rewrites := make([]audit.Rewrite, len(ai.Rewrites))
+	for i, r := range ai.Rewrites {
+		r.Why = s.keepNew(r.Why)
+		rewrites[i] = r
+	}
+	ai.Rewrites = rewrites
 	ai.Conclusion = ""
 	return &ai
 }

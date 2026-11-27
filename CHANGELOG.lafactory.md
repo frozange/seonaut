@@ -3,6 +3,20 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.12.6 - 2026-11-27
+
+Quatrième relecture du rapport de sel-tech.fr (audit 35).
+
+- **Un script n'est plus nommé « js »** : un fichier sans extension (le
+  `gtag/js?id=...` de Google) est montré avec son hôte et son chemin.
+- **Le même élément le plus lent et la même correction ne sont dits qu'une
+  fois**, sur la carte mobile, quand le bureau a le même.
+- **Le dédoublonnage couvre aussi** les commentaires des recherches visées, le
+  « Pourquoi » des réécritures et le « Que faire » des priorités.
+- « Page d'accueil » au lieu d'« Accueil » seul dans les recherches écartées.
+- Tests : `TestSpeedNamesAndOnceOnly`, `TestDedupeOnTheSelTechReport` sur le
+  rapport réel de l'audit 35.
+
 ## 1.12.5 - 2026-11-27
 
 Troisième relecture du rapport de sel-tech.fr : les mêmes constats redits avec

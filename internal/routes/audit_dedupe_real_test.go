@@ -12,7 +12,7 @@ import (
 // The report of sel-tech.fr (audit 34) said the same facts in the summary, the
 // strengths, the priorities and the cards: once each after dedupeAI.
 func TestDedupeOnTheSelTechReport(t *testing.T) {
-	b, err := os.ReadFile("testdata/result_seltech_34.json")
+	b, err := os.ReadFile("testdata/result_seltech_35.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +38,7 @@ func TestDumpSelTechText(t *testing.T) {
 	if os.Getenv("DUMP") == "" {
 		t.Skip()
 	}
-	b, _ := os.ReadFile("testdata/result_seltech_34.json")
+	b, _ := os.ReadFile("testdata/result_seltech_35.json")
 	var res audit.Result
 	_ = json.Unmarshal(b, &res)
 	a := &audit.Audit{URL: "https://sel-tech.fr/", Status: audit.StatusDone, Result: &res}
