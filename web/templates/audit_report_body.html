@@ -189,7 +189,7 @@
 	.lfr-lcp { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--lfr-line, rgba(255,255,255,.08)); }
 	.lfr-lcp .lfr-small { overflow-wrap: anywhere; }
 	.lfr-do { margin-top: 10px; color: var(--lfr-strong); }
-	.lfr-rows > li.lfr-opp { flex-wrap: wrap; }
+	.lfr-rows > li.lfr-opp > .lfr-files { grid-column: 1 / -1; }
 	.lfr-files { display: block; flex: 0 0 100%; margin-top: 4px; opacity: .75; overflow-wrap: anywhere; }
 	/* Side by side only when both cards hold tiles: a card with one sentence beside four tiles left half a column empty. */
 	@container lfr (min-width: 680px) {

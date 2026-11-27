@@ -331,6 +331,11 @@ func newQueryRow(q audit.TargetQuery) queryRow {
 
 func newReportView(a *audit.Audit, lang string, embed bool) *reportView {
 	res := a.Result
+	if res.AI != nil {
+		r := *res
+		r.AI = dedupeAI(res)
+		res = &r
+	}
 	v := &reportView{
 		Host:   hostOf(a.URL),
 		URL:    a.URL,

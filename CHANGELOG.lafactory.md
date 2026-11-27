@@ -3,6 +3,23 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.12.4 - 2026-11-27
+
+Seconde relecture indépendante du rapport de sel-tech.fr (audit 34).
+
+- **Chaque constat dit une seule fois** : l'IA redisait les mêmes faits dans
+  « L'essentiel », « Ce qui fonctionne déjà », les priorités et les cartes (les
+  26 chantiers, les mots de la page piscine, le devis et le téléphone). À
+  l'affichage, le rapport est lu dans l'ordre de la page et une phrase dont la
+  moitié des mots principaux a déjà été dite plus haut est retirée ; un point
+  fort entièrement redit disparaît. Vaut aussi pour les rapports enregistrés.
+- **Plus de paragraphe de conclusion** en bas du détail technique : sans titre,
+  il ne faisait que résumer le reste.
+- **Fichiers d'une piste de vitesse sur toute la largeur** à 390 px (la ligne est
+  une grille : `grid-column: 1 / -1`).
+- Consigne de l'IA : tout « Que faire » à l'infinitif.
+- Test : `TestDedupeOnTheSelTechReport` (rapport réel de l'audit 34).
+
 ## 1.12.3 - 2026-11-27
 
 Relecture indépendante du rapport de sel-tech.fr (audit 34).
