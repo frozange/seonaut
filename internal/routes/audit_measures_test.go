@@ -172,6 +172,10 @@ func TestSpeedCardShowsTheSolutions(t *testing.T) {
 	res.Speed.Mobile.Lab.Opportunities[0].Files = []string{"https://sel-tech.fr/wp-content/uploads/2026/11/molitor-cadre-1215x476.webp"}
 	a := &audit.Audit{URL: "https://ex.com/", Status: audit.StatusDone, Result: res}
 	out := renderFR(t, "audit_fragment", &fragmentView{Report: newReportView(a, "fr", true)})
+	// Accordions, closed (Francis, 2026-11-27: « accordéons »).
+	if strings.Contains(out, `lfr-more" open`) || !strings.Contains(out, `<details class="lfr-opp">`) {
+		t.Error("speed leads must be closed accordions")
+	}
 	for _, s := range []string{"Piscine du Crillon", "crillon-carte.webp", "fetchpriority=", "molitor-cadre-1215x476.webp"} {
 		if !strings.Contains(out, s) {
 			t.Errorf("missing %q", s)

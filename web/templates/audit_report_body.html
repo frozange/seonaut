@@ -189,7 +189,13 @@
 	.lfr-lcp { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--lfr-line, rgba(255,255,255,.08)); }
 	.lfr-lcp .lfr-small { overflow-wrap: anywhere; }
 	.lfr-do { margin-top: 10px; color: var(--lfr-strong); }
-	.lfr-rows > li.lfr-opp > .lfr-files { grid-column: 1 / -1; }
+	.lfr-opps > li:has(> .lfr-opp) { display: block; }
+	.lfr-opp > summary { cursor: pointer; list-style: none; display: grid; grid-template-columns: minmax(0, 1fr) fit-content(45%); gap: 4px 16px; align-items: baseline; }
+	.lfr-opp > summary::-webkit-details-marker { display: none; }
+	.lfr-opp > summary > span:first-child { color: var(--lfr-strong); }
+	.lfr-opp > summary > span:first-child::after { content: "\00a0▸"; color: var(--lfr-muted); }
+	.lfr-opp[open] > summary > span:first-child::after { content: "\00a0▾"; }
+	.lfr-opp > summary > span + span { text-align: right; }
 	.lfr-files { display: block; flex: 0 0 100%; margin-top: 4px; opacity: .75; overflow-wrap: anywhere; }
 	/* Side by side only when both cards hold tiles: a card with one sentence beside four tiles left half a column empty. */
 	@container lfr (min-width: 680px) {
@@ -284,8 +290,8 @@
 				{{ if .LazyLoaded }}<p class="lfr-do">{{ trans "AUDIT_SPEED_LCP_LAZY" }}</p>{{ end }}
 			</div>
 			{{ end }}{{ if .Opportunities }}
-			<details class="lfr-more" open><summary>{{ trans "AUDIT_SPEED_ADVICE" }} ({{ len .Opportunities }})</summary>
-				<ul class="lfr-rows">{{ range .Opportunities }}<li class="lfr-opp"><span>{{ if .Key }}{{ trans .Key }}{{ else }}{{ .Title }}{{ end }}</span><span class="lfr-small">{{ trans "AUDIT_SPEED_SAVING" .Saving }}</span>{{ if .Files }}<small class="lfr-files">{{ range $i, $f := .Files }}{{ if $i }}, {{ end }}{{ $f }}{{ end }}</small>{{ end }}</li>{{ end }}</ul>
+			<details class="lfr-more"><summary>{{ trans "AUDIT_SPEED_ADVICE" }} ({{ len .Opportunities }})</summary>
+				<ul class="lfr-rows lfr-opps">{{ range .Opportunities }}<li>{{ if .Files }}<details class="lfr-opp"><summary><span>{{ if .Key }}{{ trans .Key }}{{ else }}{{ .Title }}{{ end }}</span><span class="lfr-small">{{ trans "AUDIT_SPEED_SAVING" .Saving }}</span></summary><p class="lfr-files">{{ range $i, $f := .Files }}{{ if $i }}, {{ end }}{{ $f }}{{ end }}</p></details>{{ else }}<span>{{ if .Key }}{{ trans .Key }}{{ else }}{{ .Title }}{{ end }}</span><span class="lfr-small">{{ trans "AUDIT_SPEED_SAVING" .Saving }}</span>{{ end }}</li>{{ end }}</ul>
 			</details>
 			{{ end }}{{ end }}
 			{{ end }}

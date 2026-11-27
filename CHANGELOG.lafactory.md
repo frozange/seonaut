@@ -3,6 +3,12 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.12.8 - 2026-11-27
+
+- **Pistes de vitesse en accordéons** (Francis : « accordéons ») : « Ce qui
+  ralentit la page » est fermé, et chaque piste se déplie pour montrer ses
+  fichiers.
+
 ## 1.12.7 - 2026-11-27
 
 Cinquième relecture du rapport de sel-tech.fr (audit 35).
