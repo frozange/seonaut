@@ -86,6 +86,15 @@ EOF
   as chmod 600 "$APP/config"
 fi
 
+# Relay secret of lafactory.com (lf-audit, POST /audit/relay): added once under
+# [audit] of an existing config, from relay.secret next to the release.
+if [ -f "$S/relay.secret" ] && ! as grep -q '^relay_secret' "$APP/config"; then
+  as cat "$APP/config" \
+    | awk -v f="$S/relay.secret" 'BEGIN { getline s < f } { print } /^\[audit\]$/ { print "relay_secret = \"" s "\"" }' \
+    | as bash -c 'umask 077; cat > "$1.new" && mv -f "$1.new" "$1"' _ "$APP/config"
+  as grep -q '^relay_secret' "$APP/config" || { echo "relay_secret not added (no [audit] section?)"; exit 1; }
+fi
+
 as bash -c 'umask 077; cat > "$1"' _ "$APP/run.sh" <<'EOF'
 #!/bin/bash
 # Started every minute by the account's crontab: the lock keeps a single instance alive.
