@@ -119,10 +119,10 @@
 	.lfr-crit h5 { margin: 14px 0 10px; font-family: var(--lf-font-text, 'Barlow', sans-serif); font-weight: 600; }
 	.lfr-crit .verdict { color: var(--lfr-strong); }
 	.lfr-more { margin-top: 12px; border-top: 1px solid var(--lfr-line); padding-top: 12px; }
-	.lfr-more summary { cursor: pointer; font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); font-weight: 600; list-style: none; display: inline-flex; align-items: center; gap: 8px; }
-	.lfr-more summary::-webkit-details-marker { display: none; }
-	.lfr-more summary::before { content: "+"; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--lfr-line); color: var(--lfr-strong); }
-	.lfr-more[open] summary::before { content: "−"; }
+	.lfr-more > summary { cursor: pointer; font-size: var(--lf-fs-small, 16px); color: var(--lfr-muted); font-weight: 600; list-style: none; display: inline-flex; align-items: center; gap: 8px; }
+	.lfr-more > summary::-webkit-details-marker { display: none; }
+	.lfr-more > summary::before { content: "+"; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--lfr-line); color: var(--lfr-strong); }
+	.lfr-more[open] > summary::before { content: "−"; }
 	.lfr-more > p, .lfr-more > ul { margin-top: 10px; font-size: var(--lf-fs-small, 16px); }
 
 	/* Target queries */
@@ -255,7 +255,7 @@
 	#main-content .container:has(.lf-audit-report) { width: min(1280px, calc(100% - 2 * clamp(16px, 4vw, 48px))); max-width: none; }
 	@media (max-width: 600px) {
 		.lfr-card { padding: 20px 16px; }
-		.lfr-more summary, .lfr-fold > summary, .lfr-issue summary { min-height: 44px; }
+		.lfr-more > summary, .lfr-fold > summary, .lfr-issue summary, .lfr-opp > summary { min-height: 44px; }
 	}
 	@media (max-width: 480px) {
 		.lfr-gauges { grid-template-columns: 1fr; gap: 12px; }

@@ -3,6 +3,13 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.12.10 - 2026-11-27
+
+- **Accordéons de vitesse remis en ordre** : la pastille ronde de « Ce qui
+  ralentit la page » s'appliquait aussi au résumé de chaque piste et repoussait
+  son titre à droite. Les styles de l'accordéon ne visent plus que son propre
+  résumé (`.lfr-more > summary`).
+
 ## 1.12.9 - 2026-11-27
 
 - **Jamais de conseil d'afficher un prix** (Francis : « ne mets jamais le prix
