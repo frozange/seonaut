@@ -67,6 +67,7 @@ type SiteFacts struct {
 	URL              string `json:"url"`
 	Host             string `json:"host"`
 	PagesCrawled     int    `json:"pages_crawled"`
+	URLsCrawled      int    `json:"urls_crawled,omitempty"` // pages plus resources
 	CrawlLimit       int    `json:"crawl_limit"`
 	LimitReached     bool   `json:"limit_reached"`
 	RobotstxtExists  bool   `json:"robotstxt_exists"`

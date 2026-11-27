@@ -618,3 +618,36 @@ func TestHeadingLineBreakIsASpace(t *testing.T) {
 		t.Errorf("H2 = %q", pageReport.H2)
 	}
 }
+
+// A self canonical written with raw UTF-8 on a page crawled under its
+// percent-encoded URL is the page's own URL (sel-tech.fr, 2026-11-27).
+func TestSelfCanonicalWithOtherEncoding(t *testing.T) {
+	const page = "https://example.com/parking-de-5000m%c2%b2/"
+	u, err := url.Parse(page)
+	if err != nil {
+		t.Fatal(err)
+	}
+	headers := http.Header{"Content-Type": []string{"text/html"}}
+	for _, href := range []string{
+		"https://example.com/parking-de-5000m²/",
+		"https://example.com/parking-de-5000m%C2%B2/",
+	} {
+		body := []byte(`<html><head><link rel="canonical" href="` + href + `"></head><body></body></html>`)
+		pr, _, err := services.NewHTMLParser(u, 200, &headers, body, int64(len(body)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if pr.Canonical != pr.URL {
+			t.Errorf("canonical %q: stored %q, want the page URL %q", href, pr.Canonical, pr.URL)
+		}
+	}
+
+	body := []byte(`<html><head><link rel="canonical" href="https://example.com/other/"></head><body></body></html>`)
+	pr, _, err := services.NewHTMLParser(u, 200, &headers, body, int64(len(body)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pr.Canonical != "https://example.com/other/" {
+		t.Errorf("canonical to another page changed: %q", pr.Canonical)
+	}
+}

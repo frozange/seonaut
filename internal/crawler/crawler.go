@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math/rand"
+	"mime"
 	"net/http"
 	"net/url"
 	"strings"
@@ -43,7 +44,11 @@ type Client interface {
 type ResponseCallback func(r *ResponseMessage)
 
 type Options struct {
-	CrawlLimit      int
+	// CrawlLimit caps every URL requested: pages, images, scripts, styles.
+	CrawlLimit int
+	// PageLimit, when set, ends the crawl once that many HTML pages were read,
+	// so resources do not eat the page budget of an audit.
+	PageLimit       int
 	IgnoreRobotsTxt bool
 	FollowNofollow  bool
 	IncludeNoindex  bool
@@ -56,6 +61,7 @@ type Options struct {
 
 type Status struct {
 	Crawled    int
+	Pages      int // HTML responses among Crawled
 	Crawling   bool
 	Discovered int
 }
@@ -164,6 +170,9 @@ func (c *Crawler) Start() {
 		rm.Timeout = rm.Error != nil
 
 		c.status.Crawled++
+		if isHTMLResponse(rm) {
+			c.status.Pages++
+		}
 
 		if c.callback != nil {
 			c.callback(rm)
@@ -175,6 +184,9 @@ func (c *Crawler) Start() {
 		}
 
 		if !c.queue.Active() || c.status.Crawled >= c.options.CrawlLimit {
+			break
+		}
+		if c.options.PageLimit > 0 && c.status.Pages >= c.options.PageLimit {
 			break
 		}
 	}
@@ -383,4 +395,13 @@ func (c *Crawler) domainIsAllowed(d string) bool {
 	}
 
 	return false
+}
+
+// isHTMLResponse reports whether a crawled URL answered with an HTML page.
+func isHTMLResponse(rm *ResponseMessage) bool {
+	if rm == nil || rm.Response == nil {
+		return false
+	}
+	mt, _, err := mime.ParseMediaType(rm.Response.Header.Get("Content-Type"))
+	return err == nil && mt == "text/html"
 }

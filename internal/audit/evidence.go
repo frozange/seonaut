@@ -35,6 +35,15 @@ func (r *CrawlReader) Facts(crawlID int64) (SiteFacts, error) {
 	if start.Valid && end.Valid {
 		f.DurationSeconds = int(end.Time.Sub(start.Time).Seconds())
 	}
+	// total_urls counts images, scripts and styles too: the report speaks of
+	// pages, so it reads the HTML pages (sel-tech.fr, 2026-11-27: 46 pages
+	// shown as "500 pages, limit reached").
+	f.URLsCrawled = f.PagesCrawled
+	var pages int
+	if err := r.DB.QueryRow(`SELECT COUNT(*) FROM pagereports
+		WHERE crawl_id = ? AND media_type = "text/html"`, crawlID).Scan(&pages); err == nil {
+		f.PagesCrawled = pages
+	}
 	return f, nil
 }
 

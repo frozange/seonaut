@@ -276,11 +276,15 @@ func (ds *CrawlRepository) DeleteUnfinishedCrawls() {
 
 // SaveIssuesCount stores the total number of issues as well as the total issues by priority for
 // the crawl specified in the "crawlId" parameter.
+//
+// The end time comes from the database clock, like the start time written by
+// the column default: a Go time.Now() sent as UTC against a server-local start
+// made every duration an hour short (sel-tech.fr audit, 2026-11-27: -3405 s).
 func (ds *CrawlRepository) UpdateCrawl(crawl *models.Crawl) {
 	query := `UPDATE
 		crawls
-		SET 
-			end = ?,
+		SET
+			end = NOW(),
 			total_urls = ?,
 			blocked_by_robotstxt = ?,
 			noindex = ?,
@@ -302,7 +306,6 @@ func (ds *CrawlRepository) UpdateCrawl(crawl *models.Crawl) {
 
 	_, err := ds.DB.Exec(
 		query,
-		crawl.End,
 		crawl.TotalURLs,
 		crawl.BlockedByRobotstxt,
 		crawl.Noindex,

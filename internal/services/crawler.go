@@ -17,9 +17,11 @@ import (
 )
 
 const (
-	CrawlLimit      = 20000 // Default max number of page reports that will be created
-	LastCrawlsLimit = 5     // Max number returned by GetLastCrawls
-	ClientTimeout   = 10    // HTTP client timeout in seconds.
+	CrawlLimit = 20000 // Default max number of page reports that will be created
+	// ResourcesPerPage bounds the URLs of a page-capped crawl: pages times this.
+	ResourcesPerPage = 20
+	LastCrawlsLimit  = 5  // Max number returned by GetLastCrawls
+	ClientTimeout    = 10 // HTTP client timeout in seconds.
 )
 
 type CrawlerServiceRepository interface {
@@ -226,9 +228,7 @@ func (s *CrawlerService) addCrawler(u *url.URL, p *models.Project, b *models.Bas
 	if s.config.CrawlLimit > 0 {
 		crawlLimit = s.config.CrawlLimit
 	}
-	if l := s.pageLimits[p.Id]; l > 0 && l < crawlLimit {
-		crawlLimit = l
-	}
+	crawlLimit, pageLimit := CrawlCaps(crawlLimit, s.pageLimits[p.Id])
 
 	httpClient, err := newCrawlerHTTPClient(s.config)
 	if err != nil {
@@ -237,6 +237,7 @@ func (s *CrawlerService) addCrawler(u *url.URL, p *models.Project, b *models.Bas
 
 	options := &crawler.Options{
 		CrawlLimit:      crawlLimit,
+		PageLimit:       pageLimit,
 		IgnoreRobotsTxt: p.IgnoreRobotsTxt && !s.denyIgnoreRobots,
 		FollowNofollow:  p.FollowNofollow,
 		IncludeNoindex:  p.IncludeNoindex,
@@ -290,4 +291,18 @@ func newCrawlerHTTPClient(cfg *config.CrawlerConfig) (*http.Client, error) {
 			return http.ErrUseLastResponse
 		},
 	}, nil
+}
+
+// CrawlCaps returns the URL cap and the HTML page cap of a crawl. A project
+// page cap below the instance limit counts HTML pages only; images, scripts
+// and styles get a wider allowance so they cannot end an audit early.
+func CrawlCaps(instance, projectPages int) (urls, pages int) {
+	if projectPages <= 0 || projectPages >= instance {
+		return instance, 0
+	}
+	urls = projectPages * ResourcesPerPage
+	if urls > instance {
+		urls = instance
+	}
+	return urls, projectPages
 }

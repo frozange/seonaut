@@ -88,7 +88,14 @@ func (p *Parser) robots() string {
 func (p *Parser) canonical() string {
 	canonical := p.htmlCanonical()
 	if canonical == "" {
-		return p.headersCanonical()
+		canonical = p.headersCanonical()
+	}
+
+	// A self-referencing canonical written with another percent-encoding
+	// ("/5000m²/" on "/5000m%c2%b2/") is the page's own URL: store it in the
+	// page's spelling so every canonical = url comparison holds.
+	if canonical != "" && p.ParsedURL != nil && urlutils.SameURL(canonical, p.ParsedURL.String()) {
+		return p.ParsedURL.String()
 	}
 
 	return canonical

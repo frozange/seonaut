@@ -3,6 +3,30 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.11.1 - 2026-11-27
+
+Faux constats relevés sur l'audit de sel-tech.fr (audit 29).
+
+- **La limite d'un audit compte les pages, pas les images** : le robot comptait
+  chaque adresse lue (images, scripts, feuilles de style) dans les 500 pages de
+  l'audit. Les 46 pages de sel-tech.fr et leurs images faisaient 500 adresses :
+  le rapport annonçait « 500 pages lues, limite atteinte, le site en compte
+  davantage ». La limite porte désormais sur les pages HTML (`PageLimit` du
+  robot), les autres fichiers ont leur propre plafond (20 par page, borné par
+  `crawler.crawl_limit`). Le rapport lit le nombre de pages HTML ; le total des
+  adresses reste dans `urls_crawled`. Tests : `TestPageLimit*`, `TestCrawlCaps`.
+- **Une canonique écrite avec un autre encodage est la même adresse** :
+  `/parking-de-5000m²/` (canonique de la page) et `/parking-de-5000m%c2%b2/`
+  (lien du sitemap) désignent la même URL (RFC 3986, section 6.2.2). Le rapport
+  les donnait en « pages non canoniques dans le sitemap » et les retirait des
+  pages que Google peut afficher (44 au lieu de 46). L'extracteur range une
+  canonique qui désigne la page elle-même sous l'écriture de la page, et les
+  signaux de l'audit comparent les adresses normalisées (`urlutils.SameURL`).
+  Tests : `TestSameURL`, `TestSelfCanonicalWithOtherEncoding`.
+- **Durée d'exploration juste** : le début était daté par MariaDB (heure de
+  Paris), la fin par Go (UTC) : chaque durée perdait une heure (-3405 s pour
+  3 min 15). La fin est maintenant datée par MariaDB (`end = NOW()`).
+
 ## 1.11.0 - 2026-11-27
 
 - **Audits lancés depuis lafactory.com par un membre connecté** : nouvelle route

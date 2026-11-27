@@ -1,6 +1,7 @@
 package audit
 
 import (
+	"github.com/stjudewashere/seonaut/internal/urlutils"
 	"net/url"
 	"strings"
 	"sync"
@@ -149,16 +150,8 @@ func newPageSignal(pr *models.PageReport, doc *html.Node) *PageSignal {
 	return sig
 }
 
-// normalizeURL drops the fragment so "/a#top" and "/a" are one page.
+// normalizeURL drops the fragment so "/a#top" and "/a" are one page, and
+// evens out percent-encoding so "/5000m²/" and "/5000m%c2%b2/" are one page.
 func normalizeURL(raw string) string {
-	u, err := url.Parse(strings.TrimSpace(raw))
-	if err != nil {
-		return raw
-	}
-	u.Fragment, u.RawFragment = "", ""
-	u.Host = strings.ToLower(u.Host)
-	if u.Path == "" {
-		u.Path = "/"
-	}
-	return u.String()
+	return urlutils.Normalize(raw)
 }
