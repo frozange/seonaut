@@ -51,11 +51,15 @@ func TestPopularityRendersInFrench(t *testing.T) {
 			t.Errorf("missing %q", s)
 		}
 	}
-	// No rank: a position among 135 million domains tells a prospect nothing
-	// (Francis, 2026-11-26: « du charabia »).
-	for _, s := range []string{"rang 2", "centralité", "Rang</span>", "lfr-num\">12", "mieux reliés"} {
+	// The site's rank is shown; the jargon around it is not (Francis,
+	// 2026-11-26: « du charabia » ; 2026-11-27: « j'ai demandé à retirer le
+	// charabia, pas le classement du site »).
+	if !strings.Contains(out, "Votre site occupe le rang") {
+		t.Error("site rank missing")
+	}
+	for _, s := range []string{"centralité", "Rang</span>", "lfr-num\">12"} {
 		if strings.Contains(out, s) {
-			t.Errorf("rank shown: %q", s)
+			t.Errorf("jargon shown: %q", s)
 		}
 	}
 	// The section sits between speed and internal links.

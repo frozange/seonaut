@@ -468,6 +468,7 @@
 		<div class="lfr-grid lfr-pop-lists">
 			<article class="lfr-card">
 				{{ if .Site.ReferringN }}<p class="lfr-pop-figure"><b>{{ .Site.Referring }}</b> {{ if eq .Site.ReferringN 1 }}{{ trans "AUDIT_POP_SITE_ONE" }}{{ else }}{{ trans "AUDIT_POP_SITES" }}{{ end }}</p>{{ else }}<p class="lfr-card-text">{{ trans "AUDIT_POP_NONE" }}</p>{{ end }}
+				{{ if .Site.Rank }}<p class="lfr-card-text">{{ trans "AUDIT_POP_RANK" .Site.Rank .Domains }}{{ with .Site.TopPct }} {{ trans "AUDIT_POP_TOP_PCT" . }}{{ end }}</p>{{ end }}
 				{{ if .Top }}<h5 class="lfr-card-title">{{ trans "AUDIT_POP_TOP" }}</h5>
 				{{ template "lfr_pop_rows" .Top }}{{ end }}
 			</article>

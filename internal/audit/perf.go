@@ -240,8 +240,8 @@ type psiAudit struct {
 	Score        *float64 `json:"score"`
 	NumericValue *float64 `json:"numericValue"`
 	Details      struct {
-		OverallSavingsMs *float64          `json:"overallSavingsMs"`
-		Items            []json.RawMessage `json:"items"`
+		OverallSavingsMs *float64        `json:"overallSavingsMs"`
+		Items            json.RawMessage `json:"items"` // a list, but an object on document-latency-insight
 	} `json:"details"`
 	MetricSavings struct {
 		LCP *float64 `json:"LCP"`
@@ -286,7 +286,7 @@ func ParsePSI(body []byte) (*SpeedRun, error) {
 				saving = a.MetricSavings.LCP
 			}
 			if a.Score != nil && *a.Score < 0.9 && saving != nil && *saving >= 150 {
-				lab.Opportunities = append(lab.Opportunities, Opportunity{ID: id, Title: a.Title, SavingMs: int(*saving), Files: itemURLs(a.Details.Items, 5)})
+				lab.Opportunities = append(lab.Opportunities, Opportunity{ID: id, Title: a.Title, SavingMs: int(*saving), Files: itemURLs(listItems(a.Details.Items), 5)})
 			}
 		}
 		sort.Slice(lab.Opportunities, func(i, k int) bool {
@@ -397,7 +397,7 @@ func lcpElement(audits map[string]psiAudit) *LCPElement {
 	el := &LCPElement{}
 	found := false
 	for _, id := range []string{"lcp-breakdown-insight", "lcp-discovery-insight", "largest-contentful-paint-element"} {
-		for _, raw := range audits[id].Details.Items {
+		for _, raw := range listItems(audits[id].Details.Items) {
 			var it struct {
 				Type      string          `json:"type"`
 				NodeLabel string          `json:"nodeLabel"`
@@ -447,4 +447,15 @@ func lcpElement(audits map[string]psiAudit) *LCPElement {
 		return nil
 	}
 	return el
+}
+
+// listItems returns the rows of a details.items that is a list, nothing for an
+// object (document-latency-insight): one unexpected shape used to make the whole
+// answer unreadable (sel-tech.fr audit 32, 2026-11-27).
+func listItems(raw json.RawMessage) []json.RawMessage {
+	var list []json.RawMessage
+	if json.Unmarshal(raw, &list) != nil {
+		return nil
+	}
+	return list
 }

@@ -1,10 +1,12 @@
 package audit
 
 import (
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -466,7 +468,18 @@ func TestMailReportWithoutTranslationsDoesNotPanic(t *testing.T) {
 // LCP element (the Crillon card image), split its time, flag the missing
 // fetchpriority and list the files behind each advice.
 func TestParsePSIKeepsTheSolutions(t *testing.T) {
-	body, err := os.ReadFile("testdata/psi_seltech_mobile.json")
+	// The whole real answer, not a trimmed copy: an object where a list was
+	// expected (document-latency-insight) broke every audit of 1.12.0.
+	f, err := os.Open("testdata/psi_seltech_mobile.json.gz")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	zr, err := gzip.NewReader(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := io.ReadAll(zr)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -3,6 +3,18 @@
 Fork de [StJudeWasHere/seonaut](https://github.com/StJudeWasHere/seonaut), servi sur
 `seo.lafactory.com`. Ce journal ne couvre que les ajouts du fork.
 
+## 1.12.1 - 2026-11-27
+
+- **Corrigé : la vitesse était vide dans les audits de la 1.12.0** : une réponse
+  de PageSpeed porte un `items` qui n'est pas une liste (document-latency-insight)
+  et toute la réponse devenait illisible (audit 32 de sel-tech.fr). Un tel
+  `items` est ignoré. Le test lit maintenant la réponse réelle complète de
+  PageSpeed (gzip), pas une copie réduite.
+- **Le classement du site revient dans les backlinks** (Francis : « j'ai demandé
+  à retirer le charabia, pas le classement du site ») : « Votre site occupe le
+  rang … sur … », et la part des sites les mieux reliés quand il en fait partie.
+  L'explication sur la centralité harmonique reste retirée.
+
 ## 1.12.0 - 2026-11-27
 
 - **Vitesse mobile, vitesse bureau** (Francis : « vitesse mobile / bureau point

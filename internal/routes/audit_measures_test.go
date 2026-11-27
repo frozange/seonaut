@@ -178,3 +178,19 @@ func TestSpeedCardShowsTheSolutions(t *testing.T) {
 		}
 	}
 }
+
+// The site's rank stays in the backlinks section; only the jargon around it
+// went (Francis, 2026-11-27: "j'ai demandé à retirer le charabia, pas le
+// classement du site").
+func TestBacklinksShowTheSiteRank(t *testing.T) {
+	res := lotAResult()
+	res.Popularity = &audit.PopularityReport{Domains: 134979706, Site: audit.DomainPop{Domain: "ex.com", Found: true, Referring: 6, Rank: 45611747}}
+	a := &audit.Audit{URL: "https://ex.com/", Status: audit.StatusDone, Result: res}
+	out := renderFR(t, "audit_fragment", &fragmentView{Report: newReportView(a, "fr", true)})
+	if !strings.Contains(out, "Votre site occupe le rang") {
+		t.Error("site rank missing")
+	}
+	if strings.Contains(out, "centralité") {
+		t.Error("jargon shown")
+	}
+}
